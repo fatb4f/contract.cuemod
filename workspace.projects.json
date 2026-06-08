@@ -1,0 +1,119 @@
+{
+  "version": "workspace.projects.v1",
+  "contractVersion": "0.2.0",
+  "srcRoot": "/home/_404/src",
+  "contractRoot": "/home/_404/src/contract.cuemod",
+  "projects": [
+    {
+      "id": "contract",
+      "label": "workspace contract",
+      "root": "/home/_404/src/contract.cuemod",
+      "kind": "contract",
+      "intent": "Global workspace contract authority. Declares host workspaces, project sessions, workflow policy, and generated adapter-neutral projections.",
+      "editor": "nvim",
+      "commands": {
+        "default": "just --choose",
+        "check": "cue vet . && python3 scripts/validate_json.py",
+        "build": "just export"
+      },
+      "env": {
+        "TERM_PROJECT_ID": "contract",
+        "TERM_PROJECT_ROOT": "/home/_404/src/contract.cuemod",
+        "TERM_EDITOR": "nvim"
+      },
+      "adapters": {
+        "wezterm": {
+          "workspace": "contract",
+          "cwd": "/home/_404/src/contract.cuemod"
+        },
+        "editor": {
+          "command": "nvim",
+          "cwd": "/home/_404/src/contract.cuemod"
+        },
+        "xplr": {
+          "cwd": "/home/_404/src/contract.cuemod"
+        },
+        "just": {
+          "cwd": "/home/_404/src/contract.cuemod"
+        },
+        "shell": {
+          "cwd": "/home/_404/src/contract.cuemod"
+        }
+      }
+    },
+    {
+      "id": "dotfiles",
+      "label": "dotfiles",
+      "root": "/home/_404/src/dotfiles",
+      "kind": "dotfiles",
+      "intent": "Open the dotfiles implementation repo as an editable project context. Distinct from its host-workspace role.",
+      "editor": "nvim",
+      "commands": {
+        "default": "just --choose",
+        "check": "chezmoi diff",
+        "open": "nvim"
+      },
+      "env": {
+        "TERM_PROJECT_ID": "dotfiles",
+        "TERM_PROJECT_ROOT": "/home/_404/src/dotfiles",
+        "TERM_EDITOR": "nvim"
+      },
+      "adapters": {
+        "wezterm": {
+          "workspace": "dotfiles",
+          "cwd": "/home/_404/src/dotfiles"
+        },
+        "editor": {
+          "command": "nvim",
+          "cwd": "/home/_404/src/dotfiles"
+        },
+        "xplr": {
+          "cwd": "/home/_404/src/dotfiles"
+        },
+        "just": {
+          "cwd": "/home/_404/src/dotfiles"
+        },
+        "shell": {
+          "cwd": "/home/_404/src/dotfiles"
+        }
+      }
+    },
+    {
+      "id": "git-katas-progit",
+      "label": "git-katas-progit",
+      "root": "/home/_404/src/git-katas-progit",
+      "kind": "learning",
+      "intent": "Open the Pro Git aligned git-katas learning project.",
+      "editor": "nvim",
+      "commands": {
+        "default": "just --choose",
+        "check": "just check",
+        "open": "nvim"
+      },
+      "env": {
+        "TERM_PROJECT_ID": "git-katas-progit",
+        "TERM_PROJECT_ROOT": "/home/_404/src/git-katas-progit",
+        "TERM_EDITOR": "nvim"
+      },
+      "adapters": {
+        "wezterm": {
+          "workspace": "git-katas-progit",
+          "cwd": "/home/_404/src/git-katas-progit"
+        },
+        "editor": {
+          "command": "nvim",
+          "cwd": "/home/_404/src/git-katas-progit"
+        },
+        "xplr": {
+          "cwd": "/home/_404/src/git-katas-progit"
+        },
+        "just": {
+          "cwd": "/home/_404/src/git-katas-progit"
+        },
+        "shell": {
+          "cwd": "/home/_404/src/git-katas-progit"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,478 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/terminal-workflow.phase1.schema.json",
+  "title": "workspace session IDE",
+  "description": "Zero-state terminal IDE contract: xplr selects files, Neovim edits, WezTerm hosts command surfaces, just owns recipes, fzf chooses recipes, smart-splits handles movement.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "phase",
+    "model",
+    "tools",
+    "flows",
+    "invariants"
+  ],
+  "properties": {
+    "contractVersion": {
+      "type": "string",
+      "pattern": "^1\\.0\\.0$"
+    },
+    "phase": {
+      "const": "phase-1"
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "statePolicy",
+        "commandContract",
+        "palettePolicy"
+      ],
+      "properties": {
+        "name": {
+          "const": "zero-drift-terminal-ide"
+        },
+        "statePolicy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "runtimeManifest",
+            "paneRegistry",
+            "orchestrationDaemon",
+            "crossVmIpc",
+            "persistentState"
+          ],
+          "properties": {
+            "runtimeManifest": {
+              "const": false
+            },
+            "paneRegistry": {
+              "const": false
+            },
+            "orchestrationDaemon": {
+              "const": false
+            },
+            "crossVmIpc": {
+              "const": false
+            },
+            "persistentState": {
+              "const": false
+            }
+          }
+        },
+        "commandContract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "owner",
+            "source"
+          ],
+          "properties": {
+            "owner": {
+              "const": "just"
+            },
+            "source": {
+              "const": "justfile"
+            }
+          }
+        },
+        "palettePolicy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "singlePaletteBind",
+            "recipeChooser",
+            "recipeSource"
+          ],
+          "properties": {
+            "singlePaletteBind": {
+              "const": true
+            },
+            "recipeChooser": {
+              "const": "fzf"
+            },
+            "recipeSource": {
+              "const": "just --choose"
+            }
+          }
+        }
+      }
+    },
+    "tools": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "xplr",
+        "neovim",
+        "wezterm",
+        "just",
+        "fzf",
+        "smartSplits"
+      ],
+      "properties": {
+        "xplr": {
+          "$ref": "#/$defs/tool_xplr"
+        },
+        "neovim": {
+          "$ref": "#/$defs/tool_neovim"
+        },
+        "wezterm": {
+          "$ref": "#/$defs/tool_wezterm"
+        },
+        "just": {
+          "$ref": "#/$defs/tool_just"
+        },
+        "fzf": {
+          "$ref": "#/$defs/tool_fzf"
+        },
+        "smartSplits": {
+          "$ref": "#/$defs/tool_smart_splits"
+        }
+      }
+    },
+    "flows": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "openFile",
+        "commandPalette",
+        "movement"
+      ],
+      "properties": {
+        "openFile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "trigger",
+            "pathSource",
+            "command",
+            "runtimeOwner",
+            "outputOwner"
+          ],
+          "properties": {
+            "trigger": {
+              "const": "xplr.enter"
+            },
+            "pathSource": {
+              "const": "xplr.focusedFile"
+            },
+            "command": {
+              "const": "just send-to-nvim <path>"
+            },
+            "runtimeOwner": {
+              "const": "neovim.rpc"
+            },
+            "outputOwner": {
+              "const": "neovim"
+            }
+          }
+        },
+        "commandPalette": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "trigger",
+            "command",
+            "surfaceOwner",
+            "recipeOwner",
+            "chooser",
+            "outputOwner",
+            "lifecycle"
+          ],
+          "properties": {
+            "trigger": {
+              "const": "wezterm.paletteBind"
+            },
+            "command": {
+              "const": "just --choose"
+            },
+            "surfaceOwner": {
+              "const": "wezterm"
+            },
+            "recipeOwner": {
+              "const": "just"
+            },
+            "chooser": {
+              "const": "fzf"
+            },
+            "outputOwner": {
+              "const": "wezterm"
+            },
+            "lifecycle": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "success",
+                "failure",
+                "cancel"
+              ],
+              "properties": {
+                "success": {
+                  "const": "close-pane"
+                },
+                "failure": {
+                  "const": "pause-for-inspection"
+                },
+                "cancel": {
+                  "const": "close-pane"
+                }
+              }
+            }
+          }
+        },
+        "movement": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "trigger",
+            "owner",
+            "scope"
+          ],
+          "properties": {
+            "trigger": {
+              "const": "human.directionalKeybind"
+            },
+            "owner": {
+              "const": "smart-splits.nvim"
+            },
+            "scope": {
+              "const": "neovim-windows-and-wezterm-panes"
+            }
+          }
+        }
+      }
+    },
+    "invariants": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "onePaletteBind",
+        "oneCommandContract",
+        "noTaskRunnerPlugin",
+        "noOrchestrationDaemon",
+        "noManifest",
+        "noPaneRegistry",
+        "noTermctl",
+        "noNvimJustice",
+        "noXplrCommandOrchestration"
+      ],
+      "properties": {
+        "onePaletteBind": {
+          "const": true
+        },
+        "oneCommandContract": {
+          "const": true
+        },
+        "noTaskRunnerPlugin": {
+          "const": true
+        },
+        "noOrchestrationDaemon": {
+          "const": true
+        },
+        "noManifest": {
+          "const": true
+        },
+        "noPaneRegistry": {
+          "const": true
+        },
+        "noTermctl": {
+          "const": true
+        },
+        "noNvimJustice": {
+          "const": true
+        },
+        "noXplrCommandOrchestration": {
+          "const": true
+        }
+      }
+    }
+  },
+  "$defs": {
+    "tool_xplr": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owns",
+        "allowedActions",
+        "forbiddenActions"
+      ],
+      "properties": {
+        "owns": {
+          "const": [
+            "focused-file-selection"
+          ]
+        },
+        "allowedActions": {
+          "const": [
+            "send-focused-path-to-just"
+          ]
+        },
+        "forbiddenActions": {
+          "const": [
+            "command-orchestration",
+            "pane-management",
+            "process-surface-ownership",
+            "runtime-state-management"
+          ]
+        }
+      }
+    },
+    "tool_neovim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owns",
+        "allowedActions",
+        "forbiddenActions"
+      ],
+      "properties": {
+        "owns": {
+          "const": [
+            "editor",
+            "lsp",
+            "buffers"
+          ]
+        },
+        "allowedActions": {
+          "const": [
+            "receive-file-via-rpc",
+            "edit",
+            "diagnose"
+          ]
+        },
+        "forbiddenActions": {
+          "const": [
+            "task-runner-plugin",
+            "pane-management",
+            "workspace-orchestration",
+            "process-surface-ownership"
+          ]
+        }
+      }
+    },
+    "tool_wezterm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owns",
+        "allowedActions",
+        "forbiddenActions"
+      ],
+      "properties": {
+        "owns": {
+          "const": [
+            "command-palette-bind",
+            "pane-output-surface",
+            "workspace-launch-surface"
+          ]
+        },
+        "allowedActions": {
+          "const": [
+            "spawn-pane",
+            "run-just-choose",
+            "display-output"
+          ]
+        },
+        "forbiddenActions": {
+          "const": [
+            "recipe-definition",
+            "editor-buffer-state",
+            "file-selection-state",
+            "persistent-pane-registry"
+          ]
+        }
+      }
+    },
+    "tool_just": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owns",
+        "requiredRecipes",
+        "allowedRecipes"
+      ],
+      "properties": {
+        "owns": {
+          "const": [
+            "command-catalog",
+            "workspace-launch",
+            "send-to-nvim",
+            "oneshot-recipes"
+          ]
+        },
+        "requiredRecipes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "launch-workspace",
+              "send-to-nvim"
+            ]
+          },
+          "contains": {
+            "const": "launch-workspace"
+          },
+          "minItems": 2,
+          "uniqueItems": true
+        },
+        "allowedRecipes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]*$"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "tool_fzf": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owns",
+        "allowedActions"
+      ],
+      "properties": {
+        "owns": {
+          "const": [
+            "interactive-recipe-picker"
+          ]
+        },
+        "allowedActions": {
+          "const": [
+            "choose-just-recipe"
+          ]
+        }
+      }
+    },
+    "tool_smart_splits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owns",
+        "allowedActions",
+        "forbiddenActions"
+      ],
+      "properties": {
+        "owns": {
+          "const": [
+            "movement-between-editor-and-panes"
+          ]
+        },
+        "allowedActions": {
+          "const": [
+            "directional-navigation"
+          ]
+        },
+        "forbiddenActions": {
+          "const": [
+            "command-execution",
+            "recipe-selection",
+            "state-management"
+          ]
+        }
+      }
+    }
+  }
+}

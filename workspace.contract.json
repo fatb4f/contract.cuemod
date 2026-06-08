@@ -1,0 +1,385 @@
+{
+  "version": "workspace.contract.v1",
+  "contractVersion": "0.2.0",
+  "srcRoot": "/home/_404/src",
+  "contractRoot": "/home/_404/src/contract.cuemod",
+  "hosts": [
+    {
+      "id": "dotfiles",
+      "label": "dotfiles host workspace",
+      "root": "/home/_404/src/dotfiles",
+      "intent": "Host control-plane implementation repo. It materializes configuration through chezmoi and exposes shell/terminal/editor adapters, but it does not own the global workspace contract.",
+      "surfaces": {
+        "chezmoi": {
+          "sourceDir": "/home/_404/src/dotfiles/chezmoi",
+          "config": "/home/_404/src/dotfiles/chezmoi.toml.tmpl"
+        },
+        "shellWrap": {
+          "root": "/home/_404/src/dotfiles/shell-wrap"
+        },
+        "wezterm": {
+          "configRoot": "/home/_404/src/dotfiles/chezmoi/private_dot_config/wezterm",
+          "workspacesLua": "/home/_404/src/dotfiles/chezmoi/private_dot_config/wezterm/modules/workspaces.lua"
+        }
+      }
+    }
+  ],
+  "projects": [
+    {
+      "id": "contract",
+      "label": "workspace contract",
+      "root": "/home/_404/src/contract.cuemod",
+      "kind": "contract",
+      "intent": "Global workspace contract authority. Declares host workspaces, project sessions, workflow policy, and generated adapter-neutral projections.",
+      "editor": "nvim",
+      "commands": {
+        "default": "just --choose",
+        "check": "cue vet . && python3 scripts/validate_json.py",
+        "build": "just export"
+      },
+      "env": {
+        "TERM_PROJECT_ID": "contract",
+        "TERM_PROJECT_ROOT": "/home/_404/src/contract.cuemod",
+        "TERM_EDITOR": "nvim"
+      },
+      "adapters": {
+        "wezterm": {
+          "workspace": "contract",
+          "cwd": "/home/_404/src/contract.cuemod"
+        },
+        "editor": {
+          "command": "nvim",
+          "cwd": "/home/_404/src/contract.cuemod"
+        },
+        "xplr": {
+          "cwd": "/home/_404/src/contract.cuemod"
+        },
+        "just": {
+          "cwd": "/home/_404/src/contract.cuemod"
+        },
+        "shell": {
+          "cwd": "/home/_404/src/contract.cuemod"
+        }
+      }
+    },
+    {
+      "id": "dotfiles",
+      "label": "dotfiles",
+      "root": "/home/_404/src/dotfiles",
+      "kind": "dotfiles",
+      "intent": "Open the dotfiles implementation repo as an editable project context. Distinct from its host-workspace role.",
+      "editor": "nvim",
+      "commands": {
+        "default": "just --choose",
+        "check": "chezmoi diff",
+        "open": "nvim"
+      },
+      "env": {
+        "TERM_PROJECT_ID": "dotfiles",
+        "TERM_PROJECT_ROOT": "/home/_404/src/dotfiles",
+        "TERM_EDITOR": "nvim"
+      },
+      "adapters": {
+        "wezterm": {
+          "workspace": "dotfiles",
+          "cwd": "/home/_404/src/dotfiles"
+        },
+        "editor": {
+          "command": "nvim",
+          "cwd": "/home/_404/src/dotfiles"
+        },
+        "xplr": {
+          "cwd": "/home/_404/src/dotfiles"
+        },
+        "just": {
+          "cwd": "/home/_404/src/dotfiles"
+        },
+        "shell": {
+          "cwd": "/home/_404/src/dotfiles"
+        }
+      }
+    },
+    {
+      "id": "git-katas-progit",
+      "label": "git-katas-progit",
+      "root": "/home/_404/src/git-katas-progit",
+      "kind": "learning",
+      "intent": "Open the Pro Git aligned git-katas learning project.",
+      "editor": "nvim",
+      "commands": {
+        "default": "just --choose",
+        "check": "just check",
+        "open": "nvim"
+      },
+      "env": {
+        "TERM_PROJECT_ID": "git-katas-progit",
+        "TERM_PROJECT_ROOT": "/home/_404/src/git-katas-progit",
+        "TERM_EDITOR": "nvim"
+      },
+      "adapters": {
+        "wezterm": {
+          "workspace": "git-katas-progit",
+          "cwd": "/home/_404/src/git-katas-progit"
+        },
+        "editor": {
+          "command": "nvim",
+          "cwd": "/home/_404/src/git-katas-progit"
+        },
+        "xplr": {
+          "cwd": "/home/_404/src/git-katas-progit"
+        },
+        "just": {
+          "cwd": "/home/_404/src/git-katas-progit"
+        },
+        "shell": {
+          "cwd": "/home/_404/src/git-katas-progit"
+        }
+      }
+    }
+  ],
+  "domains": [
+    {
+      "name": "dotfiles",
+      "kind": "workspace",
+      "root": "/home/_404/src/dotfiles",
+      "relativeRoot": ".",
+      "surfaces": [
+        ".chezmoiroot",
+        ".gitignore",
+        "chezmoi.toml.tmpl"
+      ],
+      "owns": [
+        "repository routing",
+        "domain selection",
+        "cross-domain handoff"
+      ],
+      "router": ".codex/skills/SKILL.md",
+      "denies": [
+        "tool cache state",
+        "runtime state",
+        "git object storage",
+        "global workspace contract authority"
+      ],
+      "validations": [
+        "chezmoi diff",
+        "git status --short"
+      ],
+      "closeout": [
+        "selected domain",
+        "loaded files",
+        "changed files",
+        "validation evidence"
+      ]
+    },
+    {
+      "name": "chezmoi",
+      "kind": "materializer",
+      "root": "/home/_404/src/dotfiles/chezmoi",
+      "relativeRoot": "chezmoi",
+      "surfaces": [
+        "chezmoi/.chezmoiignore",
+        "chezmoi/dot_*",
+        "chezmoi/private_dot_config/**",
+        "chezmoi/dot_local/**"
+      ],
+      "owns": [
+        "chezmoi source files",
+        "source-to-target mapping",
+        "template source files",
+        "ignore policy"
+      ],
+      "denies": [
+        "sibling workspace domains",
+        "git object storage",
+        "tool runtime caches",
+        "project-session authority"
+      ],
+      "validations": [
+        "chezmoi status",
+        "chezmoi diff"
+      ]
+    },
+    {
+      "name": "shell-wrap",
+      "kind": "adapter",
+      "root": "/home/_404/src/dotfiles/shell-wrap",
+      "relativeRoot": "shell-wrap",
+      "surfaces": [
+        "shell-wrap/**"
+      ],
+      "owns": [
+        "Bashly source projects",
+        "shell adapter source",
+        "shell adapter tests",
+        "system integration artifacts under shell-wrap"
+      ],
+      "router": "shell-wrap/AGENTS.md",
+      "denies": [
+        "chezmoi source-to-target materialization",
+        "workspace registry authority"
+      ],
+      "validations": [
+        "shellharden",
+        "shfmt",
+        "shellcheck",
+        "bashly generate",
+        "bats tests"
+      ]
+    },
+    {
+      "name": "wezterm",
+      "kind": "config",
+      "root": "/home/_404/src/dotfiles/chezmoi/private_dot_config/wezterm",
+      "relativeRoot": "chezmoi/private_dot_config/wezterm",
+      "surfaces": [
+        "chezmoi/private_dot_config/wezterm/**"
+      ],
+      "owns": [
+        "WezTerm Lua configuration",
+        "WezTerm module files",
+        "terminal topology",
+        "pane and workspace bindings"
+      ],
+      "denies": [
+        "project-session authority",
+        "runtime project discovery",
+        "persistent pane registry"
+      ],
+      "validations": [
+        "lua syntax check when available",
+        "wezterm cli check when available"
+      ]
+    },
+    {
+      "name": "nvim",
+      "kind": "config",
+      "root": "/home/_404/src/dotfiles/chezmoi/private_dot_config/nvim",
+      "relativeRoot": "chezmoi/private_dot_config/nvim",
+      "surfaces": [
+        "chezmoi/private_dot_config/nvim/**"
+      ],
+      "owns": [
+        "Neovim Lua configuration",
+        "Neovim keymaps",
+        "Neovim options",
+        "editor adapter configuration"
+      ],
+      "denies": [
+        "terminal pane registry",
+        "project-session authority"
+      ],
+      "validations": [
+        "lua syntax check when available",
+        "nvim headless check when explicitly requested"
+      ]
+    },
+    {
+      "name": "xplr",
+      "kind": "config",
+      "root": "/home/_404/src/dotfiles/chezmoi/private_dot_config/xplr",
+      "relativeRoot": "chezmoi/private_dot_config/xplr",
+      "surfaces": [
+        "chezmoi/private_dot_config/xplr/**"
+      ],
+      "owns": [
+        "xplr configuration",
+        "xplr keybindings",
+        "focused file selection"
+      ],
+      "denies": [
+        "WezTerm pane topology",
+        "command catalog authority",
+        "project-session authority"
+      ],
+      "validations": [
+        "lua syntax check when available"
+      ]
+    },
+    {
+      "name": "zsh",
+      "kind": "shell",
+      "root": "/home/_404/src/dotfiles/chezmoi/private_dot_config/zsh",
+      "relativeRoot": "chezmoi/private_dot_config/zsh",
+      "surfaces": [
+        "chezmoi/dot_zprofile",
+        "chezmoi/dot_zshenv",
+        "chezmoi/private_dot_config/zsh/**"
+      ],
+      "owns": [
+        "zsh startup files",
+        "zsh loader files",
+        "zsh functions",
+        "zim configuration"
+      ],
+      "validations": [
+        "zsh -n when available"
+      ]
+    },
+    {
+      "name": "local-bin",
+      "kind": "config",
+      "root": "/home/_404/src/dotfiles/chezmoi/dot_local/bin",
+      "relativeRoot": "chezmoi/dot_local/bin",
+      "surfaces": [
+        "chezmoi/dot_local/bin/**"
+      ],
+      "owns": [
+        "managed local executable links",
+        "chezmoi local-bin projections"
+      ],
+      "validations": [
+        "template review"
+      ]
+    },
+    {
+      "name": "agent-skills",
+      "kind": "config",
+      "root": "/home/_404/src/dotfiles/chezmoi/dot_local/share/codex/skills",
+      "relativeRoot": "chezmoi/dot_local/share/codex/skills",
+      "surfaces": [
+        "chezmoi/dot_local/share/codex/skills/**"
+      ],
+      "owns": [
+        "agent skill markdown",
+        "skill routing instructions",
+        "task procedure contracts"
+      ],
+      "denies": [
+        "codex auth state",
+        "codex cache state",
+        "codex tmp state"
+      ],
+      "validations": [
+        "markdown review",
+        "path registry review"
+      ]
+    }
+  ],
+  "workflow": {
+    "name": "zero-drift-terminal-workspace",
+    "statePolicy": {
+      "runtimeDiscovery": false,
+      "paneRegistry": false,
+      "orchestrationDaemon": false,
+      "crossVmIpc": false,
+      "adapterOwnedManifest": false
+    },
+    "commandContract": {
+      "owner": "just",
+      "source": "justfile"
+    },
+    "palettePolicy": {
+      "singlePaletteBind": true,
+      "recipeChooser": "fzf",
+      "recipeSource": "just --choose"
+    },
+    "movementPolicy": {
+      "owner": "wezterm",
+      "scope": "terminal-panes-and-editor-surface",
+      "notes": [
+        "Focus-pane at the terminal layer removes the need for editor-specific pane movement glue.",
+        "Neovim and Helix remain editor surfaces, not pane routers."
+      ]
+    }
+  }
+}
