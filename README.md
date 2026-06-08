@@ -1,75 +1,36 @@
-# workspace-contract
+# contract.cuemod regenerated slice
 
-Adapter-neutral CUE contract for `/home/_404/src`.
-
-This repo declares two global object families:
-
-```text
-hostWorkspaces
-→ machine/control-plane implementation repos
-
-projectSessions
-→ launchable project contexts under /home/_404/src
-```
-
-Adapters consume projections; they do not own the domain objects.
-
-```text
-CUE contract
-→ workspace.projects.json
-→ WezTerm / xplr / just / editor / shell adapters
-```
+This archive replaces Python JSON validation with CUE workflow commands and adds a contract-first lint toolchain model.
 
 ## Files
 
-| File | Role |
-|---|---|
-| `workspace.schema.cue` | Core types and constraints |
-| `workspace.hosts.cue` | Host workspace declarations |
-| `workspace.projects.cue` | Project session declarations |
-| `workspace.domains.cue` | Dotfiles domain routing registry |
-| `workspace.workflow.cue` | Terminal workflow policy |
-| `workspace.projections.cue` | Exported projection objects |
-| `workspace_tool.cue` | Optional `cue cmd export` workflow |
-| `workspace.projects.json` | Adapter-neutral project/session projection |
-| `workspace.hosts.json` | Adapter-neutral host-workspace projection |
-| `workspace.contract.json` | Combined projection |
+- `workspace.cue` — root constants and generated projection paths
+- `workspace.schema.cue` — contract types and constraints
+- `workspace.hosts.cue` — host workspace declarations
+- `workspace.projects.cue` — project sessions and lint toolchain policies
+- `workspace.domains.cue` — domain routing and ownership
+- `workspace.workflow.cue` — zero-drift terminal workspace policy
+- `workspace.projections.cue` — generated projection values
+- `workspace_tool.cue` — `cue cmd export`, `validate`, and `check`
+- `justfile` — thin wrapper around CUE commands
+- `docs/linting-toolchains.md` — linting architecture notes
 
-## Generate projections
-
-```bash
-cue export . -e hostManifest --out json > workspace.hosts.json
-cue export . -e projectManifest --out json > workspace.projects.json
-cue export . -e domainManifest --out json > workspace.domains.json
-cue export . -e workflowManifest --out json > workspace.workflow.json
-cue export . -e contractManifest --out json > workspace.contract.json
-```
-
-Or, if CUE workflow commands are enabled:
-
-```bash
-cue cmd export
-```
-
-## Validate generated JSON
-
-```bash
-python3 scripts/validate_json.py
-```
-
-## Adapter rule
-
-Adapters may read `workspace.projects.json` and select fields under `projects[].adapters.<adapter>`.
-
-They must not:
+## Command boundary
 
 ```text
-- discover project roots at runtime;
-- mutate the contract;
-- treat generated JSON as adapter-owned state;
-- become the authority for workspace membership.
+CUE owns contract shape.
+just exposes recipes.
+shell-wrap executes declared adapters.
+WezTerm hosts output.
 ```
 
-## WezTerm example
+## Validation
 
-See `adapters/wezterm/workspaces.lua` for a consumer example that maps project contexts to WezTerm workspaces.
+```bash
+cue fmt .
+cue cmd export
+cue cmd validate
+cue cmd check
+```
+
+`cue` was not available in the generation environment, so run those commands locally before committing.

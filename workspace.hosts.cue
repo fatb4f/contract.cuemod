@@ -1,28 +1,24 @@
 package workspace
 
 hostWorkspaces: {
-	dotfiles: #HostWorkspace & {
-		id:     "dotfiles"
-		label:  "dotfiles host workspace"
-		root:   "\(srcRoot)/dotfiles"
-		intent: "Host control-plane implementation repo. It materializes configuration through chezmoi and exposes shell/terminal/editor adapters, but it does not own the global workspace contract."
+	main: #HostWorkspace & {
+		id: "main"
+		label: "primary development host"
+		root: srcRoot
+		intent: "Primary local workspace root containing contract, dotfiles, and project sessions."
 
 		surfaces: {
 			chezmoi: {
-				sourceDir: "\(root)/chezmoi"
-				config:    "\(root)/chezmoi.toml.tmpl"
+				sourceDir: "\(srcRoot)/dotfiles/chezmoi"
+				config: "\(srcRoot)/dotfiles/chezmoi.toml.tmpl"
 			}
-
 			shellWrap: {
-				root: "\(root)/shell-wrap"
+				root: "\(srcRoot)/dotfiles/shell-wrap"
 			}
-
 			wezterm: {
-				configRoot:    "\(root)/chezmoi/private_dot_config/wezterm"
-				workspacesLua: "\(configRoot)/modules/workspaces.lua"
+				configRoot: "\(srcRoot)/dotfiles/chezmoi/private_dot_config/wezterm"
+				workspacesLua: "\(contractRoot)/adapters/wezterm/workspaces.lua"
 			}
 		}
-
-		domains: dotfilesDomains
 	}
 }

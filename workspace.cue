@@ -1,14 +1,15 @@
 package workspace
 
+// Root contract constants. These are intentionally static: adapters consume
+// projections and must not discover project roots at runtime.
 contractVersion: "0.2.0"
-
-srcRoot:      "/home/_404/src"
-contractRoot: "\(srcRoot)/contract.cuemod"
+srcRoot:        "/home/_404/src"
+contractRoot:   "\(srcRoot)/contract.cuemod"
 
 generated: {
-	hosts:    "\(contractRoot)/workspace.hosts.json"
-	projects: "\(contractRoot)/workspace.projects.json"
-	domains:  "\(contractRoot)/workspace.domains.json"
-	workflow: "\(contractRoot)/workspace.workflow.json"
-	all:      "\(contractRoot)/workspace.contract.json"
+	hosts:    "workspace.hosts.json"
+	projects: "workspace.projects.json"
+	domains:  "workspace.domains.json"
+	workflow: "workspace.workflow.json"
+	all:      "workspace.contract.json"
 }

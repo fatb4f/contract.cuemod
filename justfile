@@ -1,17 +1,22 @@
 set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
 
+default:
+  just --choose
+
 export:
-	cue export . -e hostManifest --out json > workspace.hosts.json
-	cue export . -e projectManifest --out json > workspace.projects.json
-	cue export . -e domainManifest --out json > workspace.domains.json
-	cue export . -e workflowManifest --out json > workspace.workflow.json
-	cue export . -e contractManifest --out json > workspace.contract.json
+  cue cmd export
 
 validate:
-	cue vet .
-	python3 scripts/validate_json.py
+  cue cmd validate
 
-check: validate
+check:
+  cue cmd check
+
+fmt:
+  cue fmt .
+
+list:
+  cue cmd -l
 
 archive:
-	tar --exclude=.git -czf ../contract.cuemod.tar.gz -C .. contract.cuemod
+  tar --exclude=.git -czf ../contract.cuemod.tar.gz -C .. contract.cuemod

@@ -1,210 +1,137 @@
 package workspace
 
 dotfilesDomains: {
-	dotfiles: #Domain & {
-		name:         "dotfiles"
-		kind:         "workspace"
-		root:         "\(srcRoot)/dotfiles"
+	contract: #Domain & {
+		name: "contract"
+		kind: "workspace"
+		root: contractRoot
 		relativeRoot: "."
-		router:       ".codex/skills/SKILL.md"
+		router: "README.md"
 		surfaces: [
-			".chezmoiroot",
-			".gitignore",
-			"chezmoi.toml.tmpl",
+			"workspace.cue",
+			"workspace.schema.cue",
+			"workspace.hosts.cue",
+			"workspace.projects.cue",
+			"workspace.domains.cue",
+			"workspace.workflow.cue",
+			"workspace.projections.cue",
+			"workspace_tool.cue",
+			"workspace.*.json",
 		]
 		owns: [
-			"repository routing",
-			"domain selection",
-			"cross-domain handoff",
+			"workspace contract authority",
+			"project session declarations",
+			"adapter-neutral projections",
+			"zero-drift terminal workflow policy",
 		]
 		denies: [
-			"tool cache state",
-			"runtime state",
-			"git object storage",
-			"global workspace contract authority",
+			"runtime pane registry",
+			"adapter-owned manifest",
+			"orchestration daemon",
+			"runtime project discovery",
 		]
 		validations: [
-			"chezmoi diff",
-			"git status --short",
+			"cue cmd export",
+			"cue cmd validate",
+			"cue cmd check",
 		]
 		closeout: [
-			"selected domain",
-			"loaded files",
-			"changed files",
-			"validation evidence",
+			"cue projections regenerated",
+			"generated JSON freshness checked",
+			"adapter boundaries preserved",
 		]
 	}
 
-	chezmoi: #Domain & {
-		name:         "chezmoi"
-		kind:         "materializer"
-		root:         "\(srcRoot)/dotfiles/chezmoi"
-		relativeRoot: "chezmoi"
+	dotfiles: #Domain & {
+		name: "dotfiles"
+		kind: "workspace"
+		root: "\(srcRoot)/dotfiles"
+		relativeRoot: "dotfiles"
 		surfaces: [
-			"chezmoi/.chezmoiignore",
-			"chezmoi/dot_*",
-			"chezmoi/private_dot_config/**",
-			"chezmoi/dot_local/**",
+			"chezmoi/**",
+			"shell-wrap/**",
+			"justfile",
 		]
 		owns: [
-			"chezmoi source files",
-			"source-to-target mapping",
-			"template source files",
-			"ignore policy",
+			"dotfiles implementation",
+			"chezmoi materialization",
+			"shell-wrap adapter source",
 		]
 		denies: [
-			"sibling workspace domains",
-			"git object storage",
-			"tool runtime caches",
-			"project-session authority",
-		]
-		validations: [
-			"chezmoi status",
-			"chezmoi diff",
-		]
-	}
-
-	shellWrap: #Domain & {
-		name:         "shell-wrap"
-		kind:         "adapter"
-		root:         "\(srcRoot)/dotfiles/shell-wrap"
-		relativeRoot: "shell-wrap"
-		router:       "shell-wrap/AGENTS.md"
-		surfaces: ["shell-wrap/**"]
-		owns: [
-			"Bashly source projects",
-			"shell adapter source",
-			"shell adapter tests",
-			"system integration artifacts under shell-wrap",
-		]
-		denies: [
-			"chezmoi source-to-target materialization",
-			"workspace registry authority",
-		]
-		validations: [
-			"shellharden",
-			"shfmt",
-			"shellcheck",
-			"bashly generate",
-			"bats tests",
+			"workspace contract authority",
+			"runtime pane registry",
 		]
 	}
 
 	wezterm: #Domain & {
-		name:         "wezterm"
-		kind:         "config"
-		root:         "\(srcRoot)/dotfiles/chezmoi/private_dot_config/wezterm"
-		relativeRoot: "chezmoi/private_dot_config/wezterm"
-		surfaces: ["chezmoi/private_dot_config/wezterm/**"]
+		name: "wezterm"
+		kind: "config"
+		root: "\(srcRoot)/dotfiles/chezmoi/private_dot_config/wezterm"
+		relativeRoot: "dotfiles/chezmoi/private_dot_config/wezterm"
+		surfaces: ["**"]
 		owns: [
-			"WezTerm Lua configuration",
-			"WezTerm module files",
-			"terminal topology",
-			"pane and workspace bindings",
+			"terminal panes",
+			"workspace surface",
+			"focus-pane movement",
+			"single just palette bind",
 		]
 		denies: [
-			"project-session authority",
-			"runtime project discovery",
-			"persistent pane registry",
-		]
-		validations: [
-			"lua syntax check when available",
-			"wezterm cli check when available",
-		]
-	}
-
-	nvim: #Domain & {
-		name:         "nvim"
-		kind:         "config"
-		root:         "\(srcRoot)/dotfiles/chezmoi/private_dot_config/nvim"
-		relativeRoot: "chezmoi/private_dot_config/nvim"
-		surfaces: ["chezmoi/private_dot_config/nvim/**"]
-		owns: [
-			"Neovim Lua configuration",
-			"Neovim keymaps",
-			"Neovim options",
-			"editor adapter configuration",
-		]
-		denies: [
-			"terminal pane registry",
-			"project-session authority",
-		]
-		validations: [
-			"lua syntax check when available",
-			"nvim headless check when explicitly requested",
+			"recipe definitions",
+			"lint toolchain inference",
+			"editor buffer ownership",
 		]
 	}
 
 	xplr: #Domain & {
-		name:         "xplr"
-		kind:         "config"
-		root:         "\(srcRoot)/dotfiles/chezmoi/private_dot_config/xplr"
-		relativeRoot: "chezmoi/private_dot_config/xplr"
-		surfaces: ["chezmoi/private_dot_config/xplr/**"]
+		name: "xplr"
+		kind: "config"
+		root: "\(srcRoot)/dotfiles/chezmoi/private_dot_config/xplr"
+		relativeRoot: "dotfiles/chezmoi/private_dot_config/xplr"
+		surfaces: ["**"]
 		owns: [
-			"xplr configuration",
-			"xplr keybindings",
-			"focused file selection",
+			"focused path",
+			"selection",
+			"send focused path to editor recipe",
 		]
 		denies: [
-			"WezTerm pane topology",
-			"command catalog authority",
-			"project-session authority",
+			"command orchestration",
+			"pane management",
+			"lint toolchain inference",
 		]
-		validations: ["lua syntax check when available"]
 	}
 
-	zsh: #Domain & {
-		name:         "zsh"
-		kind:         "shell"
-		root:         "\(srcRoot)/dotfiles/chezmoi/private_dot_config/zsh"
-		relativeRoot: "chezmoi/private_dot_config/zsh"
-		surfaces: [
-			"chezmoi/dot_zprofile",
-			"chezmoi/dot_zshenv",
-			"chezmoi/private_dot_config/zsh/**",
-		]
+	nvim: #Domain & {
+		name: "nvim"
+		kind: "config"
+		root: "\(srcRoot)/dotfiles/chezmoi/private_dot_config/nvim"
+		relativeRoot: "dotfiles/chezmoi/private_dot_config/nvim"
+		surfaces: ["**"]
 		owns: [
-			"zsh startup files",
-			"zsh loader files",
-			"zsh functions",
-			"zim configuration",
-		]
-		validations: ["zsh -n when available"]
-	}
-
-	localBin: #Domain & {
-		name:         "local-bin"
-		kind:         "config"
-		root:         "\(srcRoot)/dotfiles/chezmoi/dot_local/bin"
-		relativeRoot: "chezmoi/dot_local/bin"
-		surfaces: ["chezmoi/dot_local/bin/**"]
-		owns: [
-			"managed local executable links",
-			"chezmoi local-bin projections",
-		]
-		validations: ["template review"]
-	}
-
-	agentSkills: #Domain & {
-		name:         "agent-skills"
-		kind:         "config"
-		root:         "\(srcRoot)/dotfiles/chezmoi/dot_local/share/codex/skills"
-		relativeRoot: "chezmoi/dot_local/share/codex/skills"
-		surfaces: ["chezmoi/dot_local/share/codex/skills/**"]
-		owns: [
-			"agent skill markdown",
-			"skill routing instructions",
-			"task procedure contracts",
+			"editing state",
+			"buffers",
+			"language services",
 		]
 		denies: [
-			"codex auth state",
-			"codex cache state",
-			"codex tmp state",
+			"process surface ownership",
+			"pane routing",
+			"task-runner plugin authority",
 		]
-		validations: [
-			"markdown review",
-			"path registry review",
+	}
+
+	shellWrap: #Domain & {
+		name: "shell-wrap"
+		kind: "adapter"
+		root: "\(srcRoot)/dotfiles/shell-wrap"
+		relativeRoot: "dotfiles/shell-wrap"
+		surfaces: ["**"]
+		owns: [
+			"generated shell adapters",
+			"declared command execution",
+			"lint/fmt/check adapter projection",
+		]
+		denies: [
+			"runtime language discovery",
+			"workspace membership authority",
 		]
 	}
 }
