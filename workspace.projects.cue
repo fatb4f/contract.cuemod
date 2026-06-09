@@ -2,10 +2,10 @@ package workspace
 
 projectSessions: {
 	contract: #ProjectSession & {
-		id: "contract"
-		label: "workspace contract"
-		root: contractRoot
-		kind: "contract"
+		id:     "contract"
+		label:  "workspace contract"
+		root:   contractRoot
+		kind:   "contract"
 		intent: "Global workspace contract authority. Declares host workspaces, project sessions, workflow policy, and generated adapter-neutral projections."
 		editor: "nvim"
 
@@ -15,9 +15,9 @@ projectSessions: {
 				backend: "direct"
 				steps: [
 					{
-						id: "cue-vet"
+						id:       "cue-vet"
 						language: "cue"
-						tool: "cue"
+						tool:     "cue"
 						command: {
 							name: "lint"
 							argv: ["cue", "vet", "."]
@@ -25,9 +25,9 @@ projectSessions: {
 						}
 					},
 					{
-						id: "cue-export-check"
+						id:       "cue-export-check"
 						language: "cue"
-						tool: "cue"
+						tool:     "cue"
 						command: {
 							name: "check"
 							argv: ["cue", "cmd", "check"]
@@ -45,18 +45,18 @@ projectSessions: {
 
 		commands: {
 			default: "just --choose"
-			check: "cue cmd check"
-			build: "cue cmd export"
-			lint: "cue cmd validate"
-			fmt: "cue fmt ."
+			check:   "cue cmd check"
+			build:   "cue cmd export"
+			lint:    "cue cmd validate"
+			fmt:     "cue fmt ."
 		}
 	}
 
 	dotfiles: #ProjectSession & {
-		id: "dotfiles"
-		label: "dotfiles"
-		root: "\(srcRoot)/dotfiles"
-		kind: "dotfiles"
+		id:     "dotfiles"
+		label:  "dotfiles"
+		root:   "\(srcRoot)/dotfiles"
+		kind:   "dotfiles"
 		intent: "Open the dotfiles implementation repo as an editable project context."
 		editor: "nvim"
 
@@ -65,13 +65,13 @@ projectSessions: {
 			// Preferred for multi-language dotfiles: let pre-commit own hook wiring,
 			// while just/shell-wrap expose the stable lint verb.
 			lint: {
-				backend: "pre-commit"
+				backend:    "pre-commit"
 				configPath: ".pre-commit-config.yaml"
-				allFiles: true
+				allFiles:   true
 				command: {
 					name: "lint"
 					argv: ["pre-commit", "run", "--all-files"]
-					cwd: root
+					cwd:     root
 					palette: true
 					oneshot: true
 				}
@@ -80,18 +80,18 @@ projectSessions: {
 
 		commands: {
 			default: "just --choose"
-			check: "just lint"
-			lint: "shell-wrap lint"
-			fmt: "shell-wrap fmt"
-			open: "nvim"
+			check:   "just lint"
+			lint:    "shell-wrap lint"
+			fmt:     "shell-wrap fmt"
+			open:    "nvim"
 		}
 	}
 
 	gitKatasProgit: #ProjectSession & {
-		id: "git-katas-progit"
-		label: "git-katas-progit"
-		root: "\(srcRoot)/git-katas-progit"
-		kind: "learning"
+		id:     "git-katas-progit"
+		label:  "git-katas-progit"
+		root:   "\(srcRoot)/git-katas-progit"
+		kind:   "learning"
 		intent: "Open the Pro Git aligned git-katas learning project."
 		editor: "nvim"
 
@@ -101,9 +101,9 @@ projectSessions: {
 				backend: "shell-wrap"
 				steps: [
 					{
-						id: "shellcheck"
+						id:       "shellcheck"
 						language: "shell"
-						tool: "shellcheck"
+						tool:     "shellcheck"
 						command: {
 							name: "lint"
 							argv: ["shellcheck", "-x", "exercises/**/*.sh"]
@@ -111,9 +111,9 @@ projectSessions: {
 						}
 					},
 					{
-						id: "markdownlint"
+						id:       "markdownlint"
 						language: "markdown"
-						tool: "markdownlint"
+						tool:     "markdownlint"
 						command: {
 							name: "lint"
 							argv: ["markdownlint", "."]
@@ -131,50 +131,56 @@ projectSessions: {
 
 		commands: {
 			default: "just --choose"
-			check: "just lint"
-			lint: "shell-wrap lint"
-			open: "nvim"
+			check:   "just lint"
+			lint:    "shell-wrap lint"
+			open:    "nvim"
 		}
 	}
 }
 
 // Default adapter projections for every project. These are deterministic
 // projections; they are not runtime discovery results.
-projectSessions: [Name=string]: adapters: {
-	wezterm: {
-		workspace: id
-		cwd: root
-	}
-	editor: {
-		command: editor
-		cwd: root
-	}
-	xplr: {
-		cwd: root
-	}
-	just: {
-		cwd: root
-	}
-	shell: {
-		cwd: root
-	}
-	shellWrap: {
-		cwd: root
-		commands: {
-			lint: {
-				name: "lint"
-				argv: ["shell-wrap", "lint"]
-				cwd: root
-			}
-			fmt: {
-				name: "fmt"
-				argv: ["shell-wrap", "fmt"]
-				cwd: root
-			}
-			check: {
-				name: "check"
-				argv: ["shell-wrap", "check"]
-				cwd: root
+projectSessions: [Name=string]: {
+	let projectID = projectSessions[Name].id
+	let projectRoot = projectSessions[Name].root
+	let projectEditor = projectSessions[Name].editor
+
+	adapters: {
+		wezterm: {
+			workspace: projectID
+			cwd:       projectRoot
+		}
+		editor: {
+			command: projectEditor
+			cwd:     projectRoot
+		}
+		xplr: {
+			cwd: projectRoot
+		}
+		just: {
+			cwd: projectRoot
+		}
+		shell: {
+			cwd: projectRoot
+		}
+		shellWrap: {
+			cwd: projectRoot
+			commands: {
+				lint: {
+					name: "lint"
+					argv: ["shell-wrap", "lint"]
+					cwd: projectRoot
+				}
+				fmt: {
+					name: "fmt"
+					argv: ["shell-wrap", "fmt"]
+					cwd: projectRoot
+				}
+				check: {
+					name: "check"
+					argv: ["shell-wrap", "check"]
+					cwd: projectRoot
+				}
 			}
 		}
 	}

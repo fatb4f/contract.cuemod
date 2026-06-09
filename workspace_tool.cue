@@ -45,27 +45,27 @@ command: validate: {
 
 	hosts: exec.Run & {
 		$after: [cueVet]
-		cmd: "cue vet workspace.hosts.json . -d '#HostsProjection'"
+		cmd: "cue vet . workspace.hosts.json -d=#HostsProjection"
 	}
 
 	projects: exec.Run & {
 		$after: [hosts]
-		cmd: "cue vet workspace.projects.json . -d '#ProjectsProjection'"
+		cmd: "cue vet . workspace.projects.json -d=#ProjectsProjection"
 	}
 
 	domains: exec.Run & {
 		$after: [projects]
-		cmd: "cue vet workspace.domains.json . -d '#DomainsProjection'"
+		cmd: "cue vet . workspace.domains.json -d=#DomainsProjection"
 	}
 
 	workflow: exec.Run & {
 		$after: [domains]
-		cmd: "cue vet workspace.workflow.json . -d '#WorkflowProjection'"
+		cmd: "cue vet . workspace.workflow.json -d=#WorkflowProjection"
 	}
 
 	contract: exec.Run & {
 		$after: [workflow]
-		cmd: "cue vet workspace.contract.json . -d '#ContractProjection'"
+		cmd: "cue vet . workspace.contract.json -d=#ContractProjection"
 	}
 
 	done: cli.Print & {

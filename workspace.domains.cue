@@ -2,11 +2,11 @@ package workspace
 
 dotfilesDomains: {
 	contract: #Domain & {
-		name: "contract"
-		kind: "workspace"
-		root: contractRoot
+		name:         "contract"
+		kind:         "workspace"
+		root:         contractRoot
 		relativeRoot: "."
-		router: "README.md"
+		router:       "README.md"
 		surfaces: [
 			"workspace.cue",
 			"workspace.schema.cue",
@@ -43,9 +43,9 @@ dotfilesDomains: {
 	}
 
 	dotfiles: #Domain & {
-		name: "dotfiles"
-		kind: "workspace"
-		root: "\(srcRoot)/dotfiles"
+		name:         "dotfiles"
+		kind:         "workspace"
+		root:         "\(srcRoot)/dotfiles"
 		relativeRoot: "dotfiles"
 		surfaces: [
 			"chezmoi/**",
@@ -64,9 +64,9 @@ dotfilesDomains: {
 	}
 
 	wezterm: #Domain & {
-		name: "wezterm"
-		kind: "config"
-		root: "\(srcRoot)/dotfiles/chezmoi/private_dot_config/wezterm"
+		name:         "wezterm"
+		kind:         "config"
+		root:         "\(srcRoot)/dotfiles/chezmoi/private_dot_config/wezterm"
 		relativeRoot: "dotfiles/chezmoi/private_dot_config/wezterm"
 		surfaces: ["**"]
 		owns: [
@@ -83,9 +83,9 @@ dotfilesDomains: {
 	}
 
 	xplr: #Domain & {
-		name: "xplr"
-		kind: "config"
-		root: "\(srcRoot)/dotfiles/chezmoi/private_dot_config/xplr"
+		name:         "xplr"
+		kind:         "config"
+		root:         "\(srcRoot)/dotfiles/chezmoi/private_dot_config/xplr"
 		relativeRoot: "dotfiles/chezmoi/private_dot_config/xplr"
 		surfaces: ["**"]
 		owns: [
@@ -101,9 +101,9 @@ dotfilesDomains: {
 	}
 
 	nvim: #Domain & {
-		name: "nvim"
-		kind: "config"
-		root: "\(srcRoot)/dotfiles/chezmoi/private_dot_config/nvim"
+		name:         "nvim"
+		kind:         "config"
+		root:         "\(srcRoot)/dotfiles/chezmoi/private_dot_config/nvim"
 		relativeRoot: "dotfiles/chezmoi/private_dot_config/nvim"
 		surfaces: ["**"]
 		owns: [
@@ -119,9 +119,9 @@ dotfilesDomains: {
 	}
 
 	shellWrap: #Domain & {
-		name: "shell-wrap"
-		kind: "adapter"
-		root: "\(srcRoot)/dotfiles/shell-wrap"
+		name:         "shell-wrap"
+		kind:         "adapter"
+		root:         "\(srcRoot)/dotfiles/shell-wrap"
 		relativeRoot: "dotfiles/shell-wrap"
 		surfaces: ["**"]
 		owns: [

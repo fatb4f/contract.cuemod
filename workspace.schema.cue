@@ -39,17 +39,17 @@ package workspace
 	argv: [...string]
 	cwd?: #AbsPath
 	env?: [string]: string
-	palette?: bool | *true
-	oneshot?: bool | *true
+	palette?:     bool | *true
+	oneshot?:     bool | *true
 	description?: string
 }
 
 #LintBackend: "pre-commit" | "shell-wrap" | "direct"
 
 #PreCommitLint: {
-	backend: "pre-commit"
+	backend:    "pre-commit"
 	configPath: #RelPath | *".pre-commit-config.yaml"
-	allFiles: bool | *true
+	allFiles:   bool | *true
 	command: #CommandSpec | *{
 		name: "lint"
 		argv: ["pre-commit", "run", "--all-files"]
@@ -72,10 +72,10 @@ package workspace
 #LintPolicy: #PreCommitLint | #DirectLint
 
 #LintStep: {
-	id: =~"^[a-z0-9][a-z0-9._-]*$"
+	id:       =~"^[a-z0-9][a-z0-9._-]*$"
 	language: #Language
-	tool: string
-	command: #CommandSpec
+	tool:     string
+	command:  #CommandSpec
 }
 
 #ToolchainProfile: {
@@ -86,36 +86,36 @@ package workspace
 		steps?: [...#LintStep]
 		aggregate?: #CommandSpec
 	}
-	test?: #CommandSpec
+	test?:  #CommandSpec
 	build?: #CommandSpec
 }
 
 #HostWorkspace: {
-	id: =~"^[a-z0-9][a-z0-9._-]*$"
-	label: string
-	root: #AbsPath
+	id:     =~"^[a-z0-9][a-z0-9._-]*$"
+	label:  string
+	root:   #AbsPath
 	intent: string
 
 	surfaces: {
 		chezmoi?: {
 			sourceDir: #AbsPath
-			config: #AbsPath
+			config:    #AbsPath
 		}
 		shellWrap?: {
 			root: #AbsPath
 		}
 		wezterm?: {
-			configRoot: #AbsPath
+			configRoot:    #AbsPath
 			workspacesLua: #AbsPath
 		}
 	}
 }
 
 #ProjectSession: {
-	id: =~"^[a-z0-9][a-z0-9._-]*$"
-	label: string
-	root: #AbsPath
-	kind: "contract" | "dotfiles" | "learning" | "project"
+	id:     =~"^[a-z0-9][a-z0-9._-]*$"
+	label:  string
+	root:   #AbsPath
+	kind:   "contract" | "dotfiles" | "learning" | "project"
 	intent: string
 	editor: #Editor | *"nvim"
 
@@ -123,28 +123,28 @@ package workspace
 
 	commands: {
 		default?: string
-		check?: string
-		test?: string
-		build?: string
-		lint?: string
-		fmt?: string
-		open?: string
+		check?:   string
+		test?:    string
+		build?:   string
+		lint?:    string
+		fmt?:     string
+		open?:    string
 	}
 
 	env: {
-		TERM_PROJECT_ID: id
+		TERM_PROJECT_ID:   id
 		TERM_PROJECT_ROOT: root
-		TERM_EDITOR: editor
+		TERM_EDITOR:       editor
 	}
 
 	adapters: {
 		wezterm?: {
 			workspace: string | *id
-			cwd: #AbsPath | *root
+			cwd:       #AbsPath | *root
 		}
 		editor?: {
 			command: string | *editor
-			cwd: #AbsPath | *root
+			cwd:     #AbsPath | *root
 		}
 		xplr?: {
 			cwd: #AbsPath | *root
@@ -158,10 +158,10 @@ package workspace
 		shellWrap?: {
 			cwd: #AbsPath | *root
 			commands?: {
-				lint?: #CommandSpec
-				fmt?: #CommandSpec
+				lint?:  #CommandSpec
+				fmt?:   #CommandSpec
 				check?: #CommandSpec
-				test?: #CommandSpec
+				test?:  #CommandSpec
 				build?: #CommandSpec
 			}
 		}
@@ -169,11 +169,11 @@ package workspace
 }
 
 #Domain: {
-	name: string
-	kind: "workspace" | "materializer" | "adapter" | "config" | "shell"
-	root: #AbsPath
+	name:         string
+	kind:         "workspace" | "materializer" | "adapter" | "config" | "shell"
+	root:         #AbsPath
 	relativeRoot: #RelPath | *"."
-	router?: #RelPath
+	router?:      #RelPath
 	surfaces: [...#RelPath]
 	owns: [...string]
 	denies?: [...string]
@@ -185,70 +185,70 @@ package workspace
 	name: "zero-drift-terminal-workspace"
 
 	statePolicy: {
-		runtimeDiscovery: false
-		paneRegistry: false
-		orchestrationDaemon: false
-		crossVmIpc: false
+		runtimeDiscovery:     false
+		paneRegistry:         false
+		orchestrationDaemon:  false
+		crossVmIpc:           false
 		adapterOwnedManifest: false
 	}
 
 	commandContract: {
-		owner: "just"
+		owner:  "just"
 		source: "justfile"
 	}
 
 	palettePolicy: {
 		singlePaletteBind: true
-		recipeChooser: "fzf"
-		recipeSource: "just --choose"
+		recipeChooser:     "fzf"
+		recipeSource:      "just --choose"
 	}
 
 	movementPolicy: {
-		owner: "wezterm"
-		primitive: "focus-pane"
-		scope: "terminal-panes-and-editor-surface"
+		owner:              "wezterm"
+		primitive:          "focus-pane"
+		scope:              "terminal-panes-and-editor-surface"
 		editorGlueRequired: false
 		notes: [...string]
 	}
 }
 
 #HostsProjection: {
-	version: "workspace.hosts.v1"
+	version:         "workspace.hosts.v1"
 	contractVersion: string
-	srcRoot: #AbsPath
-	contractRoot: #AbsPath
+	srcRoot:         #AbsPath
+	contractRoot:    #AbsPath
 	hosts: [...#HostWorkspace]
 }
 
 #ProjectsProjection: {
-	version: "workspace.projects.v1"
+	version:         "workspace.projects.v1"
 	contractVersion: string
-	srcRoot: #AbsPath
-	contractRoot: #AbsPath
+	srcRoot:         #AbsPath
+	contractRoot:    #AbsPath
 	projects: [...#ProjectSession]
 }
 
 #DomainsProjection: {
-	version: "workspace.domains.v1"
+	version:         "workspace.domains.v1"
 	contractVersion: string
-	srcRoot: #AbsPath
-	contractRoot: #AbsPath
+	srcRoot:         #AbsPath
+	contractRoot:    #AbsPath
 	domains: [...#Domain]
 }
 
 #WorkflowProjection: {
-	version: "workspace.workflow.v1"
+	version:         "workspace.workflow.v1"
 	contractVersion: string
-	srcRoot: #AbsPath
-	contractRoot: #AbsPath
-	workflow: #WorkflowPolicy
+	srcRoot:         #AbsPath
+	contractRoot:    #AbsPath
+	workflow:        #WorkflowPolicy
 }
 
 #ContractProjection: {
-	version: "workspace.contract.v1"
+	version:         "workspace.contract.v1"
 	contractVersion: string
-	srcRoot: #AbsPath
-	contractRoot: #AbsPath
+	srcRoot:         #AbsPath
+	contractRoot:    #AbsPath
 	hosts: [...#HostWorkspace]
 	projects: [...#ProjectSession]
 	domains: [...#Domain]

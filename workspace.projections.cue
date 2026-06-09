@@ -1,10 +1,14 @@
 package workspace
 
+let manifestContractVersion = "0.2.0"
+let manifestSrcRoot = "/home/_404/src"
+let manifestContractRoot = "/home/_404/src/contract.cuemod"
+
 hostManifest: #HostsProjection & {
-	version: "workspace.hosts.v1"
-	contractVersion: contractVersion
-	srcRoot: srcRoot
-	contractRoot: contractRoot
+	version:         "workspace.hosts.v1"
+	contractVersion: manifestContractVersion
+	srcRoot:         manifestSrcRoot
+	contractRoot:    manifestContractRoot
 	hosts: [
 		for _, host in hostWorkspaces {
 			host
@@ -13,10 +17,10 @@ hostManifest: #HostsProjection & {
 }
 
 projectManifest: #ProjectsProjection & {
-	version: "workspace.projects.v1"
-	contractVersion: contractVersion
-	srcRoot: srcRoot
-	contractRoot: contractRoot
+	version:         "workspace.projects.v1"
+	contractVersion: manifestContractVersion
+	srcRoot:         manifestSrcRoot
+	contractRoot:    manifestContractRoot
 	projects: [
 		for _, project in projectSessions {
 			project
@@ -25,10 +29,10 @@ projectManifest: #ProjectsProjection & {
 }
 
 domainManifest: #DomainsProjection & {
-	version: "workspace.domains.v1"
-	contractVersion: contractVersion
-	srcRoot: srcRoot
-	contractRoot: contractRoot
+	version:         "workspace.domains.v1"
+	contractVersion: manifestContractVersion
+	srcRoot:         manifestSrcRoot
+	contractRoot:    manifestContractRoot
 	domains: [
 		for _, domain in dotfilesDomains {
 			domain
@@ -37,20 +41,20 @@ domainManifest: #DomainsProjection & {
 }
 
 workflowManifest: #WorkflowProjection & {
-	version: "workspace.workflow.v1"
-	contractVersion: contractVersion
-	srcRoot: srcRoot
-	contractRoot: contractRoot
-	workflow: workflowPolicy
+	version:         "workspace.workflow.v1"
+	contractVersion: manifestContractVersion
+	srcRoot:         manifestSrcRoot
+	contractRoot:    manifestContractRoot
+	workflow:        workflowPolicy
 }
 
 contractManifest: #ContractProjection & {
-	version: "workspace.contract.v1"
-	contractVersion: contractVersion
-	srcRoot: srcRoot
-	contractRoot: contractRoot
-	hosts: hostManifest.hosts
-	projects: projectManifest.projects
-	domains: domainManifest.domains
-	workflow: workflowManifest.workflow
+	version:         "workspace.contract.v1"
+	contractVersion: manifestContractVersion
+	srcRoot:         manifestSrcRoot
+	contractRoot:    manifestContractRoot
+	hosts:           hostManifest.hosts
+	projects:        projectManifest.projects
+	domains:         domainManifest.domains
+	workflow:        workflowManifest.workflow
 }
