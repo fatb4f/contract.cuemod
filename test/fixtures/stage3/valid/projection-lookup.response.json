@@ -41,6 +41,12 @@
           ]
         }
       ],
+      "artifacts": [
+        {
+          "id": "df:artifact/wezterm-config-source",
+          "path": "chezmoi/private_dot_config/wezterm"
+        }
+      ],
       "relationships": [],
       "validation": {
         "required": false,

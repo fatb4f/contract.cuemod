@@ -235,6 +235,54 @@
         }
       ]
     },
+    "wezterm-smart-splits-adapter": {
+      "id": "wezterm-smart-splits-adapter",
+      "title": "WezTerm smart-splits adapter",
+      "domain": "chezmoi",
+      "kind": "terminal-pane-navigation-adapter",
+      "root": "chezmoi/private_dot_config/wezterm/modules",
+      "entrypoints": [
+        "chezmoi/private_dot_config/wezterm/modules/smart_splits.lua",
+        "chezmoi/private_dot_config/wezterm/wezterm.lua"
+      ],
+      "responsibilities": [
+        "route pane movement and resizing between Neovim and WezTerm",
+        "forward navigation keys into Neovim-owned panes",
+        "activate or resize native WezTerm panes"
+      ],
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/smart_splits.lua",
+          "line": 12
+        },
+        {
+          "path": "chezmoi/private_dot_config/wezterm/wezterm.lua",
+          "line": 23
+        }
+      ]
+    },
+    "nvim-smart-splits-client": {
+      "id": "nvim-smart-splits-client",
+      "title": "Neovim smart-splits client",
+      "domain": "chezmoi",
+      "kind": "editor-pane-navigation-client",
+      "root": "chezmoi/private_dot_config/nvim/lua/workflow",
+      "entrypoints": [
+        "chezmoi/private_dot_config/nvim/lua/workflow/smart_splits.lua"
+      ],
+      "responsibilities": [
+        "configure smart-splits multiplexer integration for WezTerm",
+        "bind editor split movement and resizing"
+      ],
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/nvim/lua/workflow/smart_splits.lua",
+          "line": 6
+        }
+      ]
+    },
     "hypr-desktop-bindings": {
       "id": "hypr-desktop-bindings",
       "title": "Hyprland desktop bindings",
@@ -398,6 +446,36 @@
       "targetPath": "~/.config/nvim",
       "authority": "source",
       "editable": true
+    },
+    "wezterm-smart-splits-lua": {
+      "id": "wezterm-smart-splits-lua",
+      "domain": "chezmoi",
+      "kind": "source",
+      "path": "chezmoi/private_dot_config/wezterm/modules/smart_splits.lua",
+      "targetPath": "~/.config/wezterm/modules/smart_splits.lua",
+      "authority": "source",
+      "editable": true,
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/smart_splits.lua",
+          "line": 48
+        }
+      ]
+    },
+    "nvim-smart-splits-config": {
+      "id": "nvim-smart-splits-config",
+      "domain": "chezmoi",
+      "kind": "source",
+      "path": "chezmoi/private_dot_config/nvim/lua/workflow/smart_splits.lua",
+      "targetPath": "~/.config/nvim/lua/workflow/smart_splits.lua",
+      "authority": "source",
+      "editable": true,
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/nvim/lua/workflow/smart_splits.lua",
+          "line": 6
+        }
+      ]
     },
     "hypr-config-source": {
       "id": "hypr-config-source",
@@ -690,17 +768,21 @@
         }
       ]
     },
-    "nvim-integrates-wezterm": {
-      "id": "nvim-integrates-wezterm",
-      "from": "nvim-workspace-client",
+    "smart-splits-cross-tool-navigation": {
+      "id": "smart-splits-cross-tool-navigation",
+      "from": "nvim-smart-splits-client",
       "type": "integrates-with",
-      "to": "wezterm-ide-controller",
-      "via": "smart-splits multiplexer integration",
+      "to": "wezterm-smart-splits-adapter",
+      "via": "smart-splits multiplexer integration plus IS_NVIM pane routing",
       "confidence": "observed",
       "evidence": [
         {
           "path": "chezmoi/private_dot_config/nvim/lua/workflow/smart_splits.lua",
           "line": 6
+        },
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/smart_splits.lua",
+          "line": 12
         }
       ]
     },
@@ -794,13 +876,18 @@
           "wezterm-ide-controller",
           "wezterm-runtime-registry",
           "xplr-project-explorer",
-          "nvim-workspace-client"
+          "nvim-workspace-client",
+          "wezterm-smart-splits-adapter",
+          "nvim-smart-splits-client"
         ],
         "interfaces": [
           "term-project-id",
           "term-project-root",
           "term-project-cwd",
           "term-nvim-socket"
+        ],
+        "relationships": [
+          "smart-splits-cross-tool-navigation"
         ]
       },
       "agentUse": [
@@ -865,12 +952,29 @@
             ],
             "relationships": [
               "controller-launches-nvim",
-              "controller-launches-xplr",
-              "nvim-integrates-wezterm"
+              "controller-launches-xplr"
             ]
           },
           "agentUse": [
             "Inspect this projection for socket lifecycle, stale editor recovery, pane caching, or explorer-to-editor routing."
+          ]
+        },
+        "cross-tool-pane-navigation": {
+          "id": "cross-tool-pane-navigation",
+          "title": "Cross-tool pane navigation",
+          "purpose": "Coordinate pane movement and resizing across Neovim splits and native WezTerm panes.",
+          "references": {
+            "components": [
+              "wezterm-smart-splits-adapter",
+              "nvim-smart-splits-client"
+            ],
+            "relationships": [
+              "smart-splits-cross-tool-navigation"
+            ]
+          },
+          "agentUse": [
+            "Treat terminal-side and editor-side smart-splits implementations as distinct cooperating components.",
+            "Do not infer that smart-splits is confined to Neovim when the WezTerm adapter is in scope."
           ]
         }
       }

@@ -65,6 +65,8 @@ agentCapabilityRoutes: #AgentCapabilityRoutes & {
 			"wezterm",
 			"workspace",
 			"sessionizer",
+			"smart-splits",
+			"smart_splits",
 			"project catalog",
 			"project discovery",
 		]
@@ -73,7 +75,13 @@ agentCapabilityRoutes: #AgentCapabilityRoutes & {
 			"chezmoi/private_dot_config/xplr",
 			"chezmoi/private_dot_config/nvim",
 		]
-		artifacts: ["wezterm-config-source"]
+		artifacts: [
+			"wezterm-config-source",
+			"nvim-config-source",
+			"xplr-config-source",
+			"wezterm-smart-splits-lua",
+			"nvim-smart-splits-config",
+		]
 		validationProfiles: ["chezmoi-closeout"]
 	}
 }
@@ -228,6 +236,10 @@ if len(matchedMutationTerms) > 0 {
 		root: #SchemaMapRelativePath
 		entrypoints: [...#SchemaMapRelativePath]
 	}]
+	artifacts: [...{
+		id:   #GraphID
+		path: #SchemaMapRelativePath
+	}]
 	relationships: [...{
 		from: #SchemaMapIdentifier
 		type: string
@@ -302,6 +314,12 @@ if len(resolverMatches) == 1 {
 				id:          modelComponents[componentID].id
 				root:        modelComponents[componentID].root
 				entrypoints: modelComponents[componentID].entrypoints
+			},
+		]
+		artifacts: [
+			for artifactID in route.artifacts {
+				id:   "df:artifact/\(artifactID)"
+				path: modelArtifacts[artifactID].path
 			},
 		]
 		relationships: [
@@ -386,7 +404,7 @@ codexSkill: """
 	Use the returned CUE projection as the task map and retain its `projection_id`.
 
 	- Resolve first; inspect second.
-	- For implementation evidence, call the `cue.search_implementation` MCP tool with the returned `projection_id`; do not invoke `rg` directly.
+	- For implementation evidence, select graph artifact IDs from the projection and call `cue.search_implementation` with `projection_id` and `artifact_ids`; do not invoke `rg` directly.
 	- Cite returned evidence IDs with exact paths and lines.
 	- Treat hook candidates as hints, never authority.
 	- Do not invoke `cue cmd` directly or hand-write temporary CUE input.

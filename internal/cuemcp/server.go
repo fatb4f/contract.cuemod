@@ -48,20 +48,29 @@ type resolveInput struct {
 type searchInput struct {
 	Schema       string   `json:"schema"`
 	ProjectionID string   `json:"projection_id"`
+	ArtifactIDs  []string `json:"artifact_ids"`
 	Intent       string   `json:"intent"`
 	Terms        []string `json:"terms"`
 	ResultLimit  int      `json:"result_limit"`
 }
 
 type executionPlan struct {
-	Backend       string   `json:"backend"`
-	Argv          []string `json:"argv"`
-	Shell         bool     `json:"shell"`
-	SearchedPaths []string `json:"searched_paths"`
+	Backend string         `json:"backend"`
+	Shell   bool           `json:"shell"`
+	Terms   []string       `json:"terms"`
+	Targets []searchTarget `json:"targets"`
+}
+
+type searchTarget struct {
+	ArtifactID string `json:"artifact_id"`
+	Path       string `json:"path"`
 }
 
 type searchResult struct {
 	ID          string    `json:"id"`
+	EvidenceID  string    `json:"evidence_id"`
+	ProviderID  string    `json:"provider_id"`
+	ArtifactID  string    `json:"artifact_id"`
 	RankTuple   []float64 `json:"rank_tuple"`
 	Kind        string    `json:"kind"`
 	Path        string    `json:"path"`
@@ -103,13 +112,15 @@ func Serve(root string) error {
 	s.AddTool(tool("lookup_projection", "Look up an in-memory immutable CUE authority envelope.", map[string]any{
 		"projection_id": stringProperty("Projection authority-envelope identity"),
 	}, "projection_id"), runtime.handleLookup)
+	s.AddTool(tool("list_semantic_providers", "List the Stage 3 evidence and LSP-backed MCP provider contracts.", map[string]any{}), runtime.handleListProviders)
 	s.AddTool(tool("search_implementation", "Search live implementation evidence inside CUE-projected bounds. Do not call rg directly when this tool applies.", map[string]any{
 		"schema":        stringProperty("agent.search-implementation.request.v1"),
 		"projection_id": stringProperty("Projection authority-envelope identity"),
+		"artifact_ids":  arrayProperty("Graph artifact identities selected from the projection"),
 		"intent":        stringProperty("Semantic search intent"),
 		"terms":         arrayProperty("Literal search terms"),
 		"result_limit":  numberProperty("Maximum returned evidence results"),
-	}, "schema", "projection_id", "intent", "terms", "result_limit"), runtime.handleSearch)
+	}, "schema", "projection_id", "artifact_ids", "intent", "terms", "result_limit"), runtime.handleSearch)
 	s.AddTool(tool("validate_projection", "Validate a projection envelope and its identity through CUE.", map[string]any{
 		"projection_id": stringProperty("Projection authority-envelope identity"),
 	}, "projection_id"), runtime.handleValidate)
@@ -173,6 +184,21 @@ func (r *Runtime) handleLookup(_ context.Context, request mcp.CallToolRequest) (
 		"projection_id": record.ID,
 		"envelope":      record.Envelope,
 	}), nil
+}
+
+func (r *Runtime) handleListProviders(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	var providers map[string]any
+	if err := r.cueExport(ctx, "stage3Providers", nil, &providers); err != nil {
+		return toolError(err), nil
+	}
+	value := map[string]any{
+		"schema":    "agent.semantic-providers.response.v1",
+		"providers": providers,
+	}
+	if err := r.cueVet(ctx, "#SemanticProvidersResponse", value); err != nil {
+		return toolError(err), nil
+	}
+	return jsonResult(value), nil
 }
 
 func (r *Runtime) handleSearch(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -265,8 +291,8 @@ func (r *Runtime) Search(ctx context.Context, input searchInput) (map[string]any
 			"maximum":   maxResultLimit,
 		})
 	}
-	if strings.TrimSpace(input.Intent) == "" || len(input.Terms) == 0 {
-		return nil, searchError("invalid_search_contract", "Intent and terms are required.", input.ProjectionID, map[string]any{})
+	if strings.TrimSpace(input.Intent) == "" || len(input.ArtifactIDs) == 0 || len(input.Terms) == 0 {
+		return nil, searchError("invalid_search_contract", "Intent, artifact_ids, and terms are required.", input.ProjectionID, map[string]any{})
 	}
 	for _, term := range input.Terms {
 		if strings.TrimSpace(term) == "" {
@@ -300,14 +326,13 @@ func (r *Runtime) Search(ctx context.Context, input searchInput) (map[string]any
 	projection := record.Envelope["projection"].(map[string]any)
 	project := projection["project"].(map[string]any)
 	projectRoot := project["root"].(string)
-	if err := validateSearchPaths(projectRoot, plan.SearchedPaths); err != nil {
+	if err := validateSearchTargets(projectRoot, plan.Targets); err != nil {
 		return nil, searchError("path_out_of_scope", err.Error(), input.ProjectionID, map[string]any{
-			"requested_path": strings.Join(plan.SearchedPaths, ","),
-			"allowed_roots":  plan.SearchedPaths,
+			"requested_path": strings.Join(targetPaths(plan.Targets), ","),
+			"allowed_roots":  targetPaths(plan.Targets),
 		})
 	}
-	entrypoints := projectionEntrypoints(projection)
-	results, backendVersion, backendErr := executeRG(ctx, projectRoot, input.ProjectionID, plan, entrypoints)
+	results, invocations, backendVersion, backendErr := executeRG(ctx, projectRoot, input.ProjectionID, plan)
 	if backendErr != nil {
 		code := "backend_failed"
 		details := map[string]any{"backend": "rg"}
@@ -338,10 +363,10 @@ func (r *Runtime) Search(ctx context.Context, input searchInput) (map[string]any
 		"projection_id": input.ProjectionID,
 		"execution": map[string]any{
 			"backend":         "rg",
+			"provider_id":     "df:provider/cue-rg-mcp",
 			"backend_version": backendVersion,
-			"argv":            plan.Argv,
 			"shell":           false,
-			"searched_paths":  plan.SearchedPaths,
+			"invocations":     invocations,
 		},
 		"pagination": map[string]any{
 			"result_limit": input.ResultLimit,
@@ -354,6 +379,13 @@ func (r *Runtime) Search(ctx context.Context, input searchInput) (map[string]any
 			"sort":   []string{"rank_tuple desc", "path asc", "line asc", "id asc"},
 		},
 		"results": results,
+		"coverage": map[string]any{
+			"selected_artifacts":     input.ArtifactIDs,
+			"searched_artifacts":     targetArtifactIDs(plan.Targets),
+			"truncated":              truncated,
+			"negative_claim_allowed": false,
+			"reason":                 "Text search returns evidence observations only; empty or complete-looking results do not prove semantic absence.",
+		},
 	}
 	if err := r.cueVet(ctx, "#SearchImplementationResponse", response); err != nil {
 		return nil, searchError("invalid_search_contract", err.Error(), input.ProjectionID, map[string]any{})
@@ -369,12 +401,17 @@ func (r *Runtime) lookup(id string) (projectionRecord, bool) {
 }
 
 func (r *Runtime) cueExport(ctx context.Context, expression string, input any, output any) error {
-	inputPath, cleanup, err := writeTempJSON(input)
-	if err != nil {
-		return err
+	args := []string{"export", ".", "dotfiles.schema-map.json"}
+	if input != nil {
+		inputPath, cleanup, err := writeTempJSON(input)
+		if err != nil {
+			return err
+		}
+		defer cleanup()
+		args = append(args, inputPath)
 	}
-	defer cleanup()
-	cmd := exec.CommandContext(ctx, "cue", "export", ".", "dotfiles.schema-map.json", inputPath, "-e", expression, "--out", "json")
+	args = append(args, "-e", expression, "--out", "json")
+	cmd := exec.CommandContext(ctx, "cue", args...)
 	cmd.Dir = r.root
 	data, err := cmd.CombinedOutput()
 	if err != nil {
@@ -430,104 +467,115 @@ func projectionID(envelope map[string]any) (string, error) {
 }
 
 func validatePlan(plan executionPlan) error {
-	if plan.Backend != "rg" || plan.Shell || len(plan.Argv) == 0 || plan.Argv[0] != "rg" {
-		return errors.New("CUE search plan violated the argv-only rg contract")
+	if plan.Backend != "rg" || plan.Shell || len(plan.Terms) == 0 || len(plan.Targets) == 0 {
+		return errors.New("CUE search plan violated the artifact-bound rg contract")
 	}
-	if len(plan.SearchedPaths) == 0 {
-		return errors.New("CUE search plan produced no searched paths")
-	}
-	for _, path := range plan.SearchedPaths {
-		if filepath.IsAbs(path) || strings.Contains(filepath.ToSlash(path), "../") || path == ".." {
-			return fmt.Errorf("CUE search plan produced an unsafe path: %s", path)
+	for _, target := range plan.Targets {
+		if target.ArtifactID == "" || filepath.IsAbs(target.Path) || strings.Contains(filepath.ToSlash(target.Path), "../") || target.Path == ".." {
+			return fmt.Errorf("CUE search plan produced an unsafe artifact target: %s", target.Path)
 		}
 	}
 	return nil
 }
 
-func validateSearchPaths(root string, paths []string) error {
+func validateSearchTargets(root string, targets []searchTarget) error {
 	realRoot, err := filepath.EvalSymlinks(root)
 	if err != nil {
 		return err
 	}
-	for _, path := range paths {
-		realPath, err := filepath.EvalSymlinks(filepath.Join(root, path))
+	for _, target := range targets {
+		realPath, err := filepath.EvalSymlinks(filepath.Join(root, target.Path))
 		if err != nil {
 			return err
 		}
 		relative, err := filepath.Rel(realRoot, realPath)
 		if err != nil || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
-			return fmt.Errorf("projected search path resolves outside repository root: %s", path)
+			return fmt.Errorf("projected artifact path resolves outside repository root: %s", target.Path)
 		}
 	}
 	return nil
 }
 
-func projectionEntrypoints(projection map[string]any) map[string]bool {
-	entrypoints := make(map[string]bool)
-	components, _ := projection["components"].([]any)
-	for _, value := range components {
-		component, _ := value.(map[string]any)
-		paths, _ := component["entrypoints"].([]any)
-		for _, path := range paths {
-			if text, ok := path.(string); ok {
-				entrypoints[text] = true
-			}
-		}
-	}
-	return entrypoints
-}
-
-func executeRG(ctx context.Context, root, projectionID string, plan executionPlan, entrypoints map[string]bool) ([]searchResult, string, error) {
+func executeRG(ctx context.Context, root, projectionID string, plan executionPlan) ([]searchResult, []map[string]any, string, error) {
 	versionCmd := exec.CommandContext(ctx, "rg", "--version")
 	versionData, err := versionCmd.Output()
 	if err != nil {
-		return nil, "", err
+		return nil, nil, "", err
 	}
 	version := strings.TrimSpace(strings.SplitN(string(versionData), "\n", 2)[0])
-	cmd := exec.CommandContext(ctx, plan.Argv[0], plan.Argv[1:]...)
-	cmd.Dir = root
-	output, err := cmd.Output()
-	if err != nil {
-		var exitErr *exec.ExitError
-		if errors.As(err, &exitErr) && exitErr.ExitCode() == 1 {
-			return []searchResult{}, version, nil
-		}
-		return nil, version, err
-	}
 	results := make([]searchResult, 0)
-	for _, line := range bytes.Split(output, []byte{'\n'}) {
-		if len(line) == 0 {
-			continue
-		}
-		var event rgEvent
-		if json.Unmarshal(line, &event) != nil || event.Type != "match" {
-			continue
-		}
-		column := 1
-		if len(event.Data.Submatches) > 0 {
-			column = event.Data.Submatches[0].Start + 1
-		}
-		kind := "related_component"
-		score := 0.8
-		entrypointFlag := 0.0
-		if entrypoints[event.Data.Path.Text] {
-			kind = "entrypoint"
-			score = 0.98
-			entrypointFlag = 1
-		}
-		text := strings.TrimSuffix(event.Data.Lines.Text, "\n")
-		results = append(results, searchResult{
-			ID:          evidenceID(projectionID, event.Data.Path.Text, event.Data.LineNumber, column, text),
-			RankTuple:   []float64{score, entrypointFlag, 0},
-			Kind:        kind,
-			Path:        event.Data.Path.Text,
-			Line:        event.Data.LineNumber,
-			Column:      column,
-			MatchedText: text,
-			Reason:      "literal implementation evidence returned by the CUE-projected rg plan",
+	invocations := make([]map[string]any, 0, len(plan.Targets))
+	for _, target := range plan.Targets {
+		argv := rgArgv(plan.Terms, target.Path)
+		invocations = append(invocations, map[string]any{
+			"artifact_id": target.ArtifactID,
+			"argv":        argv,
+			"path":        target.Path,
 		})
+		cmd := exec.CommandContext(ctx, argv[0], argv[1:]...)
+		cmd.Dir = root
+		output, err := cmd.Output()
+		if err != nil {
+			var exitErr *exec.ExitError
+			if errors.As(err, &exitErr) && exitErr.ExitCode() == 1 {
+				continue
+			}
+			return nil, invocations, version, err
+		}
+		for _, line := range bytes.Split(output, []byte{'\n'}) {
+			if len(line) == 0 {
+				continue
+			}
+			var event rgEvent
+			if json.Unmarshal(line, &event) != nil || event.Type != "match" {
+				continue
+			}
+			column := 1
+			if len(event.Data.Submatches) > 0 {
+				column = event.Data.Submatches[0].Start + 1
+			}
+			text := strings.TrimSuffix(event.Data.Lines.Text, "\n")
+			id := evidenceID(projectionID, event.Data.Path.Text, event.Data.LineNumber, column, text)
+			results = append(results, searchResult{
+				ID:          id,
+				EvidenceID:  id,
+				ProviderID:  "df:provider/cue-rg-mcp",
+				ArtifactID:  target.ArtifactID,
+				RankTuple:   []float64{0.8, 0, 0},
+				Kind:        "source",
+				Path:        event.Data.Path.Text,
+				Line:        event.Data.LineNumber,
+				Column:      column,
+				MatchedText: text,
+				Reason:      "literal evidence from an explicitly selected graph artifact",
+			})
+		}
 	}
-	return results, version, nil
+	return results, invocations, version, nil
+}
+
+func rgArgv(terms []string, path string) []string {
+	argv := []string{"rg", "--json", "--line-number", "--column", "--smart-case", "--fixed-strings"}
+	for _, term := range terms {
+		argv = append(argv, "-e", term)
+	}
+	return append(argv, "--", path)
+}
+
+func targetPaths(targets []searchTarget) []string {
+	paths := make([]string, 0, len(targets))
+	for _, target := range targets {
+		paths = append(paths, target.Path)
+	}
+	return paths
+}
+
+func targetArtifactIDs(targets []searchTarget) []string {
+	ids := make([]string, 0, len(targets))
+	for _, target := range targets {
+		ids = append(ids, target.ArtifactID)
+	}
+	return ids
 }
 
 func evidenceID(projectionID, path string, line, column int, matchedText string) string {

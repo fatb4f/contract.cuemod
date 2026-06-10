@@ -26,8 +26,9 @@ func TestResolveAndSearchImplementation(t *testing.T) {
 	result, searchErr := runtime.Search(context.Background(), searchInput{
 		Schema:       "agent.search-implementation.request.v1",
 		ProjectionID: record.ID,
+		ArtifactIDs:  []string{"df:artifact/wezterm-smart-splits-lua"},
 		Intent:       "determine whether sessionizer uses smart-splits for workspace switching",
-		Terms:        []string{"smart_splits", "SwitchToWorkspace", "get_workspace_names"},
+		Terms:        []string{"IS_NVIM", "ActivatePaneDirection", "AdjustPaneSize"},
 		ResultLimit:  50,
 	})
 	if searchErr != nil {
@@ -38,18 +39,28 @@ func TestResolveAndSearchImplementation(t *testing.T) {
 	if execution["shell"] != false {
 		t.Fatalf("shell = %v, want false", execution["shell"])
 	}
-	argv := execution["argv"].([]string)
-	if len(argv) == 0 || argv[0] != "rg" {
-		t.Fatalf("argv = %#v", argv)
+	if execution["provider_id"] != "df:provider/cue-rg-mcp" {
+		t.Fatalf("provider_id = %v", execution["provider_id"])
+	}
+	invocations := execution["invocations"].([]map[string]any)
+	if len(invocations) != 1 || invocations[0]["artifact_id"] != "df:artifact/wezterm-smart-splits-lua" {
+		t.Fatalf("invocations = %#v", invocations)
 	}
 	results := result["results"].([]searchResult)
 	if len(results) == 0 {
 		t.Fatal("expected implementation evidence")
 	}
 	for _, evidence := range results {
-		if evidence.ID == "" || filepath.IsAbs(evidence.Path) {
+		if evidence.ID == "" || evidence.EvidenceID != evidence.ID ||
+			evidence.ProviderID != "df:provider/cue-rg-mcp" ||
+			evidence.ArtifactID != "df:artifact/wezterm-smart-splits-lua" ||
+			filepath.IsAbs(evidence.Path) {
 			t.Fatalf("invalid evidence: %#v", evidence)
 		}
+	}
+	coverage := result["coverage"].(map[string]any)
+	if coverage["negative_claim_allowed"] != false {
+		t.Fatalf("coverage = %#v", coverage)
 	}
 }
 
@@ -58,11 +69,36 @@ func TestSearchRejectsUnknownProjection(t *testing.T) {
 	_, searchErr := runtime.Search(context.Background(), searchInput{
 		Schema:       "agent.search-implementation.request.v1",
 		ProjectionID: "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+		ArtifactIDs:  []string{"df:artifact/wezterm-config-source"},
 		Intent:       "search",
 		Terms:        []string{"mux"},
 		ResultLimit:  10,
 	})
 	if searchErr == nil || searchErr["code"] != "projection_not_found" {
+		t.Fatalf("error = %#v", searchErr)
+	}
+}
+
+func TestSearchRejectsArtifactOutsideProjection(t *testing.T) {
+	root := filepath.Clean(filepath.Join("..", ".."))
+	runtime := New(root)
+	record, _, err := runtime.Resolve(context.Background(), resolveInput{
+		Prompt:     "Inspect the WezTerm sessionizer",
+		CWD:        "/home/_404/src/dotfiles",
+		Candidates: []string{"workspace-lifecycle"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, searchErr := runtime.Search(context.Background(), searchInput{
+		Schema:       "agent.search-implementation.request.v1",
+		ProjectionID: record.ID,
+		ArtifactIDs:  []string{"df:artifact/session-generated-executable"},
+		Intent:       "search",
+		Terms:        []string{"mux"},
+		ResultLimit:  10,
+	})
+	if searchErr == nil || searchErr["code"] != "invalid_search_contract" {
 		t.Fatalf("error = %#v", searchErr)
 	}
 }

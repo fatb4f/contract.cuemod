@@ -6,6 +6,55 @@ import "list"
 #EvidenceID:         string & =~"^ev_[a-z2-7]{16}$"
 #DeltaID:            string & =~"^delta_[a-z2-7]{16}$"
 #SearchRelativePath: string & !~"^/" & !~"(^|/)\\.\\.(/|$)"
+#GraphID:            string & =~"^df:[a-z]+/[a-z0-9._-]+$"
+
+#ProviderID:
+	"df:provider/cue-rg-mcp" |
+	"df:provider/cue-lsp-mcp" |
+	"df:provider/lua-lsp-mcp"
+
+#Provider: close({
+	id:      #ProviderID
+	kind:    "cue-search" | "cue-lsp" | "lua-lsp"
+	plane:   "evidence" | "contract-semantics" | "implementation-semantics"
+	adapter: "native-mcp" | "lsp-backed-mcp"
+	server?: string
+	type_libraries?: [...string & !=""]
+	capabilities: [...string & !=""] & [_, ...]
+})
+
+stage3Providers: [#ProviderID]: #Provider
+stage3Providers: {
+	"df:provider/cue-rg-mcp": {
+		id:      "df:provider/cue-rg-mcp"
+		kind:    "cue-search"
+		plane:   "evidence"
+		adapter: "native-mcp"
+		capabilities: ["search", "bounded-rg", "artifact-filter", "raw-evidence"]
+	}
+	"df:provider/cue-lsp-mcp": {
+		id:      "df:provider/cue-lsp-mcp"
+		kind:    "cue-lsp"
+		plane:   "contract-semantics"
+		adapter: "lsp-backed-mcp"
+		server:  "cue lsp"
+		capabilities: ["definition", "references", "hover", "diagnostics", "document-symbols"]
+	}
+	"df:provider/lua-lsp-mcp": {
+		id:      "df:provider/lua-lsp-mcp"
+		kind:    "lua-lsp"
+		plane:   "implementation-semantics"
+		adapter: "lsp-backed-mcp"
+		server:  "lua-language-server"
+		type_libraries: ["wezterm-types"]
+		capabilities: ["definition", "references", "hover", "diagnostics", "document-symbols"]
+	}
+}
+
+#SemanticProvidersResponse: close({
+	schema: "agent.semantic-providers.response.v1"
+	providers: [#ProviderID]: #Provider
+})
 
 #SearchRejectionCode:
 	"projection_not_found" |
@@ -73,7 +122,8 @@ import "list"
 #SearchImplementationRequest: close({
 	schema:        "agent.search-implementation.request.v1"
 	projection_id: #ProjectionID
-	intent:        string & !=""
+	artifact_ids: [...#GraphID] & [_, ...]
+	intent: string & !=""
 	terms: [...string & !=""] & [_, ...]
 	result_limit: int & >=1 & <=1000
 })
@@ -111,18 +161,25 @@ import "list"
 ]
 
 #SearchExecution: close({
+	provider_id:     "df:provider/cue-rg-mcp"
 	backend:         "rg"
 	backend_version: string & =~"^ripgrep [0-9]+\\."
-	argv: ["rg", ...string]
-	shell: false
-	searched_paths: [...#SearchRelativePath] & [_, ...]
+	shell:           false
+	invocations: [...{
+		artifact_id: #GraphID
+		argv: ["rg", ...string]
+		path: #SearchRelativePath
+	}] & [_, ...]
 })
 
 #SearchExecutionPlan: close({
 	backend: "rg"
-	argv: ["rg", ...string]
-	shell: false
-	searched_paths: [...#SearchRelativePath] & [_, ...]
+	shell:   false
+	terms: [...string & !=""] & [_, ...]
+	targets: [...{
+		artifact_id: #GraphID
+		path:        #SearchRelativePath
+	}] & [_, ...]
 })
 
 #SearchPagination: {
@@ -152,6 +209,10 @@ import "list"
 
 #SearchResult: {
 	id:           #EvidenceID
+	evidence_id:  #EvidenceID
+	provider_id:  "df:provider/cue-rg-mcp"
+	artifact_id:  #GraphID
+	symbol_id?:   #GraphID
 	rank_tuple:   #SearchRankTuple
 	kind:         "entrypoint" | "related_component" | "source" | "generated" | "target" | "instruction_boundary"
 	path:         #SearchRelativePath
@@ -178,6 +239,13 @@ import "list"
 	pagination:    #SearchPagination
 	ordering:      #SearchOrdering
 	results: [...#SearchResult]
+	coverage: {
+		selected_artifacts: [...#GraphID] & [_, ...]
+		searched_artifacts: [...#GraphID] & [_, ...]
+		truncated:              bool
+		negative_claim_allowed: false
+		reason:                 string & !=""
+	}
 	model_delta?: #SearchModelDelta
 
 	pagination: returned: len(results)
@@ -310,33 +378,25 @@ searchPlanInput?: {
 }
 
 if searchPlanInput != _|_ {
-	let projectedSearchPaths = [
-		for path in searchPlanInput.envelope.projection.scope.inspect {
-			path
+	let projectedArtifacts = [
+		for artifact in searchPlanInput.envelope.projection.artifacts
+		if list.Contains(searchPlanInput.request.artifact_ids, artifact.id) {
+			artifact
 		},
 	]
-	let projectedTermArgs = list.Concat([
-		for term in searchPlanInput.request.terms {
-			["-e", term]
-		},
-	])
 
 	searchExecutionPlan: #SearchExecutionPlan & {
 		backend: "rg"
-		argv: list.Concat([
-			[
-				"rg",
-				"--json",
-				"--line-number",
-				"--column",
-				"--smart-case",
-				"--fixed-strings",
-			],
-			projectedTermArgs,
-			["--"],
-			projectedSearchPaths,
-		])
-		shell:          false
-		searched_paths: projectedSearchPaths
+		shell:   false
+		terms:   searchPlanInput.request.terms
+		targets: [
+			for artifact in projectedArtifacts {
+				artifact_id: artifact.id
+				path:        artifact.path
+			},
+		]
+		if len(projectedArtifacts) != len(searchPlanInput.request.artifact_ids) {
+			_|_("every requested artifact_id must resolve in the projection")
+		}
 	}
 }

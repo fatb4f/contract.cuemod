@@ -91,9 +91,22 @@ The public tools are:
 
 - `cue.resolve_agent_context`
 - `cue.lookup_projection`
+- `cue.list_semantic_providers`
 - `cue.search_implementation`
 - `cue.validate_projection`
 
-CUE produces the search roots and complete `rg` argv. The Go server validates
-the authority envelope, executes `rg` without a shell, ranks evidence, derives
-stable evidence IDs, and CUE-vets the typed response before returning it.
+CUE resolves graph artifact IDs to bounded search targets. The Go server
+executes one shell-free `rg` invocation per explicitly selected artifact,
+derives stable evidence IDs, and CUE-vets the provider-bound response.
+
+Stage 3 providers have distinct authority boundaries:
+
+- `cue-rg-mcp` transports bounded evidence observations.
+- `cue-lsp-mcp` describes the LSP-backed CUE semantic surface.
+- `lua-lsp-mcp` describes the LSP-backed Lua semantic surface and requires
+  `wezterm-types`.
+
+MCP may join explicitly identified provider results. It may not infer component
+ownership or authorize negative claims from file matches. Search results carry
+`provider_id`, `artifact_id`, and `evidence_id`; `symbol_id` is reserved for
+LSP-backed semantic observations.

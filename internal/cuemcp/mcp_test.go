@@ -43,8 +43,22 @@ func TestMCPResolveThenSearch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(tools.Tools) != 4 {
-		t.Fatalf("tool count = %d, want 4", len(tools.Tools))
+	if len(tools.Tools) != 5 {
+		t.Fatalf("tool count = %d, want 5", len(tools.Tools))
+	}
+
+	providers := mcp.CallToolRequest{}
+	providers.Params.Name = "list_semantic_providers"
+	providerResult, err := mcpClient.CallTool(ctx, providers)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var providerCatalog map[string]any
+	if err := json.Unmarshal([]byte(resultText(t, providerResult)), &providerCatalog); err != nil {
+		t.Fatal(err)
+	}
+	if providerCatalog["schema"] != "agent.semantic-providers.response.v1" {
+		t.Fatalf("provider catalog = %#v", providerCatalog)
 	}
 
 	resolve := mcp.CallToolRequest{}
@@ -68,8 +82,9 @@ func TestMCPResolveThenSearch(t *testing.T) {
 	search.Params.Arguments = map[string]any{
 		"schema":        "agent.search-implementation.request.v1",
 		"projection_id": resolved["projection_id"],
+		"artifact_ids":  []string{"df:artifact/wezterm-smart-splits-lua"},
 		"intent":        "determine whether sessionizer uses smart-splits for workspace switching",
-		"terms":         []string{"smart_splits", "SwitchToWorkspace", "get_workspace_names"},
+		"terms":         []string{"IS_NVIM", "ActivatePaneDirection", "AdjustPaneSize"},
 		"result_limit":  50,
 	}
 	searchResult, err := mcpClient.CallTool(ctx, search)

@@ -2,19 +2,26 @@
   "schema": "agent.search-implementation.response.v1",
   "projection_id": "sha256:0942cc8ee46075d687eb27847124eff5eb30ad6202d66d771ce73dae1f0db572",
   "execution": {
+    "provider_id": "df:provider/cue-rg-mcp",
     "backend": "rg",
     "backend_version": "ripgrep 14.1.1",
-    "argv": [
-      "rg",
-      "--json",
-      "--line-number",
-      "--column",
-      "--smart-case",
-      "smart_splits|mux",
-      "chezmoi/private_dot_config/wezterm"
-    ],
-    "searched_paths": [
-      "chezmoi/private_dot_config/wezterm"
+    "invocations": [
+      {
+        "artifact_id": "df:artifact/wezterm-config-source",
+        "argv": [
+          "rg",
+          "--json",
+          "--line-number",
+          "--column",
+          "--smart-case",
+          "--fixed-strings",
+          "-e",
+          "smart_splits",
+          "--",
+          "chezmoi/private_dot_config/wezterm"
+        ],
+        "path": "chezmoi/private_dot_config/wezterm"
+      }
     ],
     "shell": false
   },
@@ -36,6 +43,9 @@
   "results": [
     {
       "id": "ev_jwx2gssmnjomc6rq",
+      "evidence_id": "ev_jwx2gssmnjomc6rq",
+      "provider_id": "df:provider/cue-rg-mcp",
+      "artifact_id": "df:artifact/wezterm-config-source",
       "rank_tuple": [
         0.98,
         1,
@@ -50,6 +60,9 @@
     },
     {
       "id": "ev_uglaj5btsmxa33kt",
+      "evidence_id": "ev_uglaj5btsmxa33kt",
+      "provider_id": "df:provider/cue-rg-mcp",
+      "artifact_id": "df:artifact/wezterm-config-source",
       "rank_tuple": [
         0.91,
         0,
@@ -63,6 +76,13 @@
       "reason": "terminal-side smart-splits pane navigation integration"
     }
   ],
+  "coverage": {
+    "selected_artifacts": ["df:artifact/wezterm-config-source"],
+    "searched_artifacts": ["df:artifact/wezterm-config-source"],
+    "truncated": false,
+    "negative_claim_allowed": false,
+    "reason": "Text search returns evidence observations only."
+  },
   "model_delta": {
     "missing_relationships": [
       {
