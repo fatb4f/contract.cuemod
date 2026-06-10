@@ -1,5 +1,6 @@
 {
-  "schema": "agent.projection-identity.fixture.v1",
+  "schema": "agent.projection-lookup.response.v1",
+  "projection_id": "sha256:0942cc8ee46075d687eb27847124eff5eb30ad6202d66d771ce73dae1f0db572",
   "envelope": {
     "schema": "agent.projection-envelope.v1",
     "projection_schema_version": "agent.context-projection.v1",
@@ -58,13 +59,5 @@
     },
     "search_policy_version": "agent.search-policy.v1",
     "ranking_policy_version": "agent.ranking-policy.v1"
-  },
-  "canonicalization": {
-    "format": "jq-canonical-json",
-    "command": ["jq", "-cS", ".envelope"],
-    "newline": "stripped",
-    "encoding": "utf-8",
-    "hash": "sha256"
-  },
-  "projection_id": "sha256:0942cc8ee46075d687eb27847124eff5eb30ad6202d66d771ce73dae1f0db572"
+  }
 }

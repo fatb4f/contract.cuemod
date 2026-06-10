@@ -67,6 +67,9 @@ assert_response_invariants() {
 
 require_file "$schema"
 require_file "$valid/projection-identity.json"
+require_file "$valid/projection-lookup.request.json"
+require_file "$valid/projection-lookup.response.json"
+require_file "$valid/search-policy.json"
 require_file "$valid/search-request.read-only.json"
 require_file "$valid/search-response.read-only.json"
 require_file "$valid/search-response.model-delta.json"
@@ -77,10 +80,14 @@ for fixture in "$valid"/*.json "$invalid"/*.json; do
 done
 
 vet_valid '#ProjectionIdentityFixture' "$valid/projection-identity.json"
+vet_valid '#ProjectionLookupRequest' "$valid/projection-lookup.request.json"
+vet_valid '#ProjectionLookupResponse' "$valid/projection-lookup.response.json"
+vet_valid '#SearchPolicy' "$valid/search-policy.json"
 vet_valid '#SearchImplementationRequest' "$valid/search-request.read-only.json"
 vet_valid '#SearchImplementationResponse' "$valid/search-response.read-only.json"
 vet_valid '#SearchImplementationResponse' "$valid/search-response.model-delta.json"
 vet_valid '#SearchImplementationResponse' "$valid/search-response.truncated.json"
+vet_valid '#SearchImplementationOutcome' "$valid/search-response.read-only.json"
 
 vet_invalid '#SearchImplementationRequest' "$invalid/projection-id-malformed.json"
 vet_invalid '#SearchImplementationRequest' "$invalid/request-path-field.json"

@@ -30,12 +30,45 @@ import "list"
 	schema:   "agent.projection-identity.fixture.v1"
 	envelope: #ProjectionEnvelope
 	canonicalization: {
-		format:   "canonical-json"
+		format:  "jq-canonical-json"
+		command: ["jq", "-cS", ".envelope"]
+		newline: "stripped"
 		encoding: "utf-8"
-		hash:     "sha256"
+		hash:    "sha256"
 	}
 	projection_id: #ProjectionID
 }
+
+#ProjectionLookupRequest: close({
+	schema:        "agent.projection-lookup.request.v1"
+	projection_id: #ProjectionID
+})
+
+#ProjectionLookupResponse: close({
+	schema:        "agent.projection-lookup.response.v1"
+	projection_id: #ProjectionID
+	envelope:      #ProjectionEnvelope
+})
+
+#SearchPolicy: close({
+	schema:  "agent.search-policy.v1"
+	version: "agent.search-policy.v1"
+	backend: "rg"
+	result_limit: {
+		min: 1
+		max: 1000
+	}
+	path: {
+		absolute_forbidden:                 true
+		parent_escape_forbidden:            true
+		expansion_requires_projection_root: true
+	}
+	terms: {
+		non_empty:   true
+		source:      "request"
+		allow_regex: bool
+	}
+})
 
 #SearchImplementationRequest: close({
 	schema:        "agent.search-implementation.request.v1"
@@ -55,6 +88,7 @@ import "list"
 		"id asc",
 	]
 	evidence_id: {
+		semantic:  "raw-match-span-id"
 		algorithm: "sha256"
 		encoding:  "base32-lower-no-padding"
 		length:    16
@@ -80,6 +114,7 @@ import "list"
 	backend:         "rg"
 	backend_version: string & =~"^ripgrep [0-9]+\\."
 	argv: ["rg", ...string]
+	shell:          false
 	searched_paths: [...#SearchRelativePath] & [_, ...]
 })
 
@@ -257,3 +292,7 @@ import "list"
 	#ResultLimitExceededError |
 	#BackendUnavailableError |
 	#BackendFailedError
+
+#SearchImplementationOutcome:
+	#SearchImplementationResponse |
+	#SearchImplementationError

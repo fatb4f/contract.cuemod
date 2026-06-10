@@ -15,7 +15,8 @@
     ],
     "searched_paths": [
       "chezmoi/private_dot_config/wezterm"
-    ]
+    ],
+    "shell": false
   },
   "pagination": {
     "result_limit": 1,

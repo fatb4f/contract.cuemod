@@ -7,7 +7,8 @@
     "argv": "rg --json mux chezmoi/private_dot_config/wezterm",
     "searched_paths": [
       "chezmoi/private_dot_config/wezterm"
-    ]
+    ],
+    "shell": false
   },
   "pagination": {
     "result_limit": 10,
