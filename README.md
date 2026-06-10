@@ -12,6 +12,8 @@ This archive replaces Python JSON validation with CUE workflow commands and adds
 - `workspace.workflow.cue` — zero-drift terminal workspace policy
 - `workspace.projections.cue` — generated projection values
 - `workspace_tool.cue` — `cue cmd export`, `validate`, and `check`
+- `dotfiles.schema-map.json` — evidence-backed map of the live dotfiles implementation
+- `dotfiles.schema-map.cue` — validating shape derived from the initial map
 - `justfile` — thin wrapper around CUE commands
 - `docs/linting-toolchains.md` — linting architecture notes
 
@@ -31,6 +33,7 @@ cue fmt .
 cue cmd export
 cue cmd validate
 cue cmd check
+cue vet dotfiles.schema-map.cue dotfiles.schema-map.json -d '#SchemaMap'
 ```
 
 `cue` was not available in the generation environment, so run those commands locally before committing.
