@@ -30,11 +30,11 @@ import "list"
 	schema:   "agent.projection-identity.fixture.v1"
 	envelope: #ProjectionEnvelope
 	canonicalization: {
-		format:  "jq-canonical-json"
+		format: "jq-canonical-json"
 		command: ["jq", "-cS", ".envelope"]
-		newline: "stripped"
+		newline:  "stripped"
 		encoding: "utf-8"
-		hash:    "sha256"
+		hash:     "sha256"
 	}
 	projection_id: #ProjectionID
 }
@@ -114,7 +114,14 @@ import "list"
 	backend:         "rg"
 	backend_version: string & =~"^ripgrep [0-9]+\\."
 	argv: ["rg", ...string]
-	shell:          false
+	shell: false
+	searched_paths: [...#SearchRelativePath] & [_, ...]
+})
+
+#SearchExecutionPlan: close({
+	backend: "rg"
+	argv: ["rg", ...string]
+	shell: false
 	searched_paths: [...#SearchRelativePath] & [_, ...]
 })
 
@@ -296,3 +303,40 @@ import "list"
 #SearchImplementationOutcome:
 	#SearchImplementationResponse |
 	#SearchImplementationError
+
+searchPlanInput?: {
+	envelope: #ProjectionEnvelope
+	request:  #SearchImplementationRequest
+}
+
+if searchPlanInput != _|_ {
+	let projectedSearchPaths = [
+		for path in searchPlanInput.envelope.projection.scope.inspect {
+			path
+		},
+	]
+	let projectedTermArgs = list.Concat([
+		for term in searchPlanInput.request.terms {
+			["-e", term]
+		},
+	])
+
+	searchExecutionPlan: #SearchExecutionPlan & {
+		backend: "rg"
+		argv: list.Concat([
+			[
+				"rg",
+				"--json",
+				"--line-number",
+				"--column",
+				"--smart-case",
+				"--fixed-strings",
+			],
+			projectedTermArgs,
+			["--"],
+			projectedSearchPaths,
+		])
+		shell:          false
+		searched_paths: projectedSearchPaths
+	}
+}

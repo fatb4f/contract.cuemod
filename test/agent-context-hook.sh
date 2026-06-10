@@ -20,7 +20,8 @@ printf '%s\n' "$hint_context" | jq -e '
 	.schema == "agent.hook-hint.v1" and
 	.candidates == ["workspace-lifecycle"] and
 	.matchedTerms == ["wezterm"] and
-	(.resolver.command | endswith("/resolve-agent-context")) and
+	.resolver.tool == "cue.resolve_agent_context" and
+	(.resolver.fallbackCommand | endswith("/resolve-agent-context")) and
 	.resolver.skill == ".codex/skills/resolve-agent-context/SKILL.md" and
 	(has("components") | not) and
 	(has("validation") | not)
@@ -42,6 +43,17 @@ printf '%s\n' "$read_only" | jq -e '
 	.validation.required == false and
 	.validation.commands == [] and
 	([.components[].id] | index("wezterm-sessionizer") != null)
+' >/dev/null
+
+implementation_read_only=$(
+	"$resolver" \
+		--prompt "Cite exact implementation evidence for the WezTerm sessionizer" \
+		--cwd /home/_404/src/dotfiles \
+		--candidate workspace-lifecycle
+)
+printf '%s\n' "$implementation_read_only" | jq -e '
+	.decision.mode == "read-only" and
+	.validation.required == false
 ' >/dev/null
 
 candidate_is_hint=$(

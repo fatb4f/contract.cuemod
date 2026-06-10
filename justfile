@@ -26,5 +26,11 @@ agent-projections:
 agent-context-test:
   ./test/agent-context-hook.sh
 
+cue-mcp-build:
+  go build -o /home/_404/.local/bin/cue-mcp ./cmd/cue-mcp
+
+cue-mcp-test:
+  go test ./...
+
 archive:
   tar --exclude=.git -czf ../contract.cuemod.tar.gz -C .. contract.cuemod

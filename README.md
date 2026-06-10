@@ -17,6 +17,7 @@ This archive replaces Python JSON validation with CUE workflow commands and adds
 - `dotfiles.agent-context.cue` — routing hints, resolver semantics, and generated skill projection
 - `bin/dotfiles-agent-context-hook` — transport-only `UserPromptSubmit` hook adapter
 - `bin/resolve-agent-context` — stable transport adapter for CUE context resolution
+- `cmd/cue-mcp` — Stage 3 stdio MCP server exposing CUE authority and bounded implementation search
 - `justfile` — thin wrapper around CUE commands
 - `docs/linting-toolchains.md` — linting architecture notes
 
@@ -55,3 +56,25 @@ cue export . dotfiles.schema-map.json -e codexSkill \
 The hook emits only a compact routing hint. `resolve-agent-context` transports
 the prompt, cwd, and candidate IDs into CUE; matching, mode selection, authority
 constraints, and validation activation remain in `dotfiles.agent-context.cue`.
+
+## Stage 3 CUE MCP
+
+Build and register the server:
+
+```bash
+just cue-mcp-build
+codex mcp add cue \
+  --env CUE_CONTRACT_ROOT=/home/_404/src/contract.cuemod \
+  -- /home/_404/.local/bin/cue-mcp
+```
+
+The public tools are:
+
+- `cue.resolve_agent_context`
+- `cue.lookup_projection`
+- `cue.search_implementation`
+- `cue.validate_projection`
+
+CUE produces the search roots and complete `rg` argv. The Go server validates
+the authority envelope, executes `rg` without a shell, ranks evidence, derives
+stable evidence IDs, and CUE-vets the typed response before returning it.
