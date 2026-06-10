@@ -3,7 +3,9 @@ set -eu
 
 repo_root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd -P)
 hook="$repo_root/bin/dotfiles-agent-context-hook"
+resolver="$repo_root/bin/resolve-agent-context"
 generated_hooks=/home/_404/src/dotfiles/.codex/hooks.json
+generated_skill=/home/_404/src/dotfiles/.codex/skills/resolve-agent-context/SKILL.md
 
 run_hook() {
 	prompt=$1
@@ -12,44 +14,75 @@ run_hook() {
 		"$hook"
 }
 
-desktop=$(run_hook "Fix Hyprland brightness and session OSD")
-printf '%s\n' "$desktop" | jq -e '
-	.hookSpecificOutput.hookEventName == "UserPromptSubmit" and
-	(.hookSpecificOutput.additionalContext | startswith("Dotfiles capability context:\n"))
+hint=$(run_hook "How are environment variables injected when switching WezTerm sessions?")
+hint_context=$(printf '%s\n' "$hint" | jq -r '.hookSpecificOutput.additionalContext | sub("^Agent context routing hint:\\n"; "") | fromjson')
+printf '%s\n' "$hint_context" | jq -e '
+	.schema == "agent.hook-hint.v1" and
+	.candidates == ["workspace-lifecycle"] and
+	.matchedTerms == ["wezterm"] and
+	(.resolver.command | endswith("/resolve-agent-context")) and
+	.resolver.skill == ".codex/skills/resolve-agent-context/SKILL.md" and
+	(has("components") | not) and
+	(has("validation") | not)
 ' >/dev/null
 
-desktop_context=$(printf '%s\n' "$desktop" | jq -r '.hookSpecificOutput.additionalContext | sub("^Dotfiles capability context:\\n"; "") | fromjson')
-printf '%s\n' "$desktop_context" | jq -e '
-	.capability.id == "desktop-session-lifecycle" and
-	([.domains[].id] | index("chezmoi") != null) and
-	([.domains[].id] | index("shell-wrap") != null) and
-	([.repository.instructionBoundaries[].path] | index("shell-wrap/AGENTS.md") != null) and
-	([.requiredWorkflows[].id] | index("session-bashly") != null) and
-	([.requiredWorkflows[].id] | index("chezmoi-closeout") != null) and
-	([.artifacts[] | select(.id == "session-generated-executable" and .editable == false)] | length == 1)
+hint_size=$(printf '%s\n' "$hint_context" | jq -c . | wc -c)
+[ "$hint_size" -lt 1024 ]
+
+read_only=$(
+	"$resolver" \
+		--prompt "How are environment variables injected when switching WezTerm sessions?" \
+		--cwd /home/_404/src/dotfiles \
+		--candidate workspace-lifecycle
+)
+printf '%s\n' "$read_only" | jq -e '
+	.schema == "agent.context-projection.v1" and
+	.decision.capability == "workspace-lifecycle" and
+	.decision.mode == "read-only" and
+	.validation.required == false and
+	.validation.commands == [] and
+	([.components[].id] | index("wezterm-sessionizer") != null)
 ' >/dev/null
 
-workspace=$(run_hook "Change the WezTerm workspace sessionizer")
-workspace_context=$(printf '%s\n' "$workspace" | jq -r '.hookSpecificOutput.additionalContext | sub("^Dotfiles capability context:\\n"; "") | fromjson')
-printf '%s\n' "$workspace_context" | jq -e '
-	.capability.id == "workspace-lifecycle" and
-	([.components[].id] | index("wezterm-sessionizer") != null) and
-	(.repository.instructionBoundaries | length == 0)
+candidate_is_hint=$(
+	"$resolver" \
+		--prompt "How does the WezTerm sessionizer switch workspaces?" \
+		--cwd /home/_404/src/dotfiles \
+		--candidate desktop-session-lifecycle
+)
+printf '%s\n' "$candidate_is_hint" | jq -e '
+	.decision.capability == "workspace-lifecycle"
+' >/dev/null
+
+mutation=$(
+	"$resolver" \
+		--prompt "Fix Hyprland brightness through the session CLI" \
+		--cwd /home/_404/src/dotfiles \
+		--candidate desktop-session-lifecycle
+)
+printf '%s\n' "$mutation" | jq -e '
+	.decision.capability == "desktop-session-lifecycle" and
+	.decision.mode == "mutation" and
+	.validation.required == true and
+	(.validation.commands | length > 0) and
+	([.boundaries.source[]] | index("shell-wrap/src/session/src") != null) and
+	([.boundaries.generated[]] | index("shell-wrap/src/session/session") != null) and
+	([.mutationPolicy.neverEditDirectly[]] | index("shell-wrap/src/session/session") != null)
 ' >/dev/null
 
 run_hook "Update README wording" | jq -e '. == {}' >/dev/null
 run_hook "Change Hyprland and the WezTerm workspace" | jq -e '. == {}' >/dev/null
 
-generated=$(mktemp "${TMPDIR:-/tmp}/dotfiles-hooks.XXXXXX.json")
-generated_sorted=$(mktemp "${TMPDIR:-/tmp}/dotfiles-hooks-generated.XXXXXX.json")
-installed_sorted=$(mktemp "${TMPDIR:-/tmp}/dotfiles-hooks-installed.XXXXXX.json")
-trap 'rm -f "$generated" "$generated_sorted" "$installed_sorted"' EXIT HUP INT TERM
+tmp_root=$(mktemp -d "${TMPDIR:-/tmp}/agent-context-projections.XXXXXX")
+trap 'rm -rf "$tmp_root"' EXIT HUP INT TERM
 (
 	cd "$repo_root"
-	cue export . dotfiles.schema-map.json -e codexHooks --out json >"$generated"
+	cue export . dotfiles.schema-map.json -e codexHooks --out json >"$tmp_root/hooks.json"
+	cue export . dotfiles.schema-map.json -e codexSkill --out text >"$tmp_root/SKILL.md"
 )
-jq -S . "$generated" >"$generated_sorted"
-jq -S . "$generated_hooks" >"$installed_sorted"
-cmp "$generated_sorted" "$installed_sorted"
+jq -S . "$tmp_root/hooks.json" >"$tmp_root/hooks.generated.sorted"
+jq -S . "$generated_hooks" >"$tmp_root/hooks.installed.sorted"
+cmp "$tmp_root/hooks.generated.sorted" "$tmp_root/hooks.installed.sorted"
+cmp "$tmp_root/SKILL.md" "$generated_skill"
 
 printf 'agent-context-hook: ok\n'

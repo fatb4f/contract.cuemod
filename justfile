@@ -18,9 +18,10 @@ fmt:
 list:
   cue cmd -l
 
-agent-hooks:
-  mkdir -p /home/_404/src/dotfiles/.codex
+agent-projections:
+  mkdir -p /home/_404/src/dotfiles/.codex/skills/resolve-agent-context
   cue export . dotfiles.schema-map.json -e codexHooks --out json > /home/_404/src/dotfiles/.codex/hooks.json
+  cue export . dotfiles.schema-map.json -e codexSkill --out text > /home/_404/src/dotfiles/.codex/skills/resolve-agent-context/SKILL.md
 
 agent-context-test:
   ./test/agent-context-hook.sh

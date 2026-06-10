@@ -2,6 +2,7 @@ package workspace
 
 import (
 	"encoding/json"
+	"list"
 	"strings"
 )
 
@@ -18,16 +19,9 @@ let modelRepository = repository
 let modelDomains = domains
 let modelComponents = components
 let modelArtifacts = artifacts
-let modelInterfaces = interfaces
 let modelRelationships = relationships
 let modelCapabilities = capabilities
 let modelValidationProfiles = validationProfiles
-
-hookInput: {
-	hook_event_name: "UserPromptSubmit"
-	prompt:          string | *""
-	...
-}
 
 #AgentCapabilityRoute: {
 	terms: [...string]
@@ -68,114 +62,206 @@ agentCapabilityRoutes: #AgentCapabilityRoutes & {
 			"project catalog",
 			"project discovery",
 		]
-		artifacts: [
-			"wezterm-config-source",
-		]
-		validationProfiles: [
-			"chezmoi-closeout",
-		]
+		artifacts: ["wezterm-config-source"]
+		validationProfiles: ["chezmoi-closeout"]
 	}
 }
 
-_prompt: strings.ToLower(hookInput.prompt)
-
-_capabilityMatches: [
-	for capabilityID, route in agentCapabilityRoutes
-	let matchedTerms = [
-		for term in route.terms
-		if strings.Contains(_prompt, term) {
-			term
+#CapabilityMatchInput: {
+	prompt: string
+	matches: [
+		for capabilityID, route in agentCapabilityRoutes
+		let matchedTerms = [
+			for term in route.terms
+			if strings.Contains(strings.ToLower(prompt), term) {
+				term
+			},
+		]
+		if len(matchedTerms) > 0 {
+			id:    capabilityID
+			terms: matchedTerms
 		},
 	]
-	if len(matchedTerms) > 0 {
-		id:    capabilityID
-		terms: matchedTerms
+}
+
+hookInput: {
+	hook_event_name: "UserPromptSubmit"
+	prompt:          string | *""
+	...
+}
+
+hookMatch: #CapabilityMatchInput & {
+	prompt: hookInput.prompt
+}
+
+#RoutingHint: {
+	schema:    "agent.hook-hint.v1"
+	system:    "dotfiles.schema-map.v1"
+	directive: string
+	candidates: [...#SchemaMapIdentifier]
+	matchedTerms: [...string]
+	resolver: {
+		command: string
+		skill:   #SchemaMapRelativePath
+	}
+}
+
+if len(hookMatch.matches) == 1 {
+	let match = hookMatch.matches[0]
+
+	routingHint: #RoutingHint & {
+		schema:    "agent.hook-hint.v1"
+		system:    "dotfiles.schema-map.v1"
+		directive: "This is a routing hint, not task context. Before repository inspection or editing, read the named protocol skill and invoke resolve-agent-context. Use only the returned CUE projection as the task map."
+		candidates: [match.id]
+		matchedTerms: match.terms
+		resolver: {
+			command: "/home/_404/src/contract.cuemod/bin/resolve-agent-context"
+			skill:   ".codex/skills/resolve-agent-context/SKILL.md"
+		}
+	}
+
+	userPromptHookOutput: {
+		hookSpecificOutput: {
+			hookEventName:     "UserPromptSubmit"
+			additionalContext: "Agent context routing hint:\n\(json.Marshal(routingHint))"
+		}
+	}
+}
+
+if len(hookMatch.matches) != 1 {
+	userPromptHookOutput: {}
+}
+
+resolverInput: {
+	prompt: string | *""
+	cwd:    #SchemaMapAbsolutePath | *modelRepository.root
+	candidateCapabilities: [...#SchemaMapIdentifier] | *[]
+}
+
+resolverPromptMatch: #CapabilityMatchInput & {
+	prompt: resolverInput.prompt
+}
+
+resolverCandidateMatches: [
+	for match in resolverPromptMatch.matches
+	if list.Contains(resolverInput.candidateCapabilities, match.id) {
+		match
 	},
 ]
 
+resolverMatches: [...{
+	id: #SchemaMapIdentifier
+	terms: [...string]
+}] | *[]
+if len(resolverPromptMatch.matches) == 1 {
+	resolverMatches: resolverPromptMatch.matches
+}
+if len(resolverPromptMatch.matches) > 1 {
+	resolverMatches: resolverCandidateMatches
+}
+
+mutationTerms: [
+	"fix",
+	"change",
+	"update",
+	"add",
+	"remove",
+	"edit",
+	"implement",
+	"refactor",
+	"adapt",
+	"regenerate",
+]
+
+matchedMutationTerms: [
+	for term in mutationTerms
+	if strings.Contains(strings.ToLower(resolverInput.prompt), term) {
+		term
+	},
+]
+
+resolverMode: "read-only" | "mutation"
+if len(matchedMutationTerms) == 0 {
+	resolverMode: "read-only"
+}
+if len(matchedMutationTerms) > 0 {
+	resolverMode: "mutation"
+}
+
 #AgentContextProjection: {
-	schema: "dotfiles.agent-context.v1"
-	capability: {
-		id:      #SchemaMapIdentifier
-		title:   string
-		purpose: string
+	schema: "agent.context-projection.v1"
+	decision: {
+		capability: #SchemaMapIdentifier
+		mode:       "read-only" | "mutation"
+		confidence: "high"
 		matchedTerms: [...string]
 	}
-	repository: {
+	project: {
 		id:   #SchemaMapIdentifier
 		root: #SchemaMapAbsolutePath
-		instructionBoundaries: [...{
-			path:  #SchemaMapRelativePath
-			scope: #SchemaMapRelativePath
-		}]
+		cwd:  #SchemaMapAbsolutePath
 	}
-	domains: [...{
-		id:                #SchemaMapIdentifier
-		title:             string
-		root:              #SchemaMapRelativePath | "."
-		kind:              string
-		instructionEntry?: #SchemaMapRelativePath
-	}]
+	scope: {
+		inspect: [...#SchemaMapRelativePath]
+		instructionBoundaries: [...#SchemaMapRelativePath]
+	}
+	boundaries: {
+		source: [...#SchemaMapRelativePath]
+		generated: [...#SchemaMapRelativePath]
+	}
 	components: [...{
-		id:     #SchemaMapIdentifier
-		title:  string
-		domain: #SchemaMapIdentifier
-		kind:   string
-		root:   #SchemaMapRelativePath
+		id:   #SchemaMapIdentifier
+		root: #SchemaMapRelativePath
 		entrypoints: [...#SchemaMapRelativePath]
-		responsibilities: [...string]
-	}]
-	artifacts: [...{
-		id:          #SchemaMapIdentifier
-		domain:      #SchemaMapIdentifier
-		kind:        string
-		path:        #SchemaMapRelativePath
-		targetPath?: string
-		authority:   string
-		editable:    bool
-	}]
-	interfaces: [...{
-		id:       #SchemaMapIdentifier
-		kind:     string
-		name:     string
-		purpose:  string
-		lifetime: string
 	}]
 	relationships: [...{
-		id:   #SchemaMapIdentifier
 		from: #SchemaMapIdentifier
 		type: string
 		to:   #SchemaMapIdentifier
 		via?: string
 	}]
-	requiredWorkflows: [...{
-		id: #SchemaMapIdentifier
+	validation: {
+		required: bool
+		reason:   string
 		commands: [...{
 			argv: [...string]
 			cwd:     #SchemaMapRelativePath | "."
 			purpose: string
 		}]
-	}]
-	agentUse: [...string]
-	directive: string
+	}
+	mutationPolicy: {
+		edit:       "source"
+		regenerate: "generated"
+		neverEditDirectly: [...#SchemaMapRelativePath]
+	}
+	instructions: [...string]
 }
 
-if len(_capabilityMatches) == 1 {
-	let match = _capabilityMatches[0]
+if len(resolverMatches) == 1 {
+	let match = resolverMatches[0]
 	let selectedCapability = modelCapabilities[match.id]
 	let route = agentCapabilityRoutes[match.id]
 
 	agentContextProjection: #AgentContextProjection & {
-		schema: "dotfiles.agent-context.v1"
-		capability: {
-			id:           selectedCapability.id
-			title:        selectedCapability.title
-			purpose:      selectedCapability.purpose
+		schema: "agent.context-projection.v1"
+		decision: {
+			capability:   selectedCapability.id
+			mode:         resolverMode
+			confidence:   "high"
 			matchedTerms: match.terms
 		}
-		repository: {
+		project: {
 			id:   modelRepository.id
 			root: modelRepository.root
+			cwd:  resolverInput.cwd
+		}
+		scope: {
+			inspect: [
+				for componentID in selectedCapability.references.components {
+					modelComponents[componentID].root
+				},
+			]
 			instructionBoundaries: [
 				for boundary in modelRepository.instructionBoundaries
 				if len([
@@ -184,57 +270,33 @@ if len(_capabilityMatches) == 1 {
 						domainID
 					},
 				]) > 0 {
-					boundary
+					boundary.path
 				},
 			]
 		}
-		domains: [
-			for domainID in selectedCapability.references.domains {
-				id:    modelDomains[domainID].id
-				title: modelDomains[domainID].title
-				root:  modelDomains[domainID].root
-				kind:  modelDomains[domainID].kind
-				if modelDomains[domainID].instructionEntry != _|_ {
-					instructionEntry: modelDomains[domainID].instructionEntry
-				}
-			},
-		]
+		boundaries: {
+			source: [
+				for artifactID in route.artifacts
+				if modelArtifacts[artifactID].authority == "source" {
+					modelArtifacts[artifactID].path
+				},
+			]
+			generated: [
+				for artifactID in route.artifacts
+				if modelArtifacts[artifactID].authority == "generated" {
+					modelArtifacts[artifactID].path
+				},
+			]
+		}
 		components: [
 			for componentID in selectedCapability.references.components {
-				id:               modelComponents[componentID].id
-				title:            modelComponents[componentID].title
-				domain:           modelComponents[componentID].domain
-				kind:             modelComponents[componentID].kind
-				root:             modelComponents[componentID].root
-				entrypoints:      modelComponents[componentID].entrypoints
-				responsibilities: modelComponents[componentID].responsibilities
-			},
-		]
-		artifacts: [
-			for artifactID in route.artifacts {
-				id:        modelArtifacts[artifactID].id
-				domain:    modelArtifacts[artifactID].domain
-				kind:      modelArtifacts[artifactID].kind
-				path:      modelArtifacts[artifactID].path
-				authority: modelArtifacts[artifactID].authority
-				editable:  modelArtifacts[artifactID].editable
-				if modelArtifacts[artifactID].targetPath != _|_ {
-					targetPath: modelArtifacts[artifactID].targetPath
-				}
-			},
-		]
-		interfaces: [
-			for interfaceID in selectedCapability.references.interfaces {
-				id:       modelInterfaces[interfaceID].id
-				kind:     modelInterfaces[interfaceID].kind
-				name:     modelInterfaces[interfaceID].name
-				purpose:  modelInterfaces[interfaceID].purpose
-				lifetime: modelInterfaces[interfaceID].lifetime
+				id:          modelComponents[componentID].id
+				root:        modelComponents[componentID].root
+				entrypoints: modelComponents[componentID].entrypoints
 			},
 		]
 		relationships: [
 			for relationshipID in selectedCapability.references.relationships {
-				id:   modelRelationships[relationshipID].id
 				from: modelRelationships[relationshipID].from
 				type: modelRelationships[relationshipID].type
 				to:   modelRelationships[relationshipID].to
@@ -243,26 +305,40 @@ if len(_capabilityMatches) == 1 {
 				}
 			},
 		]
-		requiredWorkflows: [
-			for profileID in route.validationProfiles {
-				id:       modelValidationProfiles[profileID].id
-				commands: modelValidationProfiles[profileID].commands
-			},
-		]
-		agentUse:  selectedCapability.agentUse
-		directive: "Use this capability projection as the task map. Read applicable instruction boundaries before editing. Treat artifact authority and editable fields as constraints. Perform fresh inspection only inside the projected roots, then run the required workflows."
-	}
-
-	userPromptHookOutput: {
-		hookSpecificOutput: {
-			hookEventName:     "UserPromptSubmit"
-			additionalContext: "Dotfiles capability context:\n\(json.Marshal(agentContextProjection))"
+		validation: {
+			if resolverMode == "read-only" {
+				required: false
+				reason:   "Read-only task; mutation validation is not active."
+				commands: []
+			}
+			if resolverMode == "mutation" {
+				required: true
+				reason:   "Mutation task; validate authoritative sources and generated boundaries."
+				commands: [
+					for profileID in route.validationProfiles
+					for command in modelValidationProfiles[profileID].commands {
+						command
+					},
+				]
+			}
 		}
+		mutationPolicy: {
+			edit:       "source"
+			regenerate: "generated"
+			neverEditDirectly: [
+				for artifactID in route.artifacts
+				if modelArtifacts[artifactID].editable == false {
+					modelArtifacts[artifactID].path
+				},
+			]
+		}
+		instructions: [
+			"Use this CUE projection as the task map.",
+			"Inspect only projected roots and entrypoints unless evidence requires a bounded expansion.",
+			"Read projected instruction boundaries before editing.",
+			"Do not edit generated .codex files; regenerate them from contract.cuemod.",
+		]
 	}
-}
-
-if len(_capabilityMatches) != 1 {
-	userPromptHookOutput: {}
 }
 
 codexHooks: {
@@ -272,8 +348,37 @@ codexHooks: {
 				type:          "command"
 				command:       "/home/_404/src/contract.cuemod/bin/dotfiles-agent-context-hook"
 				timeout:       10
-				statusMessage: "Resolving dotfiles capability context"
+				statusMessage: "Routing dotfiles capability context"
 			}]
 		}]
 	}
 }
+
+codexSkill: """
+	---
+	name: resolve-agent-context
+	description: Resolve authoritative CUE task context before inspecting or editing dotfiles capabilities when a hook routing hint names this skill or the resolve-agent-context command.
+	---
+
+	# Agent Context Resolution
+
+	The hook hint is not task context. It contains candidate capability IDs only.
+
+	Before repository inspection or editing, run the stable resolver:
+
+	```sh
+	/home/_404/src/contract.cuemod/bin/resolve-agent-context \\
+	  --prompt "<current user prompt>" \\
+	  --cwd "$PWD" \\
+	  --candidate "<candidate capability from the hook hint>"
+	```
+
+	Use the returned CUE projection as the task map.
+
+	- Resolve first; inspect second.
+	- Treat hook candidates as hints, never authority.
+	- Do not invoke `cue cmd` directly or hand-write temporary CUE input.
+	- Do not infer source/generated boundaries from the hook.
+	- Do not edit generated `.codex/hooks.json` or `.codex/skills/*`; regenerate them from `contract.cuemod`.
+	- Run validation commands only when `validation.required` is `true`.
+	"""
