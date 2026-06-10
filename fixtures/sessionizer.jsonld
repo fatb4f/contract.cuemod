@@ -1,0 +1,174 @@
+{
+  "@context": "https://fatb4f.dev/dotfiles/context.jsonld",
+  "@graph": [
+    {
+      "id": "df:artifact/wezterm-projects-lua",
+      "type": "Artifact",
+      "path": "chezmoi/private_dot_config/wezterm/modules/workspaces/projects.lua",
+      "language": "lua",
+      "role": "project-catalog"
+    },
+    {
+      "id": "df:artifact/wezterm-sessionizer-lua",
+      "type": "Artifact",
+      "path": "chezmoi/private_dot_config/wezterm/modules/workspaces/sessionizer.lua",
+      "language": "lua",
+      "role": "plugin-adapter"
+    },
+    {
+      "id": "df:node/wezterm-project-catalog",
+      "type": "Node",
+      "surface": "wezterm",
+      "role": "project-catalog",
+      "artifacts": ["df:artifact/wezterm-projects-lua"],
+      "produces": [
+        "df:interface/project-identity",
+        "df:interface/project-root",
+        "df:interface/project-cwd",
+        "df:interface/project-session-env"
+      ]
+    },
+    {
+      "id": "df:node/wezterm-sessionizer",
+      "type": "Node",
+      "surface": "wezterm",
+      "role": "project-session-selector",
+      "artifacts": ["df:artifact/wezterm-sessionizer-lua"],
+      "consumes": [
+        "df:interface/project-identity",
+        "df:interface/project-root",
+        "df:interface/project-cwd",
+        "df:interface/project-session-env"
+      ]
+    },
+    {
+      "id": "df:interface/project-identity",
+      "type": "Interface",
+      "kind": "env-var",
+      "name": "TERM_PROJECT_ID",
+      "payload": {"env": ["TERM_PROJECT_ID"]}
+    },
+    {
+      "id": "df:interface/project-root",
+      "type": "Interface",
+      "kind": "filesystem-path",
+      "name": "TERM_PROJECT_ROOT",
+      "payload": {"env": ["TERM_PROJECT_ROOT"]}
+    },
+    {
+      "id": "df:interface/project-cwd",
+      "type": "Interface",
+      "kind": "filesystem-path",
+      "name": "TERM_PROJECT_CWD",
+      "payload": {"env": ["TERM_PROJECT_CWD"]}
+    },
+    {
+      "id": "df:interface/project-session-env",
+      "type": "Interface",
+      "kind": "env-var",
+      "name": "TERM project session environment",
+      "payload": {
+        "env": [
+          "TERM_PROJECT_ID",
+          "TERM_PROJECT_ROOT",
+          "TERM_PROJECT_CWD",
+          "TERM_EDITOR",
+          "TERM_NVIM_SOCKET"
+        ]
+      }
+    },
+    {
+      "id": "df:contract/project-session-selection",
+      "type": "Contract",
+      "kind": "session-selection",
+      "participants": [
+        "df:node/wezterm-project-catalog",
+        "df:node/wezterm-sessionizer"
+      ],
+      "interfaces": [
+        "df:interface/project-identity",
+        "df:interface/project-root",
+        "df:interface/project-cwd",
+        "df:interface/project-session-env"
+      ],
+      "invariants": [
+        {
+          "id": "df:invariant/session-selection-declared-project",
+          "statement": "A project session selection must resolve a declared project identity, root, cwd, and projected environment before workspace launch."
+        }
+      ]
+    },
+    {
+      "id": "df:relationship/sessionizer-consumes-project-catalog",
+      "type": "Relationship",
+      "kind": "reads",
+      "from": "df:node/wezterm-sessionizer",
+      "to": "df:node/wezterm-project-catalog",
+      "interfaces": [
+        "df:interface/project-identity",
+        "df:interface/project-root",
+        "df:interface/project-cwd",
+        "df:interface/project-session-env"
+      ],
+      "fulfills": "df:contract/project-session-selection",
+      "evidence": [
+        "df:evidence/wezterm-project-session-env",
+        "df:evidence/wezterm-sessionizer-schema"
+      ]
+    },
+    {
+      "id": "df:impl/wezterm-sessionizer-module",
+      "type": "ImplementationObject",
+      "kind": "plugin",
+      "surface": "wezterm",
+      "artifact": "df:artifact/wezterm-sessionizer-lua",
+      "symbols": [
+        {
+          "id": "df:symbol/wezterm-sessionizer-apply-to-config",
+          "type": "TypedSymbol",
+          "name": "sessionizer.apply_to_config",
+          "typeSystem": "lua-language-server",
+          "typeLibrary": "wezterm-types",
+          "configType": "fun(config: wezterm.Config)",
+          "contractType": "project-session-selector",
+          "location": {
+            "file": "chezmoi/private_dot_config/wezterm/modules/workspaces/sessionizer.lua",
+            "line": 156
+          }
+        }
+      ],
+      "consumes": [
+        "df:interface/project-identity",
+        "df:interface/project-root",
+        "df:interface/project-cwd",
+        "df:interface/project-session-env"
+      ],
+      "fulfills": ["df:contract/project-session-selection"],
+      "evidence": ["df:evidence/wezterm-sessionizer-schema"]
+    },
+    {
+      "id": "df:evidence/wezterm-project-session-env",
+      "type": "Evidence",
+      "artifact": "df:artifact/wezterm-projects-lua",
+      "file": "chezmoi/private_dot_config/wezterm/modules/workspaces/projects.lua",
+      "line": 124,
+      "symbol": "projects.session_env",
+      "statement": "Projects are projected into stable TERM_PROJECT_* and TERM_NVIM_SOCKET environment values.",
+      "typeSystem": "lua-language-server",
+      "typeLibrary": "wezterm-types",
+      "confidence": "observed"
+    },
+    {
+      "id": "df:evidence/wezterm-sessionizer-schema",
+      "type": "Evidence",
+      "artifact": "df:artifact/wezterm-sessionizer-lua",
+      "file": "chezmoi/private_dot_config/wezterm/modules/workspaces/sessionizer.lua",
+      "line": 84,
+      "symbol": "schema",
+      "statement": "Builds sessionizer choices from declared projects and active WezTerm workspaces.",
+      "typeSystem": "lua-language-server",
+      "typeLibrary": "wezterm-types",
+      "confidence": "observed"
+    }
+  ]
+}

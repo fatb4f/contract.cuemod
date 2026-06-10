@@ -1,0 +1,259 @@
+{
+  "@context": "https://fatb4f.dev/dotfiles/context.jsonld",
+  "@graph": [
+    {
+      "id": "df:artifact/wezterm-sessionizer-lua",
+      "type": "Artifact",
+      "path": "chezmoi/private_dot_config/wezterm/modules/workspaces/sessionizer.lua",
+      "language": "lua",
+      "role": "plugin-adapter"
+    },
+    {
+      "id": "df:artifact/wezterm-controller-lua",
+      "type": "Artifact",
+      "path": "chezmoi/private_dot_config/wezterm/modules/workspaces/controller.lua",
+      "language": "lua",
+      "role": "runtime-controller"
+    },
+    {
+      "id": "df:artifact/nvim-config",
+      "type": "Artifact",
+      "path": "chezmoi/private_dot_config/nvim",
+      "language": "lua",
+      "role": "editor-config"
+    },
+    {
+      "id": "df:artifact/xplr-config",
+      "type": "Artifact",
+      "path": "chezmoi/private_dot_config/xplr/init.lua",
+      "language": "lua",
+      "role": "file-explorer-config"
+    },
+    {
+      "id": "df:node/wezterm-sessionizer",
+      "type": "Node",
+      "surface": "wezterm",
+      "role": "project-session-selector",
+      "artifacts": ["df:artifact/wezterm-sessionizer-lua"],
+      "produces": [
+        "df:interface/project-session-env",
+        "df:interface/project-root",
+        "df:interface/project-cwd"
+      ]
+    },
+    {
+      "id": "df:node/wezterm-ide-controller",
+      "type": "Node",
+      "surface": "wezterm",
+      "role": "ide-lifecycle-controller",
+      "artifacts": ["df:artifact/wezterm-controller-lua"],
+      "consumes": [
+        "df:interface/project-session-env",
+        "df:interface/project-root",
+        "df:interface/project-cwd"
+      ],
+      "produces": ["df:interface/nvim-socket"]
+    },
+    {
+      "id": "df:node/nvim-socket-server",
+      "type": "Node",
+      "surface": "nvim",
+      "role": "socket-backed-editor",
+      "artifacts": ["df:artifact/nvim-config"],
+      "consumes": ["df:interface/nvim-socket"]
+    },
+    {
+      "id": "df:node/xplr-project-explorer",
+      "type": "Node",
+      "surface": "xplr",
+      "role": "project-root-file-explorer",
+      "artifacts": ["df:artifact/xplr-config"],
+      "consumes": [
+        "df:interface/project-root",
+        "df:interface/nvim-socket"
+      ]
+    },
+    {
+      "id": "df:interface/project-session-env",
+      "type": "Interface",
+      "kind": "env-var",
+      "name": "TERM project session environment",
+      "payload": {
+        "env": [
+          "TERM_PROJECT_ID",
+          "TERM_PROJECT_ROOT",
+          "TERM_PROJECT_CWD",
+          "TERM_EDITOR",
+          "TERM_NVIM_SOCKET"
+        ]
+      }
+    },
+    {
+      "id": "df:interface/project-root",
+      "type": "Interface",
+      "kind": "filesystem-path",
+      "name": "TERM_PROJECT_ROOT",
+      "payload": {"env": ["TERM_PROJECT_ROOT"]}
+    },
+    {
+      "id": "df:interface/project-cwd",
+      "type": "Interface",
+      "kind": "filesystem-path",
+      "name": "TERM_PROJECT_CWD",
+      "payload": {"env": ["TERM_PROJECT_CWD"]}
+    },
+    {
+      "id": "df:interface/nvim-socket",
+      "type": "Interface",
+      "kind": "socket",
+      "name": "TERM_NVIM_SOCKET",
+      "payload": {"env": ["TERM_NVIM_SOCKET"]}
+    },
+    {
+      "id": "df:contract/project-ide-lifecycle",
+      "type": "Contract",
+      "kind": "ide-lifecycle",
+      "participants": [
+        "df:node/wezterm-sessionizer",
+        "df:node/wezterm-ide-controller",
+        "df:node/nvim-socket-server",
+        "df:node/xplr-project-explorer"
+      ],
+      "interfaces": [
+        "df:interface/project-session-env",
+        "df:interface/project-root",
+        "df:interface/project-cwd",
+        "df:interface/nvim-socket"
+      ],
+      "invariants": [
+        {
+          "id": "df:invariant/project-root-consistency",
+          "statement": "WezTerm, Neovim, and Xplr must resolve the same project root for a session claim to be valid."
+        },
+        {
+          "id": "df:invariant/socket-before-remote-open",
+          "statement": "Xplr remote-open is valid only after the Neovim socket interface has been produced."
+        }
+      ]
+    },
+    {
+      "id": "df:relationship/sessionizer-launches-controller",
+      "type": "Relationship",
+      "kind": "spawns",
+      "from": "df:node/wezterm-sessionizer",
+      "to": "df:node/wezterm-ide-controller",
+      "interfaces": [
+        "df:interface/project-session-env",
+        "df:interface/project-root",
+        "df:interface/project-cwd"
+      ],
+      "fulfills": "df:contract/project-ide-lifecycle",
+      "evidence": ["df:evidence/wezterm-sessionizer-launch"]
+    },
+    {
+      "id": "df:relationship/controller-launches-nvim",
+      "type": "Relationship",
+      "kind": "spawns",
+      "from": "df:node/wezterm-ide-controller",
+      "to": "df:node/nvim-socket-server",
+      "interfaces": ["df:interface/nvim-socket"],
+      "fulfills": "df:contract/project-ide-lifecycle",
+      "evidence": ["df:evidence/wezterm-controller-nvim"]
+    },
+    {
+      "id": "df:relationship/controller-launches-xplr",
+      "type": "Relationship",
+      "kind": "spawns",
+      "from": "df:node/wezterm-ide-controller",
+      "to": "df:node/xplr-project-explorer",
+      "interfaces": [
+        "df:interface/project-root",
+        "df:interface/nvim-socket"
+      ],
+      "fulfills": "df:contract/project-ide-lifecycle",
+      "evidence": [
+        "df:evidence/wezterm-controller-xplr",
+        "df:evidence/xplr-remote-open"
+      ]
+    },
+    {
+      "id": "df:impl/wezterm-ide-controller",
+      "type": "ImplementationObject",
+      "kind": "runtime-binding",
+      "surface": "wezterm",
+      "artifact": "df:artifact/wezterm-controller-lua",
+      "symbols": [
+        {
+          "id": "df:symbol/wezterm-controller-launch-ide",
+          "type": "TypedSymbol",
+          "name": "controller.launch_ide",
+          "typeSystem": "lua-language-server",
+          "typeLibrary": "wezterm-types",
+          "runtimeType": "fun(window: wezterm.Window, pane: wezterm.Pane)",
+          "contractType": "ide-lifecycle-controller",
+          "location": {
+            "file": "chezmoi/private_dot_config/wezterm/modules/workspaces/controller.lua",
+            "line": 179
+          }
+        }
+      ],
+      "consumes": [
+        "df:interface/project-session-env",
+        "df:interface/project-root",
+        "df:interface/project-cwd"
+      ],
+      "provides": ["df:interface/nvim-socket"],
+      "fulfills": ["df:contract/project-ide-lifecycle"],
+      "evidence": [
+        "df:evidence/wezterm-controller-nvim",
+        "df:evidence/wezterm-controller-xplr"
+      ]
+    },
+    {
+      "id": "df:evidence/wezterm-sessionizer-launch",
+      "type": "Evidence",
+      "artifact": "df:artifact/wezterm-sessionizer-lua",
+      "file": "chezmoi/private_dot_config/wezterm/modules/workspaces/sessionizer.lua",
+      "line": 84,
+      "symbol": "project_choice",
+      "statement": "Creates project workspace choices with projected environment and spawn metadata.",
+      "typeSystem": "lua-language-server",
+      "typeLibrary": "wezterm-types",
+      "confidence": "observed"
+    },
+    {
+      "id": "df:evidence/wezterm-controller-nvim",
+      "type": "Evidence",
+      "artifact": "df:artifact/wezterm-controller-lua",
+      "file": "chezmoi/private_dot_config/wezterm/modules/workspaces/controller.lua",
+      "line": 167,
+      "symbol": "spawn_editor",
+      "statement": "Spawns Neovim with the project-specific socket and reuses a live server when available.",
+      "typeSystem": "lua-language-server",
+      "typeLibrary": "wezterm-types",
+      "confidence": "observed"
+    },
+    {
+      "id": "df:evidence/wezterm-controller-xplr",
+      "type": "Evidence",
+      "artifact": "df:artifact/wezterm-controller-lua",
+      "file": "chezmoi/private_dot_config/wezterm/modules/workspaces/controller.lua",
+      "line": 224,
+      "symbol": "controller.launch_explorer",
+      "statement": "Launches Xplr at the validated project root with the project session environment.",
+      "typeSystem": "lua-language-server",
+      "typeLibrary": "wezterm-types",
+      "confidence": "observed"
+    },
+    {
+      "id": "df:evidence/xplr-remote-open",
+      "type": "Evidence",
+      "artifact": "df:artifact/xplr-config",
+      "file": "chezmoi/private_dot_config/xplr/init.lua",
+      "line": 27,
+      "statement": "Uses TERM_NVIM_SOCKET to remote-open the selected file in the project Neovim server.",
+      "typeSystem": "lua-language-server",
+      "confidence": "observed"
+    }
+  ]
+}
