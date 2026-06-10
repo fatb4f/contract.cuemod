@@ -1,0 +1,60 @@
+package providers
+
+import "github.com/fatb4f/contract.cuemod/contracts/mcp"
+
+#TypedProvider: mcp.#MCPProvider & {
+	kind: mcp.#ProviderKind
+
+	if kind == "cue-lsp" {
+		protocol:  "lsp-over-mcp"
+		authority: "cue-graph"
+	}
+
+	if kind == "lua-lsp" {
+		protocol:  "lsp-over-mcp"
+		authority: "lua-implementation"
+	}
+
+	if kind == "chezmoi" {
+		protocol:  "mcp-tool"
+		authority: "deployment-provenance"
+	}
+}
+
+#CueLSPResult: mcp.#MCPResult & {
+	provider_id: "df:provider/cue-lsp-mcp"
+	provider: {
+		kind:      "cue-lsp"
+		protocol:  "lsp-over-mcp"
+		authority: "cue-graph"
+	}
+	capability:
+		"definition" |
+		"references" |
+		"hover" |
+		"diagnostics" |
+		"documentSymbols" |
+		"workspaceSymbols" |
+		"validate"
+}
+
+#LuaLSPResult: mcp.#MCPResult & {
+	provider_id: "df:provider/lua-lsp-mcp"
+	provider: {
+		kind:      "lua-lsp"
+		protocol:  "lsp-over-mcp"
+		authority: "lua-implementation"
+	}
+	capability:
+		"definition" |
+		"references" |
+		"hover" |
+		"diagnostics" |
+		"documentSymbols" |
+		"workspaceSymbols" |
+		"evidence"
+}
+
+#LuaEvidenceResult: #LuaLSPResult & mcp.#EvidenceResult & {
+	capability: "evidence"
+}

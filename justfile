@@ -1,36 +1,10 @@
 set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
 
-default:
-  just --choose
-
-export:
-  cue cmd export
-
-validate:
-  cue cmd validate
-
 check:
-  cue cmd check
+  ./test/check.sh
 
 fmt:
-  cue fmt .
-
-list:
-  cue cmd -l
-
-agent-projections:
-  mkdir -p /home/_404/src/dotfiles/.codex/skills/resolve-agent-context
-  cue export . dotfiles.schema-map.json -e codexHooks --out json > /home/_404/src/dotfiles/.codex/hooks.json
-  cue export . dotfiles.schema-map.json -e codexSkill --out text > /home/_404/src/dotfiles/.codex/skills/resolve-agent-context/SKILL.md
-
-agent-context-test:
-  ./test/agent-context-hook.sh
-
-cue-mcp-build:
-  go build -o /home/_404/.local/bin/cue-mcp ./cmd/cue-mcp
-
-cue-mcp-test:
-  go test ./...
+  cue fmt ./contracts/... ./providers/... ./projections/... ./fixtures/... ./migration/...
 
 archive:
   tar --exclude=.git -czf ../contract.cuemod.tar.gz -C .. contract.cuemod
