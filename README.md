@@ -14,6 +14,8 @@ This archive replaces Python JSON validation with CUE workflow commands and adds
 - `workspace_tool.cue` — `cue cmd export`, `validate`, and `check`
 - `dotfiles.schema-map.json` — evidence-backed map of the live dotfiles implementation
 - `dotfiles.schema-map.cue` — validating shape derived from the initial map
+- `dotfiles.agent-context.cue` — prompt routing and capability-scoped Codex context projection
+- `bin/dotfiles-agent-context-hook` — transport-only `UserPromptSubmit` hook adapter
 - `justfile` — thin wrapper around CUE commands
 - `docs/linting-toolchains.md` — linting architecture notes
 
@@ -34,6 +36,21 @@ cue cmd export
 cue cmd validate
 cue cmd check
 cue vet dotfiles.schema-map.cue dotfiles.schema-map.json -d '#SchemaMap'
+cue vet . dotfiles.schema-map.json
 ```
+
+## Agent context POC
+
+The project-local hook configuration is generated into the dotfiles repository:
+
+```bash
+mkdir -p /home/_404/src/dotfiles/.codex
+cue export . dotfiles.schema-map.json -e codexHooks \
+  --out json > /home/_404/src/dotfiles/.codex/hooks.json
+```
+
+The hook adapter only wraps native hook JSON and invokes CUE. Capability
+selection, reference expansion, authority constraints, and workflow projection
+remain in `dotfiles.agent-context.cue`.
 
 `cue` was not available in the generation environment, so run those commands locally before committing.

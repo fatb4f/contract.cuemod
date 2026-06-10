@@ -11,11 +11,12 @@ package workspace
 }
 
 #SchemaMapReferenceSet: {
-	domains?: [...#SchemaMapIdentifier]
-	components?: [...#SchemaMapIdentifier]
-	artifacts?: [...#SchemaMapIdentifier]
-	interfaces?: [...#SchemaMapIdentifier]
-	relationships?: [...#SchemaMapIdentifier]
+	domains: [...#SchemaMapIdentifier] | *[]
+	components: [...#SchemaMapIdentifier] | *[]
+	artifacts: [...#SchemaMapIdentifier] | *[]
+	interfaces: [...#SchemaMapIdentifier] | *[]
+	relationships: [...#SchemaMapIdentifier] | *[]
+	validationProfiles: [...#SchemaMapIdentifier] | *[]
 }
 
 #SchemaMapCapabilityProjection: {

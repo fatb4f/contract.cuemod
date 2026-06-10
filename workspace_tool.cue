@@ -40,11 +40,16 @@ command: export: {
 
 command: validate: {
 	cueVet: exec.Run & {
-		cmd: "cue vet ."
+		cmd: "cue vet -c=false ."
+	}
+
+	schemaMap: exec.Run & {
+		$after: [cueVet]
+		cmd: "cue vet . dotfiles.schema-map.json -d=#SchemaMap"
 	}
 
 	hosts: exec.Run & {
-		$after: [cueVet]
+		$after: [schemaMap]
 		cmd: "cue vet . workspace.hosts.json -d=#HostsProjection"
 	}
 
