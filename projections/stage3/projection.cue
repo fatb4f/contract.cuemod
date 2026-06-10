@@ -3,6 +3,7 @@ package stage3
 import (
 	"github.com/fatb4f/contract.cuemod/contracts/graph"
 	cuelsp "github.com/fatb4f/contract.cuemod/providers/cue-lsp:cuelsp"
+	cuerg "github.com/fatb4f/contract.cuemod/providers/cue-rg:cuerg"
 	lualsp "github.com/fatb4f/contract.cuemod/providers/lua-lsp:lualsp"
 )
 
@@ -11,6 +12,7 @@ import (
 	provider_ids: [
 		"df:provider/cue-lsp-mcp",
 		"df:provider/lua-lsp-mcp",
+		"df:provider/cue-rg-mcp",
 	]
 	contract_ids: [...graph.#ContractID]
 	artifact_ids: [...graph.#ArtifactID]
@@ -26,4 +28,5 @@ projection: #Stage3Projection & {
 providers: [
 	cuelsp.provider,
 	lualsp.provider,
+	cuerg.provider,
 ]

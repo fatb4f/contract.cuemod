@@ -10,6 +10,7 @@ which provider may expose facts about an artifact.
 - `providers/` declares concrete `cue-lsp` and `lua-lsp` capabilities plus a deferred `chezmoi` identity.
 - `projections/` exposes bounded views of the authority surface.
 - `fixtures/` contains canonical provider result evidence.
+- `fixtures/resolver/` contains typed forward, reverse, exclusion, and completeness packets.
 - `migration/` quarantines observations that are not authority.
 - `test/` vets the supported surface and rejects invalid direct-access and negative-claim cases.
 

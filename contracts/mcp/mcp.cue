@@ -2,11 +2,12 @@ package mcp
 
 import "github.com/fatb4f/contract.cuemod/contracts/graph"
 
-#ProviderKind: "cue-lsp" | "lua-lsp" | "chezmoi"
+#ProviderKind: "cue-lsp" | "lua-lsp" | "cue-rg" | "chezmoi"
 
 #AuthorityPlane:
 	"cue-graph" |
 	"lua-implementation" |
+	"bounded-text-evidence" |
 	"deployment-provenance"
 
 #MCPCapability:

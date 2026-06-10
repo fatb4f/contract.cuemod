@@ -15,6 +15,11 @@ import "github.com/fatb4f/contract.cuemod/contracts/mcp"
 		authority: "lua-implementation"
 	}
 
+	if kind == "cue-rg" {
+		protocol:  "mcp-tool"
+		authority: "bounded-text-evidence"
+	}
+
 	if kind == "chezmoi" {
 		protocol:  "mcp-tool"
 		authority: "deployment-provenance"

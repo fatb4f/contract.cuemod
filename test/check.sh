@@ -7,12 +7,15 @@ cd "$repo_root"
 cue vet ./contracts/graph
 cue vet ./contracts/mcp
 cue vet ./contracts/providers
+cue vet ./contracts/resolver
 cue vet ./contracts/validation
 cue vet ./providers/cue-lsp
+cue vet ./providers/cue-rg
 cue vet ./providers/lua-lsp
 cue vet ./providers/chezmoi
 cue vet ./projections/stage3
 cue vet ./fixtures/mcp/valid
+cue vet ./fixtures/resolver/workspace-lifecycle
 cue vet ./migration
 
 if cue vet ./fixtures/mcp/invalid-negative >/dev/null 2>&1; then

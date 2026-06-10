@@ -8,6 +8,16 @@ package graph
 #ArtifactID:       string & =~"^df:artifact/[a-z0-9._-]+$"
 #SymbolID:         string & =~"^df:symbol/[a-z0-9._-]+$"
 #EvidenceID:       string & =~"^df:evidence/[a-z0-9._-]+$"
+#EdgeID:           string & =~"^df:edge/[a-z0-9._-]+$"
+#ValidationID:     string & =~"^df:validation/[a-z0-9._-]+$"
+
+#EntityID:
+	#ContractID |
+	#NodeID |
+	#ImplementationID |
+	#ArtifactID |
+	#SymbolID |
+	#EvidenceID
 
 #ArtifactAccess: close({
 	artifact_id: #ArtifactID
