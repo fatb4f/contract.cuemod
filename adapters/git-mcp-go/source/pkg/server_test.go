@@ -75,6 +75,46 @@ func TestStackStageHandlerRunsTransaction(t *testing.T) {
 	}
 }
 
+func TestStackFinalizePatchHandlerRunsTransaction(t *testing.T) {
+	for _, mode := range []string{"shell", "go-git"} {
+		t.Run(mode, func(t *testing.T) {
+			repoDir := t.TempDir()
+			initRepoWithCommit(t, repoDir)
+			require.NoError(t, os.WriteFile(filepath.Join(repoDir, "test.txt"), []byte("finalized\n"), 0o644))
+			require.NoError(t, exec.Command("git", "-C", repoDir, "add", "test.txt").Run())
+			headBefore := gitOutput(t, repoDir, "rev-parse", "HEAD")
+			preparedTreeOID := gitOutput(t, repoDir, "write-tree")
+
+			gitServer := NewGitServer([]string{repoDir}, gitOperationsForMode(t, mode), false)
+			gitServer.RegisterTools()
+			request := mcp.CallToolRequest{}
+			request.Params.Name = "stack_finalize_patch"
+			request.Params.Arguments = map[string]interface{}{
+				"repo_path":             repoDir,
+				"patch_id":              "patch-1",
+				"message":               "patch one",
+				"prepared_evidence_uri": "evidence://prepared/patch-1",
+				"prepared_tree_oid":     preparedTreeOID,
+			}
+			result, err := gitServer.stackFinalizePatchHandler(context.Background(), request)
+			responseText := callToolText(t, result, err)
+			var response transaction.FinalizePatchResponse
+			require.NoError(t, json.Unmarshal([]byte(responseText), &response))
+			require.True(t, response.Transaction.OK)
+			require.Equal(t, transaction.StateCommitted, response.Transaction.State)
+			require.Equal(t, "patch-1", response.PatchID)
+			require.Len(t, response.CommitOID, 40)
+			require.Equal(t, response.CommitOID, gitOutput(t, repoDir, "rev-parse", response.StackRef))
+			require.FileExists(t, strings.TrimPrefix(response.MetadataURI, "file://"))
+			require.FileExists(t, filepath.Join(
+				repoDir, ".git", "git-mcp-transactions",
+				response.Transaction.TransactionID, "transaction.json",
+			))
+			require.Equal(t, headBefore, gitOutput(t, repoDir, "rev-parse", "HEAD"))
+		})
+	}
+}
+
 // createCommit creates a file and commits it
 func createCommit(t *testing.T, repoDir, filename, content, message string) {
 	filePath := filepath.Join(repoDir, filename)

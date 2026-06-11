@@ -157,3 +157,22 @@ input. Postflight requires an index delta, rejects changes outside the selected
 paths, and proves that tracked worktree content and untracked paths were
 preserved. Mutation or postflight failure restores the recorded index tree with
 an `index_only` rollback and emits rollback and diagnostic evidence.
+
+## Transactional Patch Finalization
+
+The `stack_finalize_patch` MCP tool converts an already staged tree into an
+immutable patch commit without moving `HEAD`. It derives the stable stack ref
+`refs/stack/patches/<patch-id>`, creates the commit with `HEAD` as its parent,
+updates that ref with compare-and-swap semantics, and writes sealed patch
+metadata under `.git/git-mcp-patches`.
+
+Finalization aborts before mutation when the index is empty, the worktree has
+unstaged changes, or a merge, cherry-pick, revert, or rebase conflict state is
+active. It also requires the tree OID recorded by prepared evidence to equal the
+current staged tree. Postflight verifies the commit object, stack ref, unchanged
+index and worktree, preserved untracked paths, and the metadata link between
+patch identity, commit identity, and prepared evidence.
+
+The transaction snapshots the previous stack ref and metadata artifact.
+Mutation or postflight failure restores the prior ref and metadata, or deletes
+newly created state, while retaining the immutable commit object for diagnosis.

@@ -4,8 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"time"
 )
+
+var oidPattern = regexp.MustCompile(`^[0-9a-f]{40}$`)
 
 type State string
 
@@ -132,6 +135,7 @@ type Snapshot struct {
 	Untracked     []string
 	ConflictState string
 	Artifacts     []string
+	ArtifactState map[string]*string
 	Operation     string
 }
 
@@ -190,13 +194,15 @@ type Policy struct {
 	AllowedRollbackClasses []RollbackClass
 	UntrackedPolicy        string
 	OperationInput         string
+	AdapterArtifactPaths   []string
 }
 
 type Request struct {
-	Command   string
-	Mutation  Mutation
-	Validator Validator
-	Policy    Policy
+	Command            string
+	PreflightValidator PreflightValidator
+	Mutation           Mutation
+	Validator          Validator
+	Policy             Policy
 }
 
 type TransactionState = State
@@ -238,6 +244,10 @@ type View interface {
 
 type PreflightObserver interface {
 	Observe(context.Context, Repository) (Preflight, error)
+}
+
+type PreflightValidator interface {
+	ValidatePreflight(context.Context, Repository, Preflight) error
 }
 
 type SnapshotStore interface {

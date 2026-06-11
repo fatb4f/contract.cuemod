@@ -162,19 +162,20 @@ func GetReadOnlyToolNames() map[string]bool {
 func GetLocalOnlyToolNames() map[string]bool {
 	// local tools that alter state, complementing the read-only tools
 	result := map[string]bool{
-		"git_init":            true,
-		"git_create_branch":   true,
-		"git_checkout":        true,
-		"git_commit":          true,
-		"git_commit_amend":    true,
-		"git_cherry_pick":     true,
-		"git_revert":          true,
-		"git_add":             true,
-		"git_reset":           true,
-		"stack_stage":         true,
-		"git_worktree_add":    true,
-		"git_worktree_remove": true,
-		"git_worktree_prune":  true,
+		"git_init":             true,
+		"git_create_branch":    true,
+		"git_checkout":         true,
+		"git_commit":           true,
+		"git_commit_amend":     true,
+		"git_cherry_pick":      true,
+		"git_revert":           true,
+		"git_add":              true,
+		"git_reset":            true,
+		"stack_stage":          true,
+		"stack_finalize_patch": true,
+		"git_worktree_add":     true,
+		"git_worktree_remove":  true,
+		"git_worktree_prune":   true,
 	}
 
 	for toolName := range GetReadOnlyToolNames() {
@@ -369,6 +370,31 @@ func (s *GitServer) RegisterTools() {
 		),
 	)
 	s.server.AddTool(stackStageTool, s.stackStageHandler)
+
+	stackFinalizePatchTool := mcp.NewTool("stack_finalize_patch",
+		mcp.WithDescription("Creates a patch commit and stack ref through the transaction runner"),
+		mcp.WithString("repo_path",
+			mcp.Required(),
+			mcp.Description("Path to Git repository"),
+		),
+		mcp.WithString("patch_id",
+			mcp.Required(),
+			mcp.Description("Stable patch identity"),
+		),
+		mcp.WithString("message",
+			mcp.Required(),
+			mcp.Description("Patch commit message"),
+		),
+		mcp.WithString("prepared_evidence_uri",
+			mcp.Required(),
+			mcp.Description("Prepared evidence bound to the staged tree"),
+		),
+		mcp.WithString("prepared_tree_oid",
+			mcp.Required(),
+			mcp.Description("Tree object identity recorded by prepared evidence"),
+		),
+	)
+	s.server.AddTool(stackFinalizePatchTool, s.stackFinalizePatchHandler)
 
 	// Register git_log tool
 	logTool := mcp.NewTool("git_log",
@@ -783,6 +809,45 @@ func (s *GitServer) stackStageHandler(ctx context.Context, request mcp.CallToolR
 	encoded, err := json.Marshal(transaction.NewStageResponse(result, stagedPaths))
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Encode stack.stage response: %v", err)), nil
+	}
+	return mcp.NewToolResultText(string(encoded)), nil
+}
+
+func (s *GitServer) stackFinalizePatchHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	requestedPath, _ := request.Params.Arguments["repo_path"].(string)
+	repoPath, err := s.getRepoPathForOperation(requestedPath)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Repository path error: %v", err)), nil
+	}
+	finalizeRequest := transaction.FinalizePatchRequest{}
+	finalizeRequest.PatchID, _ = request.Params.Arguments["patch_id"].(string)
+	finalizeRequest.Message, _ = request.Params.Arguments["message"].(string)
+	finalizeRequest.PreparedEvidenceURI, _ = request.Params.Arguments["prepared_evidence_uri"].(string)
+	finalizeRequest.PreparedTreeOID, _ = request.Params.Arguments["prepared_tree_oid"].(string)
+
+	transactionRequest, outcome, err := transaction.NewFinalizePatchTransactionRequest(repoPath, finalizeRequest)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Invalid stack.finalizePatch request: %v", err)), nil
+	}
+	artifactRoot := filepath.Join(repoPath, ".git", "git-mcp-transactions")
+	runner := transaction.NewRunner(
+		transaction.LocalRepository(repoPath),
+		transaction.GitObserver{StackRefPrefixes: []string{"refs/heads", "refs/stack"}},
+		transaction.GitSnapshotStore{},
+		&transaction.JSONLJournalStore{Root: artifactRoot},
+		transaction.Dispatcher{Handlers: map[transaction.RollbackClass]transaction.RollbackHandler{
+			transaction.RollbackRefOnly: transaction.FinalizePatchRollback{},
+		}},
+		transaction.DirectoryEvidenceEmitter{Root: artifactRoot},
+	)
+	result, runErr := runner.Run(ctx, transactionRequest)
+	if runErr != nil {
+		encoded, _ := json.Marshal(result)
+		return mcp.NewToolResultError(fmt.Sprintf("stack.finalizePatch failed: %v\n%s", runErr, encoded)), nil
+	}
+	encoded, err := json.Marshal(transaction.NewFinalizePatchResponse(result, finalizeRequest, outcome))
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Encode stack.finalizePatch response: %v", err)), nil
 	}
 	return mcp.NewToolResultText(string(encoded)), nil
 }

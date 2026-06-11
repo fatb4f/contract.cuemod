@@ -48,6 +48,38 @@ package vcs
 	stagedPaths: [string & !="", ...(string & !="")]
 })
 
+#StackFinalizePatchRequest: close({
+	patchID:             string & =~"^[A-Za-z0-9][A-Za-z0-9._-]*$"
+	message:             string & !=""
+	preparedEvidenceURI: string & !=""
+	preparedTreeOID:     string & =~"^[0-9a-f]{40}$"
+})
+
+#PatchMetadata: close({
+	patchID:             string & =~"^[A-Za-z0-9][A-Za-z0-9._-]*$"
+	commitOID:           string & =~"^[0-9a-f]{40}$"
+	treeOID:             string & =~"^[0-9a-f]{40}$"
+	parentOID:           string & =~"^[0-9a-f]{40}$"
+	stackRef:            string & =~"^refs/stack/patches/"
+	preparedEvidenceURI: string & !=""
+	preparedTreeOID:     string & =~"^[0-9a-f]{40}$"
+	evidenceState:       "sealed"
+})
+
+#StackFinalizePatchResponse: close({
+	transaction: close({
+		transactionID: string & !=""
+		command:       "stack.finalizePatch"
+		state:         "committed"
+		ok:            true
+		evidence: [#EvidenceRef, ...#EvidenceRef]
+	})
+	patchID:     string & =~"^[A-Za-z0-9][A-Za-z0-9._-]*$"
+	commitOID:   string & =~"^[0-9a-f]{40}$"
+	stackRef:    string & =~"^refs/stack/patches/"
+	metadataURI: string & !=""
+})
+
 #SkillOperation: close({
 	id:          #PublicOperationID
 	class:       #SkillOperationClass

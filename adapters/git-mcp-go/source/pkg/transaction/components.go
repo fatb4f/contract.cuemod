@@ -139,6 +139,20 @@ func (GitSnapshotStore) Capture(
 	}
 	if required(SurfaceAdapterArtifacts) {
 		snapshot.Artifacts = append([]string(nil), preflight.AdapterArtifacts...)
+		snapshot.Artifacts = append(snapshot.Artifacts, policy.AdapterArtifactPaths...)
+		snapshot.ArtifactState = make(map[string]*string, len(policy.AdapterArtifactPaths))
+		for _, path := range policy.AdapterArtifactPaths {
+			content, err := os.ReadFile(path)
+			if errors.Is(err, os.ErrNotExist) {
+				snapshot.ArtifactState[path] = nil
+				continue
+			}
+			if err != nil {
+				return Snapshot{}, fmt.Errorf("snapshot adapter artifact %s: %w", path, err)
+			}
+			value := string(content)
+			snapshot.ArtifactState[path] = &value
+		}
 		snapshot.Coverage[SurfaceAdapterArtifacts] = CoverageComplete
 	}
 	if required(SurfaceOperationInput) {
@@ -306,6 +320,16 @@ func (NoopValidator) Validate(context.Context, Repository, View) error {
 
 func git(ctx context.Context, root string, args ...string) (string, error) {
 	command := exec.CommandContext(ctx, "git", append([]string{"-C", root}, args...)...)
+	output, err := command.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("git %s: %w: %s", strings.Join(args, " "), err, strings.TrimSpace(string(output)))
+	}
+	return strings.TrimSpace(string(output)), nil
+}
+
+func gitWithInput(ctx context.Context, root, input string, args ...string) (string, error) {
+	command := exec.CommandContext(ctx, "git", append([]string{"-C", root}, args...)...)
+	command.Stdin = strings.NewReader(input)
 	output, err := command.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("git %s: %w: %s", strings.Join(args, " "), err, strings.TrimSpace(string(output)))

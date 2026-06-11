@@ -59,6 +59,11 @@ func (r *Runner) Run(ctx context.Context, req Request) (*Result, error) {
 		return r.abort(ctx, tx, FailurePreflight, err)
 	}
 	tx.preflight = preflight
+	if req.PreflightValidator != nil {
+		if err := req.PreflightValidator.ValidatePreflight(ctx, r.repo, preflight); err != nil {
+			return r.abort(ctx, tx, FailurePreflight, err)
+		}
+	}
 	if err := tx.transition(StatePreflighted); err != nil {
 		return nil, err
 	}
