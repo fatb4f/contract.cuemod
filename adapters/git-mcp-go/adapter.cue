@@ -38,6 +38,7 @@ adapter: adapters.#ManagedAdapter & {
 		"index-mutation",
 		"commit-mutation",
 		"linked-worktree-management",
+		"stack-transaction-runtime",
 		"cue-projection",
 		"cue-semantic-gates",
 	]

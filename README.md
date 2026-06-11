@@ -22,6 +22,8 @@ provider execution metadata and every artifact access contract fixes
 The managed `git-mcp-go` adapter is pinned to the `fatb4f/git-mcp-go`
 `worktree-v0` branch. Its source is materialized without nested `.git`
 metadata and remains an internal backend rather than a default agent surface.
+The adapter's `pkg/transaction` package provides the guarded stack mutation
+runner, durable journal, rollback dispatch, and transaction evidence runtime.
 
 ## Validation
 
