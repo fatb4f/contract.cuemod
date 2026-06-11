@@ -58,7 +58,8 @@ package vcs
 
 	backendCapabilities: [string & =~"^(vcs|evidence)\\.", ...(string & =~"^(vcs|evidence)\\.")]
 	forbiddenBackends: [...string & !=""] | *["git-cli"]
-	rationale: string & !=""
+	rationale:          string & !=""
+	transactionPolicy?: #CommandTransactionPolicy
 
 	if len(effects.writes) > 0 {
 		requires: transaction: true
@@ -69,6 +70,10 @@ package vcs
 			activePatch: true
 			transaction: true
 		}
+	}
+
+	if id == "stack.stage" || id == "stack.finalizePatch" || id == "stack.rollback" {
+		transactionPolicy: #CommandTransactionPolicy
 	}
 
 	if class == "finalize" {
@@ -277,6 +282,12 @@ patchStackSkill: #PatchStackSkillContract & {
 					reads: ["stack metadata", "patch metadata", "Git status"]
 				}
 				backendCapabilities: ["vcs.status", "vcs.readRefs", "vcs.readIndex"]
+				transactionPolicy: {
+					mode: "exempt"
+					requiredSnapshotSurfaces: []
+					postflightPredicates: []
+					priorTransactionIDAllowed: false
+				}
 				rationale: "Report stack, active patch, index, and worktree state without mutation."
 			},
 			{
@@ -326,6 +337,13 @@ patchStackSkill: #PatchStackSkillContract & {
 					changesIndex: true
 				}
 				backendCapabilities: ["vcs.readWorktree", "vcs.writeIndex", "vcs.writeTransaction"]
+				transactionPolicy: {
+					mode:                "required"
+					transactionContract: "#Transaction"
+					requiredSnapshotSurfaces: ["head", "refs", "index", "worktree", "untracked", "operation_input"]
+					postflightPredicates: ["selected paths staged", "worktree preserved", "transaction evidence updated"]
+					priorTransactionIDAllowed: false
+				}
 				rationale: "Stage paths only into the active patch transaction."
 			},
 			{
@@ -361,6 +379,13 @@ patchStackSkill: #PatchStackSkillContract & {
 					changesRef:    true
 				}
 				backendCapabilities: ["vcs.writeTree", "vcs.createCommit", "vcs.updateRef", "evidence.seal", "vcs.writeTransaction"]
+				transactionPolicy: {
+					mode:                "required"
+					transactionContract: "#Transaction"
+					requiredSnapshotSurfaces: ["head", "refs", "index", "worktree", "untracked", "adapter_artifacts", "operation_input"]
+					postflightPredicates: ["patch commit exists", "stack ref updated", "index and worktree policy satisfied", "evidence links commit oid"]
+					priorTransactionIDAllowed: false
+				}
 				rationale: "Create the final commit only after staged-tree evidence has been prepared."
 			},
 			{
@@ -392,6 +417,12 @@ patchStackSkill: #PatchStackSkillContract & {
 					reads: ["patch metadata", "stack order", "commit graphs", "trees"]
 				}
 				backendCapabilities: ["vcs.compareRevision"]
+				transactionPolicy: {
+					mode: "exempt"
+					requiredSnapshotSurfaces: []
+					postflightPredicates: []
+					priorTransactionIDAllowed: false
+				}
 				rationale: "Compare patch-stack revisions natively by patch identity and tree changes, without git range-diff."
 			},
 			{
@@ -411,6 +442,13 @@ patchStackSkill: #PatchStackSkillContract & {
 					changesWorktree: true
 				}
 				backendCapabilities: ["vcs.restoreRefs", "vcs.restoreIndex", "vcs.restoreWorktree", "vcs.writeTransaction"]
+				transactionPolicy: {
+					mode:                "rollback_aware"
+					transactionContract: "#Transaction"
+					requiredSnapshotSurfaces: ["head", "refs", "index", "worktree", "untracked", "conflict_state", "adapter_artifacts"]
+					postflightPredicates: ["target transaction restored", "recovery state verified", "rollback evidence emitted"]
+					priorTransactionIDAllowed: true
+				}
 				rationale: "Restore recorded pre-state from the transaction journal while preserving evidence."
 			},
 			{

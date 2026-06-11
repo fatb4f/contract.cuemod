@@ -43,4 +43,14 @@ if cue vet ./fixtures/vcs/invalid-unpushed >/dev/null 2>&1; then
 	exit 1
 fi
 
+if cue vet ./fixtures/vcs/invalid-reflog-only >/dev/null 2>&1; then
+	printf '%s\n' "reflog-only non-ref rollback unexpectedly passed" >&2
+	exit 1
+fi
+
+if cue vet ./fixtures/vcs/invalid-missing-transaction-policy >/dev/null 2>&1; then
+	printf '%s\n' "stack mutator without transaction policy unexpectedly passed" >&2
+	exit 1
+fi
+
 printf '%s\n' "contract checks: ok"
