@@ -6,7 +6,7 @@
         "lifecycle": "source",
         "authority": "authoritative",
         "generated": false,
-        "owner": "contracts/repo",
+        "owner": "contract/repo",
         "validatesWith": [
             "cue vet ./contracts/..."
         ],
@@ -45,7 +45,7 @@
         "lifecycle": "source",
         "authority": "derived",
         "generated": false,
-        "owner": "contracts/repo",
+        "owner": "contract/repo",
         "validatesWith": [
             "cue vet ./projections/..."
         ],
@@ -71,7 +71,7 @@
         "lifecycle": "quarantine",
         "authority": "quarantined",
         "generated": false,
-        "owner": "contracts/repo",
+        "owner": "contract/repo",
         "validatesWith": [
             "cue vet ./migration"
         ],
@@ -97,7 +97,7 @@
         "lifecycle": "source",
         "authority": "non-authority",
         "generated": false,
-        "owner": "contracts/repo",
+        "owner": "contract/repo",
         "validatesWith": [
             "./test/check.sh"
         ],
@@ -133,14 +133,14 @@
         "path": "contract/",
         "kind": "directory",
         "role": "authority",
-        "lifecycle": "deprecated",
-        "authority": "legacy",
+        "lifecycle": "source",
+        "authority": "authoritative",
         "generated": false,
-        "owner": "contracts/repo",
+        "owner": "contract/repo",
         "validatesWith": [
-            "cue vet ./contract/vcs"
+            "cue vet ./contract/..."
         ],
-        "status": "legacy"
+        "status": "declared"
     },
     {
         "path": "cmd/",
@@ -175,7 +175,7 @@
         "lifecycle": "source",
         "authority": "non-authority",
         "generated": false,
-        "owner": "contracts/repo",
+        "owner": "contract/repo",
         "validatesWith": [
             "./test/repo-layout.sh"
         ],

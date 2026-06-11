@@ -3,12 +3,13 @@ package repo
 generated: manifest.generatedAssets
 
 layoutMarkdown: """
-	<!-- Code generated from contracts/repo and projections/repo. DO NOT EDIT. -->
+	<!-- Code generated from contract/repo and projections/repo. DO NOT EDIT. -->
 
 	# Repository Layout
 
 	| Surface | Role | Lifecycle | Authority |
 	| --- | --- | --- | --- |
+	| `contract/` | authority | source | authoritative |
 	| `contracts/` | authority | source | authoritative |
 	| `providers/` | provider | source | authoritative |
 	| `adapters/` | adapter | managed-snapshot | non-authority |
@@ -19,7 +20,6 @@ layoutMarkdown: """
 	| `docs/` | documentation | source | non-authority |
 	| `.codex/` | generated | generated | derived |
 	| `.repo/` | generated | generated | derived |
-	| `contract/` | authority | deprecated | legacy |
 	| `cmd/` | tooling | source | non-authority |
 	| `internal/` | tooling | source | non-authority |
 	| `bin/` | tooling | source | non-authority |

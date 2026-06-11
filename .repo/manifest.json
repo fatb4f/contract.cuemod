@@ -8,8 +8,8 @@
             "lifecycle": "source",
             "authority": "authoritative",
             "generated": false,
-            "owner": "contracts/repo",
-            "description": "Authoritative CUE contracts.",
+            "owner": "contract/repo",
+            "description": "Active shared runtime schemas imported across providers, projections, and fixtures.",
             "allowedFileKinds": [
                 "file",
                 "directory"
@@ -80,7 +80,7 @@
             "lifecycle": "source",
             "authority": "derived",
             "generated": false,
-            "owner": "contracts/repo",
+            "owner": "contract/repo",
             "description": "Bounded views derived from contracts.",
             "allowedFileKinds": [
                 "file",
@@ -125,7 +125,7 @@
             "lifecycle": "quarantine",
             "authority": "quarantined",
             "generated": false,
-            "owner": "contracts/repo",
+            "owner": "contract/repo",
             "description": "Quarantined observations awaiting classification.",
             "allowedFileKinds": [
                 "file",
@@ -167,7 +167,7 @@
             "lifecycle": "source",
             "authority": "non-authority",
             "generated": false,
-            "owner": "contracts/repo",
+            "owner": "contract/repo",
             "description": "Explanatory non-authority documentation.",
             "allowedFileKinds": [
                 "file",
@@ -230,23 +230,26 @@
             "path": "contract/",
             "kind": "directory",
             "role": "authority",
-            "lifecycle": "deprecated",
-            "authority": "legacy",
+            "lifecycle": "source",
+            "authority": "authoritative",
             "generated": false,
-            "owner": "contracts/repo",
-            "description": "Legacy authority packages pending migration.",
+            "owner": "contract/repo",
+            "description": "Active domain contracts and the preferred root for new contract families.",
             "allowedFileKinds": [
                 "file",
                 "directory"
             ],
             "allowedImports": [],
+            "allowedExtensions": [
+                ".cue",
+                ".md"
+            ],
             "validatesWith": [
-                "cue vet ./contract/vcs"
+                "cue vet ./contract/..."
             ],
             "prunesWith": [
                 "reject undeclared children"
-            ],
-            "replacement": "contracts/"
+            ]
         },
         {
             "path": "cmd/",
@@ -297,7 +300,7 @@
             "lifecycle": "source",
             "authority": "non-authority",
             "generated": false,
-            "owner": "contracts/repo",
+            "owner": "contract/repo",
             "description": "Developer-only tooling; never agent-visible.",
             "allowedFileKinds": [
                 "file",
@@ -732,7 +735,7 @@
         {
             "path": ".repo/manifest.json",
             "generated": true,
-            "source": "contracts/repo",
+            "source": "contract/repo",
             "projection": "projections/repo:manifest",
             "command": "cue export ./projections/repo -e manifest",
             "editable": false,
@@ -743,7 +746,7 @@
         {
             "path": ".repo/inventory.json",
             "generated": true,
-            "source": "contracts/repo",
+            "source": "contract/repo",
             "projection": "projections/repo:inventory",
             "command": "cue export ./projections/repo -e inventory",
             "editable": false,
@@ -754,7 +757,7 @@
         {
             "path": ".repo/layout.md",
             "generated": true,
-            "source": "contracts/repo",
+            "source": "contract/repo",
             "projection": "projections/repo:layoutMarkdown",
             "command": "cue export ./projections/repo -e layoutMarkdown --out text",
             "editable": false,
