@@ -6,6 +6,8 @@ which provider may expose facts about an artifact.
 
 ## Authority surface
 
+`contracts/` is the only contract authority root.
+
 - `contracts/` defines MCP envelopes, graph identities, provider planes, and validation profiles.
 - `adapters/` contains contract-managed snapshots of privileged backend implementations.
 - `providers/` declares concrete `cue-lsp` and `lua-lsp` capabilities plus a deferred `chezmoi` identity.

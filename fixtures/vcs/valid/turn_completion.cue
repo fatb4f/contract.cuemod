@@ -1,6 +1,6 @@
 package valid
 
-import "github.com/fatb4f/contract.cuemod/contract/vcs"
+import "github.com/fatb4f/contract.cuemod/contracts/vcs"
 
 turnCompletion: vcs.#MutationTurnCompletion & {
 	kind: "mutation-turn"

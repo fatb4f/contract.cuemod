@@ -1,6 +1,6 @@
 package valid
 
-import "github.com/fatb4f/contract.cuemod/contract/vcs"
+import "github.com/fatb4f/contract.cuemod/contracts/vcs"
 
 transaction: vcs.#Transaction & {
 	id:      "txn-20260611-0001"

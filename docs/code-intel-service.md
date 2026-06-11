@@ -28,13 +28,14 @@ MCP is the outer protocol projection: servers expose resources, tools, and promp
 contract.cuemod/
 ├── cue.mod/
 │   └── module.cue
-├── contract/
-│   ├── schema.cue
-│   ├── primitives.cue
-│   ├── adapters.cue
-│   ├── tools.cue
-│   ├── workflows.cue
-│   └── policy.cue
+├── contracts/
+│   └── code-intel/
+│       ├── schema.cue
+│       ├── primitives.cue
+│       ├── adapters.cue
+│       ├── tools.cue
+│       ├── workflows.cue
+│       └── policy.cue
 └── spec/
     └── mcp-code-intel-server.md
 ```
@@ -52,7 +53,7 @@ Adjust `language.version` to the local `cue` toolchain version.
 
 ---
 
-# 3. `contract.cuemod/contract/schema.cue`
+# 3. `contract.cuemod/contracts/code-intel/schema.cue`
 
 ```cue
 package contract
@@ -164,7 +165,7 @@ package contract
 
 ---
 
-# 4. `contract.cuemod/contract/primitives.cue`
+# 4. `contract.cuemod/contracts/code-intel/primitives.cue`
 
 ```cue
 package contract
@@ -265,7 +266,7 @@ primitives: {
 
 ---
 
-# 5. `contract.cuemod/contract/adapters.cue`
+# 5. `contract.cuemod/contracts/code-intel/adapters.cue`
 
 ```cue
 package contract
@@ -506,7 +507,7 @@ adapters: {
 
 ---
 
-# 6. `contract.cuemod/contract/tools.cue`
+# 6. `contract.cuemod/contracts/code-intel/tools.cue`
 
 ```cue
 package contract
@@ -657,7 +658,7 @@ tools: {
 
 ---
 
-# 7. `contract.cuemod/contract/policy.cue`
+# 7. `contract.cuemod/contracts/code-intel/policy.cue`
 
 ```cue
 package contract
@@ -712,7 +713,7 @@ policy: {
 
 ---
 
-# 8. `contract.cuemod/contract/workflows.cue`
+# 8. `contract.cuemod/contracts/code-intel/workflows.cue`
 
 ```cue
 package contract

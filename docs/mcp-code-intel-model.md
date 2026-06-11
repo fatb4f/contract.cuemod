@@ -674,14 +674,14 @@ Every adapter should follow this shape:
 # 13. Minimal CUE package layout
 
 ```text
-contract/
+contracts/
   mcp/
     schema.cue          # MCP projection types
     resources.cue       # resource contracts
     tools.cue           # tool contracts
     prompts.cue         # prompt/workflow projections
 
-  codeintel/
+  code-intel/
     state.cue           # CodeIntelState
     component.cue       # Component/Rationale/Contract
     adapter.cue         # Adapter contract

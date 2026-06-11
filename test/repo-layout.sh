@@ -15,6 +15,22 @@ cmp "$tmp_root/manifest.json" .repo/manifest.json
 cmp "$tmp_root/inventory.json" .repo/inventory.json
 cmp "$tmp_root/layout.md" .repo/layout.md
 
+if [ -e contract ]; then
+	printf '%s\n' "singular authority root must not exist" >&2
+	exit 1
+fi
+
+if rg -n \
+	--glob '*.cue' \
+	--glob '*.md' \
+	--glob '*.sh' \
+	--glob 'justfile' \
+	'github\.com/fatb4f/contract\.cuemod/contract/|`(\./|\.\./)?contract/' \
+	. >/dev/null; then
+	printf '%s\n' "singular authority-root reference found" >&2
+	exit 1
+fi
+
 find . -mindepth 1 -maxdepth 1 \
 	! -name .git \
 	-printf '%f\n' |
