@@ -53,7 +53,8 @@ for invalid_fixture in \
 	./fixtures/agent-skill/invalid \
 	./fixtures/mcp/invalid-authority \
 	./fixtures/mcp/invalid-capability \
-	./fixtures/mcp/invalid-complete
+	./fixtures/mcp/invalid-complete \
+	./fixtures/mcp/invalid-provider-id
 do
 	if cue vet "$invalid_fixture" >/dev/null 2>&1; then
 		printf '%s\n' "$invalid_fixture unexpectedly passed" >&2

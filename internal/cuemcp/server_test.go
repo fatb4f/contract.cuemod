@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/mark3labs/mcp-go/mcp"
 )
 
 func TestResolveAndSearchImplementation(t *testing.T) {
@@ -76,6 +78,61 @@ func TestSearchRejectsUnknownProjection(t *testing.T) {
 	})
 	if searchErr == nil || searchErr["code"] != "projection_not_found" {
 		t.Fatalf("error = %#v", searchErr)
+	}
+}
+
+func TestSearchHandlerWrapsModeledError(t *testing.T) {
+	runtime := New(filepath.Clean(filepath.Join("..", "..")))
+	request := mcp.CallToolRequest{}
+	request.Params.Arguments = map[string]any{
+		"schema":        "agent.search-implementation.request.v1",
+		"projection_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+		"artifact_ids":  []string{"df:artifact/wezterm-config-source"},
+		"intent":        "search",
+		"terms":         []string{"mux"},
+		"result_limit":  10,
+	}
+	result, err := runtime.handleSearch(context.Background(), request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var envelope map[string]any
+	if err := json.Unmarshal([]byte(resultText(t, result)), &envelope); err != nil {
+		t.Fatal(err)
+	}
+	if envelope["provider_id"] != "df:provider/cue-rg-mcp" {
+		t.Fatalf("error envelope = %#v", envelope)
+	}
+	payload := envelope["result"].(map[string]any)
+	if payload["code"] != "projection_not_found" {
+		t.Fatalf("error payload = %#v", payload)
+	}
+}
+
+func TestLookupAndValidateHandlersWrapModeledErrors(t *testing.T) {
+	runtime := New(filepath.Clean(filepath.Join("..", "..")))
+	for name, handler := range map[string]func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error){
+		"lookup":   runtime.handleLookup,
+		"validate": runtime.handleValidate,
+	} {
+		t.Run(name, func(t *testing.T) {
+			request := mcp.CallToolRequest{}
+			request.Params.Arguments = map[string]any{
+				"projection_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			}
+			result, err := handler(context.Background(), request)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var envelope map[string]any
+			if err := json.Unmarshal([]byte(resultText(t, result)), &envelope); err != nil {
+				t.Fatal(err)
+			}
+			payload := envelope["result"].(map[string]any)
+			if payload["code"] != "projection_not_found" {
+				t.Fatalf("error payload = %#v", payload)
+			}
+		})
 	}
 }
 

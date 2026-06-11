@@ -248,7 +248,7 @@ stage3Providers: {
 	schema:        "agent.search-implementation.error.v1"
 	code:          "projection_not_found"
 	message:       string & !=""
-	projection_id: #ProjectionID
+	projection_id: string
 	details: {}
 }
 
@@ -256,10 +256,10 @@ stage3Providers: {
 	schema:        "agent.search-implementation.error.v1"
 	code:          "projection_hash_mismatch"
 	message:       string & !=""
-	projection_id: #ProjectionID
+	projection_id: string
 	details: {
-		expected_projection_id: #ProjectionID
-		actual_projection_id:   #ProjectionID
+		expected_projection_id: string
+		actual_projection_id:   string
 	}
 }
 
@@ -267,7 +267,7 @@ stage3Providers: {
 	schema:        "agent.search-implementation.error.v1"
 	code:          "path_out_of_scope"
 	message:       string & !=""
-	projection_id: #ProjectionID
+	projection_id: string
 	details: {
 		requested_path: string
 		allowed_roots: [...#SearchRelativePath]
@@ -278,7 +278,7 @@ stage3Providers: {
 	schema:        "agent.search-implementation.error.v1"
 	code:          "expansion_forbidden"
 	message:       string & !=""
-	projection_id: #ProjectionID
+	projection_id: string
 	details: {
 		requested_path: #SearchRelativePath
 		allowed_roots: [...#SearchRelativePath]
@@ -289,10 +289,10 @@ stage3Providers: {
 	schema:        "agent.search-implementation.error.v1"
 	code:          "term_not_allowed"
 	message:       string & !=""
-	projection_id: #ProjectionID
+	projection_id: string
 	details: {
 		term: string
-		allowed_terms: [...string]
+		allowed_terms?: [...string]
 	}
 }
 
@@ -300,7 +300,7 @@ stage3Providers: {
 	schema:        "agent.search-implementation.error.v1"
 	code:          "invalid_search_contract"
 	message:       string & !=""
-	projection_id: #ProjectionID
+	projection_id: string
 	details: {
 		field?:  string
 		reason?: string
@@ -311,9 +311,9 @@ stage3Providers: {
 	schema:        "agent.search-implementation.error.v1"
 	code:          "result_limit_exceeded"
 	message:       string & !=""
-	projection_id: #ProjectionID
+	projection_id: string
 	details: {
-		requested: int & >=1
+		requested: int
 		maximum:   int & >=1
 	}
 }
@@ -322,7 +322,7 @@ stage3Providers: {
 	schema:        "agent.search-implementation.error.v1"
 	code:          "backend_unavailable"
 	message:       string & !=""
-	projection_id: #ProjectionID
+	projection_id: string
 	details: {
 		backend: "rg"
 	}
@@ -332,7 +332,7 @@ stage3Providers: {
 	schema:        "agent.search-implementation.error.v1"
 	code:          "backend_failed"
 	message:       string & !=""
-	projection_id: #ProjectionID
+	projection_id: string
 	details: {
 		backend:   "rg"
 		exit_code: int

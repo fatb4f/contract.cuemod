@@ -93,6 +93,8 @@ trap 'rm -rf "$tmp_root"' EXIT HUP INT TERM
 	cue export . dotfiles.schema-map.json -e codexSkill --out text >"$tmp_root/SKILL.md"
 	cue export . dotfiles.schema-map.json -e agentContextHookScript.content --out text >"$tmp_root/dotfiles-agent-context-hook"
 	cue export . dotfiles.schema-map.json -e resolveAgentContextScript.content --out text >"$tmp_root/resolve-agent-context"
+	cue export ./projections/agent-skill -e 'projection.scripts["dotfiles-agent-context-hook"].content' --out text >"$tmp_root/projected-dotfiles-agent-context-hook"
+	cue export ./projections/agent-skill -e 'projection.scripts["resolve-agent-context"].content' --out text >"$tmp_root/projected-resolve-agent-context"
 )
 jq -S . "$tmp_root/hooks.json" >"$tmp_root/hooks.generated.sorted"
 jq -S . "$generated_hooks" >"$tmp_root/hooks.installed.sorted"
@@ -100,12 +102,14 @@ cmp "$tmp_root/hooks.generated.sorted" "$tmp_root/hooks.installed.sorted"
 cmp "$tmp_root/SKILL.md" "$generated_skill"
 cmp "$tmp_root/dotfiles-agent-context-hook" "$hook"
 cmp "$tmp_root/resolve-agent-context" "$resolver"
+cmp "$tmp_root/projected-dotfiles-agent-context-hook" "$hook"
+cmp "$tmp_root/projected-resolve-agent-context" "$resolver"
 
 [ -x "$hook" ]
 [ -x "$resolver" ]
 
-if grep -R "/home/_404/src/contract.cuemod/bin\\|bin/resolve-agent-context\\|bin/dotfiles-agent-context-hook" "$repo_root/.codex"; then
-	printf '%s\n' "generated agent assets reference repo-local bin scripts" >&2
+if grep -R "/home/_404/src/contract.cuemod\\|bin/resolve-agent-context\\|bin/dotfiles-agent-context-hook" "$repo_root/.codex"; then
+	printf '%s\n' "generated agent assets reference repo-local source paths" >&2
 	exit 1
 fi
 

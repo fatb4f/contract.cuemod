@@ -10,7 +10,11 @@ import (
 func main() {
 	root := os.Getenv("CUE_CONTRACT_ROOT")
 	if root == "" {
-		root = "/home/_404/src/contract.cuemod"
+		var err error
+		root, err = os.Getwd()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	if err := cuemcp.Serve(root); err != nil {
 		log.Fatal(err)

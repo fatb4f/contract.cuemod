@@ -11,6 +11,7 @@ func TestValidateRejectsUnboundProvider(t *testing.T) {
 	result := Result{
 		ProviderID: "df:provider/cue-lsp-mcp",
 		Provider: Provider{
+			ID:        "df:provider/cue-lsp-mcp",
 			Kind:      "invented-provider",
 			Protocol:  "mcp-tool",
 			Authority: "cue-graph",

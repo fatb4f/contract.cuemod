@@ -6,6 +6,7 @@ result: mcp.#MCPResult & {
 	provider_id: "df:provider/cue-rg-mcp"
 	contract_id: "df:contract/mcp-provider-authority"
 	provider: {
+		id:        "df:provider/cue-rg-mcp"
 		kind:      "cue-rg"
 		protocol:  "mcp-tool"
 		authority: "bounded-text-evidence"

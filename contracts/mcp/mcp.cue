@@ -48,6 +48,7 @@ import "github.com/fatb4f/contract.cuemod/contracts/graph"
 	evidence_id?:       graph.#EvidenceID
 
 	provider: close({
+		id:        resultProviderID
 		kind:      #ProviderKind
 		authority: #AuthorityPlane
 		protocol:  "lsp-over-mcp" | "mcp-tool"

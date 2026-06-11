@@ -7,6 +7,7 @@ cueDefinition: providers.#CueLSPResult & {
 	projection_id: "df:projection/stage3-mcp-authority"
 	contract_id:   "df:contract/mcp-provider-authority"
 	provider: {
+		id:        "df:provider/cue-lsp-mcp"
 		kind:      "cue-lsp"
 		authority: "cue-graph"
 		protocol:  "lsp-over-mcp"
@@ -23,6 +24,7 @@ luaSymbolEvidence: providers.#LuaEvidenceResult & {
 	symbol_id:         "df:symbol/wezterm-smart-splits-apply-to-config"
 	evidence_id:       "df:evidence/wezterm-smart-splits-apply-to-config"
 	provider: {
+		id:        "df:provider/lua-lsp-mcp"
 		kind:      "lua-lsp"
 		authority: "lua-implementation"
 		protocol:  "lsp-over-mcp"

@@ -29,6 +29,7 @@ import "github.com/fatb4f/contract.cuemod/contracts/mcp"
 #CueLSPResult: mcp.#MCPResult & {
 	provider_id: "df:provider/cue-lsp-mcp"
 	provider: {
+		id:        "df:provider/cue-lsp-mcp"
 		kind:      "cue-lsp"
 		protocol:  "lsp-over-mcp"
 		authority: "cue-graph"
@@ -46,6 +47,7 @@ import "github.com/fatb4f/contract.cuemod/contracts/mcp"
 #LuaLSPResult: mcp.#MCPResult & {
 	provider_id: "df:provider/lua-lsp-mcp"
 	provider: {
+		id:        "df:provider/lua-lsp-mcp"
 		kind:      "lua-lsp"
 		protocol:  "lsp-over-mcp"
 		authority: "lua-implementation"

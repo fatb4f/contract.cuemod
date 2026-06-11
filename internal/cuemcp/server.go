@@ -170,6 +170,7 @@ func (r *Runtime) handleResolve(ctx context.Context, request mcp.CallToolRequest
 		ProviderID: "df:provider/cue-lsp-mcp",
 		ContractID: "df:contract/mcp-provider-authority",
 		Provider: mcpcontract.Provider{
+			ID:        "df:provider/cue-lsp-mcp",
 			Kind:      "cue-lsp",
 			Protocol:  "lsp-over-mcp",
 			Authority: "cue-graph",
@@ -191,12 +192,14 @@ func (r *Runtime) handleLookup(ctx context.Context, request mcp.CallToolRequest)
 	id, _ := request.Params.Arguments["projection_id"].(string)
 	record, ok := r.lookup(id)
 	if !ok {
-		return jsonResult(searchError("projection_not_found", "Projection is not available in this MCP session.", id, map[string]any{})), nil
+		return r.errorResult(ctx, "#ProjectionLookupErrorMCPResult", "df:provider/cue-lsp-mcp", "cue-lsp", "lsp-over-mcp", "cue-graph", "definition", "projection-lookup-error",
+			searchError("projection_not_found", "Projection is not available in this MCP session.", id, map[string]any{})), nil
 	}
 	return r.validatedResult(ctx, "#ProjectionLookupMCPResult", mcpcontract.Result{
 		ProviderID: "df:provider/cue-lsp-mcp",
 		ContractID: "df:contract/mcp-provider-authority",
 		Provider: mcpcontract.Provider{
+			ID:        "df:provider/cue-lsp-mcp",
 			Kind:      "cue-lsp",
 			Protocol:  "lsp-over-mcp",
 			Authority: "cue-graph",
@@ -229,6 +232,7 @@ func (r *Runtime) handleListProviders(ctx context.Context, _ mcp.CallToolRequest
 		ProviderID: "df:provider/cue-lsp-mcp",
 		ContractID: "df:contract/mcp-provider-authority",
 		Provider: mcpcontract.Provider{
+			ID:        "df:provider/cue-lsp-mcp",
 			Kind:      "cue-lsp",
 			Protocol:  "lsp-over-mcp",
 			Authority: "cue-graph",
@@ -248,12 +252,13 @@ func (r *Runtime) handleSearch(ctx context.Context, request mcp.CallToolRequest)
 	}
 	result, searchErr := r.Search(ctx, input)
 	if searchErr != nil {
-		return jsonResult(searchErr), nil
+		return r.errorResult(ctx, "#SearchImplementationErrorMCPResult", "df:provider/cue-rg-mcp", "cue-rg", "mcp-tool", "bounded-text-evidence", "search", "search-error", searchErr), nil
 	}
 	return r.validatedResult(ctx, "#SearchImplementationMCPResult", mcpcontract.Result{
 		ProviderID: "df:provider/cue-rg-mcp",
 		ContractID: "df:contract/mcp-provider-authority",
 		Provider: mcpcontract.Provider{
+			ID:        "df:provider/cue-rg-mcp",
 			Kind:      "cue-rg",
 			Protocol:  "mcp-tool",
 			Authority: "bounded-text-evidence",
@@ -270,14 +275,15 @@ func (r *Runtime) handleValidate(ctx context.Context, request mcp.CallToolReques
 	id, _ := request.Params.Arguments["projection_id"].(string)
 	record, ok := r.lookup(id)
 	if !ok {
-		return jsonResult(searchError("projection_not_found", "Projection is not available in this MCP session.", id, map[string]any{})), nil
+		return r.errorResult(ctx, "#ValidateProjectionErrorMCPResult", "df:provider/cue-lsp-mcp", "cue-lsp", "lsp-over-mcp", "cue-graph", "validate", "projection-validation-error",
+			searchError("projection_not_found", "Projection is not available in this MCP session.", id, map[string]any{})), nil
 	}
 	actual, err := projectionID(record.Envelope)
 	if err != nil {
 		return toolError(err), nil
 	}
 	if actual != id {
-		return jsonResult(searchError("projection_hash_mismatch", "Projection identity does not match its authority envelope.", id, map[string]any{
+		return r.errorResult(ctx, "#ValidateProjectionErrorMCPResult", "df:provider/cue-lsp-mcp", "cue-lsp", "lsp-over-mcp", "cue-graph", "validate", "projection-validation-error", searchError("projection_hash_mismatch", "Projection identity does not match its authority envelope.", id, map[string]any{
 			"expected_projection_id": id,
 			"actual_projection_id":   actual,
 		})), nil
@@ -294,6 +300,7 @@ func (r *Runtime) handleValidate(ctx context.Context, request mcp.CallToolReques
 		ProviderID: "df:provider/cue-lsp-mcp",
 		ContractID: "df:contract/mcp-provider-authority",
 		Provider: mcpcontract.Provider{
+			ID:        "df:provider/cue-lsp-mcp",
 			Kind:      "cue-lsp",
 			Protocol:  "lsp-over-mcp",
 			Authority: "cue-graph",
@@ -513,6 +520,24 @@ func (r *Runtime) validatedResult(ctx context.Context, definition string, value 
 		return toolError(err)
 	}
 	return jsonResult(value)
+}
+
+func (r *Runtime) errorResult(ctx context.Context, definition, providerID, kind, protocol, authority, capability, claimKind string, result map[string]any) *mcp.CallToolResult {
+	return r.validatedResult(ctx, definition, mcpcontract.Result{
+		ProviderID: providerID,
+		ContractID: "df:contract/mcp-provider-authority",
+		Provider: mcpcontract.Provider{
+			ID:        providerID,
+			Kind:      kind,
+			Protocol:  protocol,
+			Authority: authority,
+		},
+		Capability: capability,
+		Claim: mcpcontract.Claim{
+			Kind: claimKind,
+		},
+		Result: result,
+	})
 }
 
 func writeTempJSON(value any) (string, func(), error) {

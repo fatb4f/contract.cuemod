@@ -26,8 +26,13 @@ skill: agentskill.#SkillProjection & {
 	}
 	scripts: {
 		"resolve-agent-context": {
-			path:       ".codex/skills/resolve-agent-context/scripts/resolve-agent-context"
-			content:    "#!/bin/sh\nset -eu\n"
+			path: ".codex/skills/resolve-agent-context/scripts/resolve-agent-context"
+			content: """
+				#!/bin/sh
+				set -eu
+				script_dir=$(CDPATH= cd -- "$(dirname "$0")" && pwd -P)
+				contract_root=${CONTRACT_CUEMOD_ROOT:-$(CDPATH= cd -- "$script_dir/../../../.." && pwd -P)}
+				"""
 			executable: true
 			provenance: metadata.provenance
 		}

@@ -429,7 +429,8 @@ agentContextHookScript: agentskill.#ScriptAsset & {
 		#!/bin/sh
 		set -eu
 
-		contract_root=${DOTFILES_CONTRACT_ROOT:-/home/_404/src/contract.cuemod}
+		script_dir=$(CDPATH= cd -- "$(dirname "$0")" && pwd -P)
+		contract_root=${CONTRACT_CUEMOD_ROOT:-${CONTRACT_ROOT:-${DOTFILES_CONTRACT_ROOT:-$(CDPATH= cd -- "$script_dir/../../../.." && pwd -P)}}}
 		input_json=$(mktemp "${TMPDIR:-/tmp}/dotfiles-agent-context.XXXXXX.json")
 		wrapped_json=$(mktemp "${TMPDIR:-/tmp}/dotfiles-agent-context-wrapped.XXXXXX.json")
 
@@ -454,7 +455,8 @@ resolveAgentContextScript: agentskill.#ScriptAsset & {
 		#!/bin/sh
 		set -eu
 
-		contract_root=${DOTFILES_CONTRACT_ROOT:-/home/_404/src/contract.cuemod}
+		script_dir=$(CDPATH= cd -- "$(dirname "$0")" && pwd -P)
+		contract_root=${CONTRACT_CUEMOD_ROOT:-${CONTRACT_ROOT:-${DOTFILES_CONTRACT_ROOT:-$(CDPATH= cd -- "$script_dir/../../../.." && pwd -P)}}}
 		prompt=
 		cwd=$PWD
 		candidates_json='[]'
