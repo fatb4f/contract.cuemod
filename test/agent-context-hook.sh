@@ -2,10 +2,10 @@
 set -eu
 
 repo_root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd -P)
-hook="$repo_root/bin/dotfiles-agent-context-hook"
-resolver="$repo_root/bin/resolve-agent-context"
-generated_hooks=/home/_404/src/dotfiles/.codex/hooks.json
-generated_skill=/home/_404/src/dotfiles/.codex/skills/resolve-agent-context/SKILL.md
+hook="$repo_root/.codex/skills/resolve-agent-context/scripts/dotfiles-agent-context-hook"
+resolver="$repo_root/.codex/skills/resolve-agent-context/scripts/resolve-agent-context"
+generated_hooks="$repo_root/.codex/hooks.json"
+generated_skill="$repo_root/.codex/skills/resolve-agent-context/SKILL.md"
 
 run_hook() {
 	prompt=$1
@@ -91,10 +91,22 @@ trap 'rm -rf "$tmp_root"' EXIT HUP INT TERM
 	cd "$repo_root"
 	cue export . dotfiles.schema-map.json -e codexHooks --out json >"$tmp_root/hooks.json"
 	cue export . dotfiles.schema-map.json -e codexSkill --out text >"$tmp_root/SKILL.md"
+	cue export . dotfiles.schema-map.json -e agentContextHookScript.content --out text >"$tmp_root/dotfiles-agent-context-hook"
+	cue export . dotfiles.schema-map.json -e resolveAgentContextScript.content --out text >"$tmp_root/resolve-agent-context"
 )
 jq -S . "$tmp_root/hooks.json" >"$tmp_root/hooks.generated.sorted"
 jq -S . "$generated_hooks" >"$tmp_root/hooks.installed.sorted"
 cmp "$tmp_root/hooks.generated.sorted" "$tmp_root/hooks.installed.sorted"
 cmp "$tmp_root/SKILL.md" "$generated_skill"
+cmp "$tmp_root/dotfiles-agent-context-hook" "$hook"
+cmp "$tmp_root/resolve-agent-context" "$resolver"
+
+[ -x "$hook" ]
+[ -x "$resolver" ]
+
+if grep -R "/home/_404/src/contract.cuemod/bin\\|bin/resolve-agent-context\\|bin/dotfiles-agent-context-hook" "$repo_root/.codex"; then
+	printf '%s\n' "generated agent assets reference repo-local bin scripts" >&2
+	exit 1
+fi
 
 printf 'agent-context-hook: ok\n'

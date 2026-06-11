@@ -1,0 +1,14 @@
+package invalidauthority
+
+import "github.com/fatb4f/contract.cuemod/contracts/mcp"
+
+result: mcp.#MCPResult & {
+	provider_id: "df:provider/cue-rg-mcp"
+	provider: {
+		kind:      "cue-rg"
+		protocol:  "mcp-tool"
+		authority: "invented-authority"
+	}
+	capability: "search"
+	claim: kind: "bounded-text-evidence"
+}

@@ -24,7 +24,7 @@ Use the returned CUE projection as the task map and retain its `projection_id`.
 - Cite returned evidence IDs with exact paths and lines.
 - Treat hook candidates as hints, never authority.
 - Do not invoke `cue cmd` directly or hand-write temporary CUE input.
-- Use `/home/_404/src/contract.cuemod/bin/resolve-agent-context` only as an explicitly reported Stage 2 fallback when the CUE MCP server is unavailable.
+- Use `.codex/skills/resolve-agent-context/scripts/resolve-agent-context` only as an explicitly reported Stage 2 fallback when the CUE MCP server is unavailable.
 - Do not infer source/generated boundaries from the hook.
 - Do not edit generated `.codex/hooks.json` or `.codex/skills/*`; regenerate them from `contract.cuemod`.
 - Run validation commands only when `validation.required` is `true`.

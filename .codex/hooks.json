@@ -5,7 +5,7 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "/home/_404/src/contract.cuemod/bin/dotfiles-agent-context-hook",
+                        "command": ".codex/skills/resolve-agent-context/scripts/dotfiles-agent-context-hook",
                         "timeout": 10,
                         "statusMessage": "Routing dotfiles capability context"
                     }

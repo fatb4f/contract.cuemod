@@ -2,6 +2,7 @@ package workspace
 
 import (
 	"encoding/json"
+	agentskill "github.com/fatb4f/contract.cuemod/contracts/agent-skill:agentskill"
 	"list"
 	"strings"
 )
@@ -137,7 +138,7 @@ if len(hookMatch.matches) == 1 {
 		matchedTerms: match.terms
 		resolver: {
 			tool:            "cue.resolve_agent_context"
-			fallbackCommand: "/home/_404/src/contract.cuemod/bin/resolve-agent-context"
+			fallbackCommand: ".codex/skills/resolve-agent-context/scripts/resolve-agent-context"
 			skill:           ".codex/skills/resolve-agent-context/SKILL.md"
 		}
 	}
@@ -368,12 +369,18 @@ if len(resolverMatches) == 1 {
 	}
 }
 
-codexHooks: {
+agentSkillProvenance: agentskill.#ProjectionProvenance & {
+	projection_id: "df:projection/resolve-agent-context-skill"
+	contract_ids: ["df:contract/agent-skill-runtime"]
+	generated: true
+}
+
+codexHooks: agentskill.#HookProjection & {
 	hooks: {
 		UserPromptSubmit: [{
 			hooks: [{
 				type:          "command"
-				command:       "/home/_404/src/contract.cuemod/bin/dotfiles-agent-context-hook"
+				command:       ".codex/skills/resolve-agent-context/scripts/dotfiles-agent-context-hook"
 				timeout:       10
 				statusMessage: "Routing dotfiles capability context"
 			}]
@@ -408,8 +415,105 @@ codexSkill: """
 	- Cite returned evidence IDs with exact paths and lines.
 	- Treat hook candidates as hints, never authority.
 	- Do not invoke `cue cmd` directly or hand-write temporary CUE input.
-	- Use `/home/_404/src/contract.cuemod/bin/resolve-agent-context` only as an explicitly reported Stage 2 fallback when the CUE MCP server is unavailable.
+	- Use `.codex/skills/resolve-agent-context/scripts/resolve-agent-context` only as an explicitly reported Stage 2 fallback when the CUE MCP server is unavailable.
 	- Do not infer source/generated boundaries from the hook.
 	- Do not edit generated `.codex/hooks.json` or `.codex/skills/*`; regenerate them from `contract.cuemod`.
 	- Run validation commands only when `validation.required` is `true`.
 	"""
+
+agentContextHookScript: agentskill.#ScriptAsset & {
+	path:       ".codex/skills/resolve-agent-context/scripts/dotfiles-agent-context-hook"
+	executable: true
+	provenance: agentSkillProvenance
+	content: """
+		#!/bin/sh
+		set -eu
+
+		contract_root=${DOTFILES_CONTRACT_ROOT:-/home/_404/src/contract.cuemod}
+		input_json=$(mktemp "${TMPDIR:-/tmp}/dotfiles-agent-context.XXXXXX.json")
+		wrapped_json=$(mktemp "${TMPDIR:-/tmp}/dotfiles-agent-context-wrapped.XXXXXX.json")
+
+		cleanup() {
+			rm -f "$input_json" "$wrapped_json"
+		}
+		trap cleanup EXIT HUP INT TERM
+
+		cat >"$input_json"
+		jq -c '{hookInput: .}' "$input_json" >"$wrapped_json"
+
+		cd "$contract_root"
+		cue export . dotfiles.schema-map.json "$wrapped_json" -e userPromptHookOutput
+		"""
+}
+
+resolveAgentContextScript: agentskill.#ScriptAsset & {
+	path:       ".codex/skills/resolve-agent-context/scripts/resolve-agent-context"
+	executable: true
+	provenance: agentSkillProvenance
+	content: """
+		#!/bin/sh
+		set -eu
+
+		contract_root=${DOTFILES_CONTRACT_ROOT:-/home/_404/src/contract.cuemod}
+		prompt=
+		cwd=$PWD
+		candidates_json='[]'
+
+		while [ "$#" -gt 0 ]; do
+			case $1 in
+			--prompt)
+				[ "$#" -ge 2 ] || {
+					printf 'resolve-agent-context: --prompt requires a value\\n' >&2
+					exit 2
+				}
+				prompt=$2
+				shift 2
+				;;
+			--cwd)
+				[ "$#" -ge 2 ] || {
+					printf 'resolve-agent-context: --cwd requires a value\\n' >&2
+					exit 2
+				}
+				cwd=$2
+				shift 2
+				;;
+			--candidate)
+				[ "$#" -ge 2 ] || {
+					printf 'resolve-agent-context: --candidate requires a value\\n' >&2
+					exit 2
+				}
+				candidates_json=$(jq -c --arg candidate "$2" '. + [$candidate]' <<EOF
+		$candidates_json
+		EOF
+		)
+				shift 2
+				;;
+			*)
+				printf 'resolve-agent-context: unknown argument: %s\\n' "$1" >&2
+				exit 2
+				;;
+			esac
+		done
+
+		[ -n "$prompt" ] || {
+			printf 'resolve-agent-context: --prompt is required\\n' >&2
+			exit 2
+		}
+
+		input_json=$(mktemp "${TMPDIR:-/tmp}/resolve-agent-context.XXXXXX.json")
+		cleanup() {
+			rm -f "$input_json"
+		}
+		trap cleanup EXIT HUP INT TERM
+
+		jq -n \\
+			--arg prompt "$prompt" \\
+			--arg cwd "$cwd" \\
+			--argjson candidates "$candidates_json" \\
+			'{resolverInput: {prompt: $prompt, cwd: $cwd, candidateCapabilities: $candidates}}' \\
+			>"$input_json"
+
+		cd "$contract_root"
+		cue export . dotfiles.schema-map.json "$input_json" -e agentContextProjection
+		"""
+}

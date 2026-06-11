@@ -75,6 +75,8 @@ import "github.com/fatb4f/contract.cuemod/contracts/graph"
 		capability: "references" | "diagnostics" | "validate"
 		evidence:   graph.#Evidence
 	}
+
+	result?: _
 })
 
 #EvidenceResult: #MCPResult & {

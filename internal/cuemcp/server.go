@@ -17,6 +17,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/fatb4f/contract.cuemod/runtime/internal/mcpcontract"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
@@ -165,24 +166,50 @@ func (r *Runtime) handleResolve(ctx context.Context, request mcp.CallToolRequest
 	if err != nil {
 		return toolError(err), nil
 	}
-	return jsonResult(map[string]any{
-		"schema":        "agent.resolve-context.response.v1",
-		"projection_id": record.ID,
-		"envelope":      record.Envelope,
-		"projection":    projection,
+	return r.validatedResult(ctx, "#ResolveAgentContextMCPResult", mcpcontract.Result{
+		ProviderID: "df:provider/cue-lsp-mcp",
+		ContractID: "df:contract/mcp-provider-authority",
+		Provider: mcpcontract.Provider{
+			Kind:      "cue-lsp",
+			Protocol:  "lsp-over-mcp",
+			Authority: "cue-graph",
+		},
+		Capability: "validate",
+		Claim: mcpcontract.Claim{
+			Kind: "context-projection",
+		},
+		Result: map[string]any{
+			"schema":        "agent.resolve-context.response.v1",
+			"projection_id": record.ID,
+			"envelope":      record.Envelope,
+			"projection":    projection,
+		},
 	}), nil
 }
 
-func (r *Runtime) handleLookup(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (r *Runtime) handleLookup(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	id, _ := request.Params.Arguments["projection_id"].(string)
 	record, ok := r.lookup(id)
 	if !ok {
 		return jsonResult(searchError("projection_not_found", "Projection is not available in this MCP session.", id, map[string]any{})), nil
 	}
-	return jsonResult(map[string]any{
-		"schema":        "agent.projection-lookup.response.v1",
-		"projection_id": record.ID,
-		"envelope":      record.Envelope,
+	return r.validatedResult(ctx, "#ProjectionLookupMCPResult", mcpcontract.Result{
+		ProviderID: "df:provider/cue-lsp-mcp",
+		ContractID: "df:contract/mcp-provider-authority",
+		Provider: mcpcontract.Provider{
+			Kind:      "cue-lsp",
+			Protocol:  "lsp-over-mcp",
+			Authority: "cue-graph",
+		},
+		Capability: "definition",
+		Claim: mcpcontract.Claim{
+			Kind: "projection-lookup",
+		},
+		Result: map[string]any{
+			"schema":        "agent.projection-lookup.response.v1",
+			"projection_id": record.ID,
+			"envelope":      record.Envelope,
+		},
 	}), nil
 }
 
@@ -198,7 +225,20 @@ func (r *Runtime) handleListProviders(ctx context.Context, _ mcp.CallToolRequest
 	if err := r.cueVet(ctx, "#SemanticProvidersResponse", value); err != nil {
 		return toolError(err), nil
 	}
-	return jsonResult(value), nil
+	return r.validatedResult(ctx, "#SemanticProvidersMCPResult", mcpcontract.Result{
+		ProviderID: "df:provider/cue-lsp-mcp",
+		ContractID: "df:contract/mcp-provider-authority",
+		Provider: mcpcontract.Provider{
+			Kind:      "cue-lsp",
+			Protocol:  "lsp-over-mcp",
+			Authority: "cue-graph",
+		},
+		Capability: "definition",
+		Claim: mcpcontract.Claim{
+			Kind: "provider-catalog",
+		},
+		Result: value,
+	}), nil
 }
 
 func (r *Runtime) handleSearch(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -210,7 +250,20 @@ func (r *Runtime) handleSearch(ctx context.Context, request mcp.CallToolRequest)
 	if searchErr != nil {
 		return jsonResult(searchErr), nil
 	}
-	return jsonResult(result), nil
+	return r.validatedResult(ctx, "#SearchImplementationMCPResult", mcpcontract.Result{
+		ProviderID: "df:provider/cue-rg-mcp",
+		ContractID: "df:contract/mcp-provider-authority",
+		Provider: mcpcontract.Provider{
+			Kind:      "cue-rg",
+			Protocol:  "mcp-tool",
+			Authority: "bounded-text-evidence",
+		},
+		Capability: "search",
+		Claim: mcpcontract.Claim{
+			Kind: "bounded-text-evidence",
+		},
+		Result: result,
+	}), nil
 }
 
 func (r *Runtime) handleValidate(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -237,7 +290,24 @@ func (r *Runtime) handleValidate(ctx context.Context, request mcp.CallToolReques
 	if err := r.cueVet(ctx, "#ProjectionLookupResponse", value); err != nil {
 		return toolError(err), nil
 	}
-	return jsonResult(map[string]any{"schema": "agent.validate-projection.response.v1", "projection_id": id, "valid": true}), nil
+	return r.validatedResult(ctx, "#ValidateProjectionMCPResult", mcpcontract.Result{
+		ProviderID: "df:provider/cue-lsp-mcp",
+		ContractID: "df:contract/mcp-provider-authority",
+		Provider: mcpcontract.Provider{
+			Kind:      "cue-lsp",
+			Protocol:  "lsp-over-mcp",
+			Authority: "cue-graph",
+		},
+		Capability: "validate",
+		Claim: mcpcontract.Claim{
+			Kind: "projection-validation",
+		},
+		Result: map[string]any{
+			"schema":        "agent.validate-projection.response.v1",
+			"projection_id": id,
+			"valid":         true,
+		},
+	}), nil
 }
 
 func (r *Runtime) Resolve(ctx context.Context, input resolveInput) (projectionRecord, map[string]any, error) {
@@ -436,6 +506,13 @@ func (r *Runtime) cueVet(ctx context.Context, definition string, value any) erro
 		return fmt.Errorf("cue vet %s: %w: %s", definition, err, strings.TrimSpace(string(data)))
 	}
 	return nil
+}
+
+func (r *Runtime) validatedResult(ctx context.Context, definition string, value mcpcontract.Result) *mcp.CallToolResult {
+	if err := mcpcontract.Validate(ctx, r.root, definition, value); err != nil {
+		return toolError(err)
+	}
+	return jsonResult(value)
 }
 
 func writeTempJSON(value any) (string, func(), error) {

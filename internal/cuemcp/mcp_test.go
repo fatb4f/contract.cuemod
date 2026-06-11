@@ -57,7 +57,8 @@ func TestMCPResolveThenSearch(t *testing.T) {
 	if err := json.Unmarshal([]byte(resultText(t, providerResult)), &providerCatalog); err != nil {
 		t.Fatal(err)
 	}
-	if providerCatalog["schema"] != "agent.semantic-providers.response.v1" {
+	providerPayload := providerCatalog["result"].(map[string]any)
+	if providerPayload["schema"] != "agent.semantic-providers.response.v1" {
 		t.Fatalf("provider catalog = %#v", providerCatalog)
 	}
 
@@ -76,12 +77,13 @@ func TestMCPResolveThenSearch(t *testing.T) {
 	if err := json.Unmarshal([]byte(resultText(t, resolveResult)), &resolved); err != nil {
 		t.Fatal(err)
 	}
+	resolvedPayload := resolved["result"].(map[string]any)
 
 	search := mcp.CallToolRequest{}
 	search.Params.Name = "search_implementation"
 	search.Params.Arguments = map[string]any{
 		"schema":        "agent.search-implementation.request.v1",
-		"projection_id": resolved["projection_id"],
+		"projection_id": resolvedPayload["projection_id"],
 		"artifact_ids":  []string{"df:artifact/wezterm-smart-splits-lua"},
 		"intent":        "determine whether sessionizer uses smart-splits for workspace switching",
 		"terms":         []string{"IS_NVIM", "ActivatePaneDirection", "AdjustPaneSize"},
@@ -95,10 +97,11 @@ func TestMCPResolveThenSearch(t *testing.T) {
 	if err := json.Unmarshal([]byte(resultText(t, searchResult)), &searched); err != nil {
 		t.Fatal(err)
 	}
-	if searched["schema"] != "agent.search-implementation.response.v1" {
+	searchedPayload := searched["result"].(map[string]any)
+	if searchedPayload["schema"] != "agent.search-implementation.response.v1" {
 		t.Fatalf("search outcome = %#v", searched)
 	}
-	execution := searched["execution"].(map[string]any)
+	execution := searchedPayload["execution"].(map[string]any)
 	if execution["shell"] != false {
 		t.Fatalf("shell = %v, want false", execution["shell"])
 	}

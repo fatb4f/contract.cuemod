@@ -1,6 +1,12 @@
 package workspace
 
-import "list"
+import (
+	providercontract "github.com/fatb4f/contract.cuemod/contracts/providers"
+	cuelsp "github.com/fatb4f/contract.cuemod/providers/cue-lsp:cuelsp"
+	cuerg "github.com/fatb4f/contract.cuemod/providers/cue-rg:cuerg"
+	lualsp "github.com/fatb4f/contract.cuemod/providers/lua-lsp:lualsp"
+	"list"
+)
 
 #ProjectionID:       string & =~"^sha256:[0-9a-f]{64}$"
 #EvidenceID:         string & =~"^ev_[a-z2-7]{16}$"
@@ -8,52 +14,16 @@ import "list"
 #SearchRelativePath: string & !~"^/" & !~"(^|/)\\.\\.(/|$)"
 #GraphID:            string & =~"^df:[a-z]+/[a-z0-9._-]+$"
 
-#ProviderID:
-	"df:provider/cue-rg-mcp" |
-	"df:provider/cue-lsp-mcp" |
-	"df:provider/lua-lsp-mcp"
-
-#Provider: close({
-	id:      #ProviderID
-	kind:    "cue-search" | "cue-lsp" | "lua-lsp"
-	plane:   "evidence" | "contract-semantics" | "implementation-semantics"
-	adapter: "native-mcp" | "lsp-backed-mcp"
-	server?: string
-	type_libraries?: [...string & !=""]
-	capabilities: [...string & !=""] & [_, ...]
-})
-
-stage3Providers: [#ProviderID]: #Provider
+stage3Providers: [string]: providercontract.#TypedProvider
 stage3Providers: {
-	"df:provider/cue-rg-mcp": {
-		id:      "df:provider/cue-rg-mcp"
-		kind:    "cue-search"
-		plane:   "evidence"
-		adapter: "native-mcp"
-		capabilities: ["search", "bounded-rg", "artifact-filter", "raw-evidence"]
-	}
-	"df:provider/cue-lsp-mcp": {
-		id:      "df:provider/cue-lsp-mcp"
-		kind:    "cue-lsp"
-		plane:   "contract-semantics"
-		adapter: "lsp-backed-mcp"
-		server:  "cue lsp"
-		capabilities: ["definition", "references", "hover", "diagnostics", "document-symbols"]
-	}
-	"df:provider/lua-lsp-mcp": {
-		id:      "df:provider/lua-lsp-mcp"
-		kind:    "lua-lsp"
-		plane:   "implementation-semantics"
-		adapter: "lsp-backed-mcp"
-		server:  "lua-language-server"
-		type_libraries: ["wezterm-types"]
-		capabilities: ["definition", "references", "hover", "diagnostics", "document-symbols"]
-	}
+	"df:provider/cue-rg-mcp":  cuerg.provider
+	"df:provider/cue-lsp-mcp": cuelsp.provider
+	"df:provider/lua-lsp-mcp": lualsp.provider
 }
 
 #SemanticProvidersResponse: close({
 	schema: "agent.semantic-providers.response.v1"
-	providers: [#ProviderID]: #Provider
+	providers: [string]: providercontract.#TypedProvider
 })
 
 #SearchRejectionCode:
@@ -97,6 +67,19 @@ stage3Providers: {
 	schema:        "agent.projection-lookup.response.v1"
 	projection_id: #ProjectionID
 	envelope:      #ProjectionEnvelope
+})
+
+#ResolveAgentContextResponse: close({
+	schema:        "agent.resolve-context.response.v1"
+	projection_id: #ProjectionID
+	envelope:      #ProjectionEnvelope
+	projection:    #AgentContextProjection
+})
+
+#ValidateProjectionResponse: close({
+	schema:        "agent.validate-projection.response.v1"
+	projection_id: #ProjectionID
+	valid:         true
 })
 
 #SearchPolicy: close({

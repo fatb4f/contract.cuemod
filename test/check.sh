@@ -10,6 +10,7 @@ cue vet ./contracts/mcp
 cue vet ./contracts/providers
 cue vet ./contracts/resolver
 cue vet ./contracts/validation
+cue vet ./contracts/agent-skill
 cue vet ./contract/vcs
 cue export ./contract/vcs >/dev/null
 cue vet ./providers/cue-lsp
@@ -18,10 +19,15 @@ cue vet ./providers/lua-lsp
 cue vet ./providers/chezmoi
 cue vet ./adapters/git-mcp-go
 cue vet ./projections/stage3
+cue vet ./projections/agent-skill
 cue vet ./fixtures/mcp/valid
+cue vet ./fixtures/mcp/adapter-output
+cue vet ./fixtures/agent-skill/valid
 cue vet ./fixtures/vcs/valid
 cue vet ./fixtures/resolver/workspace-lifecycle
 cue vet ./migration
+
+./test/agent-context-hook.sh
 
 if find adapters/git-mcp-go/source -name .git -print -quit | grep -q .; then
 	printf '%s\n' "managed git-mcp-go adapter contains nested Git metadata" >&2
@@ -37,6 +43,23 @@ if cue vet ./fixtures/mcp/invalid-direct >/dev/null 2>&1; then
 	printf '%s\n' "invalid direct artifact access unexpectedly passed" >&2
 	exit 1
 fi
+
+if cue vet ./fixtures/mcp/invalid-adapter-output >/dev/null 2>&1; then
+	printf '%s\n' "invalid MCP adapter output unexpectedly passed" >&2
+	exit 1
+fi
+
+for invalid_fixture in \
+	./fixtures/agent-skill/invalid \
+	./fixtures/mcp/invalid-authority \
+	./fixtures/mcp/invalid-capability \
+	./fixtures/mcp/invalid-complete
+do
+	if cue vet "$invalid_fixture" >/dev/null 2>&1; then
+		printf '%s\n' "$invalid_fixture unexpectedly passed" >&2
+		exit 1
+	fi
+done
 
 if cue vet ./fixtures/vcs/invalid-unpushed >/dev/null 2>&1; then
 	printf '%s\n' "unpushed mutation turn unexpectedly passed" >&2
