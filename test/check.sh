@@ -11,6 +11,7 @@ cue vet ./contracts/providers
 cue vet ./contracts/resolver
 cue vet ./contracts/validation
 cue vet ./contracts/agent-skill
+cue vet ./contracts/repo
 cue vet ./contract/vcs
 cue export ./contract/vcs >/dev/null
 cue vet ./providers/cue-lsp
@@ -20,6 +21,9 @@ cue vet ./providers/chezmoi
 cue vet ./adapters/git-mcp-go
 cue vet ./projections/stage3
 cue vet ./projections/agent-skill
+cue vet ./projections/repo
+cue export ./projections/repo -e manifest >/dev/null
+cue export ./projections/repo -e inventory >/dev/null
 cue vet ./fixtures/mcp/valid
 cue vet ./fixtures/mcp/adapter-output
 cue vet ./fixtures/agent-skill/valid
@@ -28,6 +32,7 @@ cue vet ./fixtures/resolver/workspace-lifecycle
 cue vet ./migration
 
 ./test/agent-context-hook.sh
+./test/repo-layout.sh
 
 if find adapters/git-mcp-go/source -name .git -print -quit | grep -q .; then
 	printf '%s\n' "managed git-mcp-go adapter contains nested Git metadata" >&2

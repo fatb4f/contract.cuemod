@@ -10,10 +10,10 @@ adapter: adapters.#ManagedAdapter & {
 
 	source: {
 		repository: "https://github.com/fatb4f/git-mcp-go"
-		forkOf:    "https://github.com/geropl/git-mcp-go"
-		branch:    "worktree-v0"
-		revision:  "5e951b4acae146d70c57e8feb6495046c477782b"
-		archive:   "https://github.com/fatb4f/git-mcp-go/archive/5e951b4acae146d70c57e8feb6495046c477782b.tar.gz"
+		forkOf:     "https://github.com/geropl/git-mcp-go"
+		branch:     "worktree-v0"
+		revision:   "5e951b4acae146d70c57e8feb6495046c477782b"
+		archive:    "https://github.com/fatb4f/git-mcp-go/archive/5e951b4acae146d70c57e8feb6495046c477782b.tar.gz"
 	}
 
 	materialization: {
@@ -21,7 +21,19 @@ adapter: adapters.#ManagedAdapter & {
 		nestedGit:        false
 		updateStrategy:   "replace-source-snapshot"
 		preserveUpstream: true
+		allowedChanges: [
+			"AGENTS.cue",
+		]
+		forbiddenMetadata: [
+			".git",
+		]
 	}
+
+	contractBoundary: "contracts/adapters"
+	validatesWith: [
+		"cue vet ./adapters/git-mcp-go",
+		"go test ./adapters/git-mcp-go/source/...",
+	]
 
 	runtime: {
 		language:   "go"

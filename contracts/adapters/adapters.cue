@@ -20,7 +20,12 @@ package adapters
 		nestedGit:        false
 		updateStrategy:   "replace-source-snapshot"
 		preserveUpstream: true
+		allowedChanges: [...string]
+		forbiddenMetadata: [...string & !=""] & [_, ...]
 	})
+
+	contractBoundary: string & !=""
+	validatesWith: [...string & !=""] & [_, ...]
 
 	runtime: close({
 		language:   "go"
