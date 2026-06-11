@@ -10,6 +10,8 @@ cue vet ./contracts/mcp
 cue vet ./contracts/providers
 cue vet ./contracts/resolver
 cue vet ./contracts/validation
+cue vet ./contract/vcs
+cue export ./contract/vcs >/dev/null
 cue vet ./providers/cue-lsp
 cue vet ./providers/cue-rg
 cue vet ./providers/lua-lsp
@@ -17,6 +19,7 @@ cue vet ./providers/chezmoi
 cue vet ./adapters/git-mcp-go
 cue vet ./projections/stage3
 cue vet ./fixtures/mcp/valid
+cue vet ./fixtures/vcs/valid
 cue vet ./fixtures/resolver/workspace-lifecycle
 cue vet ./migration
 
@@ -32,6 +35,11 @@ fi
 
 if cue vet ./fixtures/mcp/invalid-direct >/dev/null 2>&1; then
 	printf '%s\n' "invalid direct artifact access unexpectedly passed" >&2
+	exit 1
+fi
+
+if cue vet ./fixtures/vcs/invalid-unpushed >/dev/null 2>&1; then
+	printf '%s\n' "unpushed mutation turn unexpectedly passed" >&2
 	exit 1
 fi
 
