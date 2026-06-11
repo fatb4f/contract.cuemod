@@ -110,15 +110,20 @@ func (GitSnapshotStore) Capture(
 	snapshot.Coverage[SurfaceHead] = CoverageComplete
 	snapshot.Coverage[SurfaceRefs] = CoverageComplete
 	if required(SurfaceIndex) {
+		indexTree, err := git(ctx, repo.Root(), "write-tree")
+		if err != nil {
+			return Snapshot{}, err
+		}
 		index, err := git(ctx, repo.Root(), "diff", "--cached", "--binary")
 		if err != nil {
 			return Snapshot{}, err
 		}
+		snapshot.IndexTreeOID = indexTree
 		snapshot.IndexArtifact = index
 		snapshot.Coverage[SurfaceIndex] = CoverageComplete
 	}
 	if required(SurfaceWorktree) {
-		worktree, err := git(ctx, repo.Root(), "diff", "--binary")
+		worktree, err := git(ctx, repo.Root(), "diff", "HEAD", "--binary")
 		if err != nil {
 			return Snapshot{}, err
 		}
@@ -137,7 +142,10 @@ func (GitSnapshotStore) Capture(
 		snapshot.Coverage[SurfaceAdapterArtifacts] = CoverageComplete
 	}
 	if required(SurfaceOperationInput) {
-		snapshot.Operation = "captured by transaction request"
+		if policy.OperationInput == "" {
+			return Snapshot{}, errors.New("operation input snapshot is required")
+		}
+		snapshot.Operation = policy.OperationInput
 		snapshot.Coverage[SurfaceOperationInput] = CoverageComplete
 	}
 	return snapshot, nil

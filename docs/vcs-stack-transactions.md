@@ -143,3 +143,17 @@ they cover every rollback class and degraded recovery.
 recovery cannot validate for an index rollback. `test/check.sh` requires that
 fixture to fail. `fixtures/vcs/invalid-missing-transaction-policy` similarly
 proves that a stack mutator cannot validate without a transaction policy.
+
+## Transactional Staging
+
+The `stack_stage` MCP tool implements `stack.stage` as an index-only
+transaction. Requests identify the active patch and list exact
+repository-relative paths. An optional unified patch selects hunks while still
+constraining the resulting index delta to those paths.
+
+Before mutation, the runner records the current index tree, the complete
+worktree diff against `HEAD`, untracked paths, refs, and serialized operation
+input. Postflight requires an index delta, rejects changes outside the selected
+paths, and proves that tracked worktree content and untracked paths were
+preserved. Mutation or postflight failure restores the recorded index tree with
+an `index_only` rollback and emits rollback and diagnostic evidence.

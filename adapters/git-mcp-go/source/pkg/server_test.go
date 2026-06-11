@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -12,6 +13,7 @@ import (
 	"github.com/geropl/git-mcp-go/pkg/gitops"
 	"github.com/geropl/git-mcp-go/pkg/gitops/gogit"
 	"github.com/geropl/git-mcp-go/pkg/gitops/shell"
+	"github.com/geropl/git-mcp-go/pkg/transaction"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/stretchr/testify/require"
 )
@@ -35,6 +37,42 @@ func initRepos(t *testing.T, remoteDir, localDir string) {
 	cmd = exec.Command("git", "config", "user.email", "test@example.com")
 	cmd.Dir = localDir
 	require.NoError(t, cmd.Run())
+}
+
+func TestStackStageHandlerRunsTransaction(t *testing.T) {
+	for _, mode := range []string{"shell", "go-git"} {
+		t.Run(mode, func(t *testing.T) {
+			repoDir := t.TempDir()
+			initRepoWithCommit(t, repoDir)
+			require.NoError(t, os.WriteFile(filepath.Join(repoDir, "test.txt"), []byte("changed\n"), 0o644))
+
+			gitServer := NewGitServer([]string{repoDir}, gitOperationsForMode(t, mode), false)
+			gitServer.RegisterTools()
+			request := mcp.CallToolRequest{}
+			request.Params.Name = "stack_stage"
+			request.Params.Arguments = map[string]interface{}{
+				"repo_path":       repoDir,
+				"active_patch_id": "patch-1",
+				"paths":           "test.txt",
+			}
+			result, err := gitServer.stackStageHandler(context.Background(), request)
+			responseText := callToolText(t, result, err)
+			var response transaction.StageResponse
+			require.NoError(t, json.Unmarshal([]byte(responseText), &response))
+			require.True(t, response.Transaction.OK)
+			require.Equal(t, transaction.StateCommitted, response.Transaction.State)
+			require.Equal(t, []string{"test.txt"}, response.StagedPaths)
+			require.NotEmpty(t, response.Transaction.Evidence)
+			require.FileExists(t, filepath.Join(
+				repoDir, ".git", "git-mcp-transactions",
+				response.Transaction.TransactionID, "transaction.json",
+			))
+			require.Equal(t, "test.txt", gitOutput(t, repoDir, "diff", "--cached", "--name-only"))
+			content, err := os.ReadFile(filepath.Join(repoDir, "test.txt"))
+			require.NoError(t, err)
+			require.Equal(t, "changed", strings.TrimSpace(string(content)))
+		})
+	}
 }
 
 // createCommit creates a file and commits it

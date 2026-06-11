@@ -299,7 +299,7 @@ func TestGitObserverAndSnapshotCaptureRepositoryState(t *testing.T) {
 		Policy{RequiredSnapshots: []Surface{
 			SurfaceHead, SurfaceRefs, SurfaceIndex, SurfaceWorktree,
 			SurfaceUntracked, SurfaceConflictState, SurfaceAdapterArtifacts, SurfaceOperationInput,
-		}},
+		}, OperationInput: `{"command":"test"}`},
 	)
 	if err != nil {
 		t.Fatalf("Capture() error = %v", err)

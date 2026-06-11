@@ -126,6 +126,7 @@ type Snapshot struct {
 	HeadOID       string
 	HeadRef       string
 	Refs          map[string]string
+	IndexTreeOID  string
 	IndexArtifact string
 	WorktreePatch string
 	Untracked     []string
@@ -156,10 +157,10 @@ type JournalEntry struct {
 }
 
 type EvidenceRef struct {
-	TransactionID string
-	Kind          string
-	URI           string
-	Immutable     bool
+	TransactionID string `json:"transactionID"`
+	Kind          string `json:"kind"`
+	URI           string `json:"uri"`
+	Immutable     bool   `json:"immutable"`
 }
 
 type RecoveryReport struct {
@@ -188,6 +189,7 @@ type Policy struct {
 	RequiredSnapshots      []Surface
 	AllowedRollbackClasses []RollbackClass
 	UntrackedPolicy        string
+	OperationInput         string
 }
 
 type Request struct {

@@ -31,6 +31,23 @@ package vcs
 	"evidence.seal" |
 	"evidence.inspect"
 
+#StackStageRequest: close({
+	activePatchID: string & !=""
+	paths: [string & !="", ...(string & !="")]
+	hunkPatch?: string & !=""
+})
+
+#StackStageResponse: close({
+	transaction: close({
+		transactionID: string & !=""
+		command:       "stack.stage"
+		state:         "committed"
+		ok:            true
+		evidence: [#EvidenceRef, ...#EvidenceRef]
+	})
+	stagedPaths: [string & !="", ...(string & !="")]
+})
+
 #SkillOperation: close({
 	id:          #PublicOperationID
 	class:       #SkillOperationClass

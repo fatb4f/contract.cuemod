@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -9,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/geropl/git-mcp-go/pkg/gitops"
+	"github.com/geropl/git-mcp-go/pkg/transaction"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
@@ -169,6 +171,7 @@ func GetLocalOnlyToolNames() map[string]bool {
 		"git_revert":          true,
 		"git_add":             true,
 		"git_reset":           true,
+		"stack_stage":         true,
 		"git_worktree_add":    true,
 		"git_worktree_remove": true,
 		"git_worktree_prune":  true,
@@ -346,6 +349,26 @@ func (s *GitServer) RegisterTools() {
 		),
 	)
 	s.server.AddTool(resetTool, s.gitResetHandler)
+
+	stackStageTool := mcp.NewTool("stack_stage",
+		mcp.WithDescription("Stages selected paths or hunks through the stack transaction runner"),
+		mcp.WithString("repo_path",
+			mcp.Required(),
+			mcp.Description("Path to Git repository"),
+		),
+		mcp.WithString("active_patch_id",
+			mcp.Required(),
+			mcp.Description("Stable identity of the active patch"),
+		),
+		mcp.WithString("paths",
+			mcp.Required(),
+			mcp.Description("Comma-separated exact repository-relative paths"),
+		),
+		mcp.WithString("hunk_patch",
+			mcp.Description("Optional unified patch to apply to the index only"),
+		),
+	)
+	s.server.AddTool(stackStageTool, s.stackStageHandler)
 
 	// Register git_log tool
 	logTool := mcp.NewTool("git_log",
@@ -717,6 +740,62 @@ func (s *GitServer) gitResetHandler(ctx context.Context, request mcp.CallToolReq
 	}
 
 	return mcp.NewToolResultText(result), nil
+}
+
+func (s *GitServer) stackStageHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	requestedPath, _ := request.Params.Arguments["repo_path"].(string)
+	repoPath, err := s.getRepoPathForOperation(requestedPath)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Repository path error: %v", err)), nil
+	}
+	activePatchID, _ := request.Params.Arguments["active_patch_id"].(string)
+	pathList, _ := request.Params.Arguments["paths"].(string)
+	hunkPatch, _ := request.Params.Arguments["hunk_patch"].(string)
+
+	stageRequest, err := transaction.NewStageTransactionRequest(s.gitOps, transaction.StageRequest{
+		ActivePatchID: activePatchID,
+		Paths:         splitCommaList(pathList),
+		HunkPatch:     hunkPatch,
+	})
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Invalid stack.stage request: %v", err)), nil
+	}
+	artifactRoot := filepath.Join(repoPath, ".git", "git-mcp-transactions")
+	runner := transaction.NewRunner(
+		transaction.LocalRepository(repoPath),
+		transaction.GitObserver{StackRefPrefixes: []string{"refs/heads", "refs/stack"}},
+		transaction.GitSnapshotStore{},
+		&transaction.JSONLJournalStore{Root: artifactRoot},
+		transaction.Dispatcher{Handlers: map[transaction.RollbackClass]transaction.RollbackHandler{
+			transaction.RollbackIndexOnly: transaction.IndexSnapshotRollback{},
+		}},
+		transaction.DirectoryEvidenceEmitter{Root: artifactRoot},
+	)
+	result, runErr := runner.Run(ctx, stageRequest)
+	if runErr != nil {
+		encoded, _ := json.Marshal(result)
+		return mcp.NewToolResultError(fmt.Sprintf("stack.stage failed: %v\n%s", runErr, encoded)), nil
+	}
+	stagedPaths, err := transaction.StagedPaths(ctx, transaction.LocalRepository(repoPath), result.Snapshot.IndexTreeOID)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Read staged paths: %v", err)), nil
+	}
+	encoded, err := json.Marshal(transaction.NewStageResponse(result, stagedPaths))
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Encode stack.stage response: %v", err)), nil
+	}
+	return mcp.NewToolResultText(string(encoded)), nil
+}
+
+func splitCommaList(value string) []string {
+	parts := strings.Split(value, ",")
+	result := make([]string, 0, len(parts))
+	for _, part := range parts {
+		if trimmed := strings.TrimSpace(part); trimmed != "" {
+			result = append(result, trimmed)
+		}
+	}
+	return result
 }
 
 func (s *GitServer) gitLogHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
