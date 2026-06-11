@@ -1,0 +1,63 @@
+{
+  "schema": "agent.search-implementation.response.v1",
+  "projection_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "execution": {
+    "backend": "rg",
+    "backend_version": "ripgrep 14.1.1",
+    "argv": [
+      "rg",
+      "--json",
+      "mux",
+      "chezmoi/private_dot_config/wezterm"
+    ],
+    "searched_paths": [
+      "chezmoi/private_dot_config/wezterm"
+    ],
+    "shell": false
+  },
+  "pagination": {
+    "result_limit": 1,
+    "returned": 2,
+    "truncated": false,
+    "next_cursor": null
+  },
+  "ordering": {
+    "policy": "agent.ranking-policy.v1",
+    "sort": [
+      "rank_tuple desc",
+      "path asc",
+      "line asc",
+      "id asc"
+    ]
+  },
+  "results": [
+    {
+      "id": "ev_aaaaaaaaaaaaaaaa",
+      "rank_tuple": [
+        0.9,
+        1,
+        0
+      ],
+      "kind": "entrypoint",
+      "path": "a.lua",
+      "line": 1,
+      "column": 1,
+      "matched_text": "mux",
+      "reason": "first result"
+    },
+    {
+      "id": "ev_bbbbbbbbbbbbbbbb",
+      "rank_tuple": [
+        0.8,
+        1,
+        0
+      ],
+      "kind": "related_component",
+      "path": "b.lua",
+      "line": 2,
+      "column": 1,
+      "matched_text": "mux",
+      "reason": "second result"
+    }
+  ]
+}

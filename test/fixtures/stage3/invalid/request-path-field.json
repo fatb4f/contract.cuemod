@@ -1,0 +1,8 @@
+{
+  "schema": "agent.search-implementation.request.v1",
+  "projection_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "intent": "escape the projected search scope",
+  "terms": ["mux"],
+  "result_limit": 10,
+  "path": "../secrets"
+}

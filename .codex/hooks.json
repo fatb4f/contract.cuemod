@@ -1,0 +1,16 @@
+{
+    "hooks": {
+        "UserPromptSubmit": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "/home/_404/src/contract.cuemod/bin/dotfiles-agent-context-hook",
+                        "timeout": 10,
+                        "statusMessage": "Routing dotfiles capability context"
+                    }
+                ]
+            }
+        ]
+    }
+}

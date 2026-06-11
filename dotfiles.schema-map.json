@@ -1,0 +1,1322 @@
+{
+  "version": "dotfiles.schema-map.v1",
+  "repository": {
+    "id": "dotfiles",
+    "root": "/home/_404/src/dotfiles",
+    "kind": "polyglot-dotfiles",
+    "sourceOfTruth": "live-implementation",
+    "languages": [
+      "lua",
+      "shell",
+      "bash",
+      "yaml",
+      "chezmoi-template"
+    ],
+    "instructionBoundaries": [
+      {
+        "path": "shell-wrap/AGENTS.md",
+        "scope": "shell-wrap"
+      }
+    ]
+  },
+  "domains": {
+    "repository": {
+      "id": "repository",
+      "title": "dotfiles repository",
+      "root": ".",
+      "kind": "repository",
+      "languages": [
+        "lua",
+        "shell",
+        "bash",
+        "yaml",
+        "chezmoi-template"
+      ],
+      "owns": [
+        "cross-domain implementation",
+        "repository-level capability composition"
+      ]
+    },
+    "chezmoi": {
+      "id": "chezmoi",
+      "title": "chezmoi source state",
+      "root": "chezmoi",
+      "kind": "materializer",
+      "languages": [
+        "lua",
+        "shell",
+        "chezmoi-template"
+      ],
+      "owns": [
+        "managed user configuration source",
+        "source-to-target materialization",
+        "desktop and terminal integration"
+      ]
+    },
+    "shell-wrap": {
+      "id": "shell-wrap",
+      "title": "shell executable source",
+      "root": "shell-wrap",
+      "kind": "executable-source",
+      "languages": [
+        "bash",
+        "yaml",
+        "bats"
+      ],
+      "instructionEntry": "shell-wrap/AGENTS.md",
+      "owns": [
+        "Bashly command definitions",
+        "session command implementation",
+        "generated shell adapter boundary",
+        "session lifecycle tests"
+      ]
+    }
+  },
+  "components": {
+    "chezmoi-materializer": {
+      "id": "chezmoi-materializer",
+      "title": "chezmoi materializer",
+      "domain": "chezmoi",
+      "kind": "materializer",
+      "root": "chezmoi",
+      "entrypoints": [
+        "chezmoi.toml.tmpl"
+      ],
+      "responsibilities": [
+        "map source state into user home targets",
+        "render templates and symlink declarations"
+      ],
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi.toml.tmpl"
+        }
+      ]
+    },
+    "wezterm-project-catalog": {
+      "id": "wezterm-project-catalog",
+      "title": "WezTerm project catalog",
+      "domain": "chezmoi",
+      "kind": "project-catalog",
+      "root": "chezmoi/private_dot_config/wezterm/modules/projects",
+      "entrypoints": [
+        "chezmoi/private_dot_config/wezterm/modules/workspaces/projects.lua"
+      ],
+      "responsibilities": [
+        "load project declarations",
+        "normalize project roots and environment",
+        "project declarations into terminal sessions",
+        "resolve sessions from filesystem paths"
+      ],
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/workspaces/projects.lua",
+          "line": 166
+        }
+      ]
+    },
+    "wezterm-sessionizer": {
+      "id": "wezterm-sessionizer",
+      "title": "WezTerm session selector",
+      "domain": "chezmoi",
+      "kind": "workspace-selector",
+      "root": "chezmoi/private_dot_config/wezterm/modules/workspaces",
+      "entrypoints": [
+        "chezmoi/private_dot_config/wezterm/modules/workspaces/sessionizer.lua"
+      ],
+      "responsibilities": [
+        "present declared and active workspaces",
+        "switch to existing sessions",
+        "spawn project workspaces with projected environment"
+      ],
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/workspaces/sessionizer.lua",
+          "line": 84
+        }
+      ]
+    },
+    "wezterm-ide-controller": {
+      "id": "wezterm-ide-controller",
+      "title": "WezTerm IDE controller",
+      "domain": "chezmoi",
+      "kind": "workspace-controller",
+      "root": "chezmoi/private_dot_config/wezterm/modules/workspaces",
+      "entrypoints": [
+        "chezmoi/private_dot_config/wezterm/modules/workspaces/controller.lua",
+        "chezmoi/private_dot_config/wezterm/modules/workspaces/events.lua",
+        "chezmoi/private_dot_config/wezterm/modules/workspaces/palette.lua"
+      ],
+      "responsibilities": [
+        "validate active project session identity",
+        "launch or focus socket-backed Neovim",
+        "launch Xplr as the project explorer",
+        "retain runtime pane references"
+      ],
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/workspaces/controller.lua",
+          "line": 77
+        },
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/workspaces/controller.lua",
+          "line": 179
+        }
+      ]
+    },
+    "wezterm-runtime-registry": {
+      "id": "wezterm-runtime-registry",
+      "title": "WezTerm runtime registry",
+      "domain": "chezmoi",
+      "kind": "runtime-cache",
+      "root": "chezmoi/private_dot_config/wezterm/modules/workspaces",
+      "entrypoints": [
+        "chezmoi/private_dot_config/wezterm/modules/workspaces/runtime.lua"
+      ],
+      "responsibilities": [
+        "cache selected sessions by workspace",
+        "cache editor and explorer pane identifiers"
+      ],
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/workspaces/runtime.lua",
+          "line": 3
+        }
+      ]
+    },
+    "xplr-project-explorer": {
+      "id": "xplr-project-explorer",
+      "title": "Xplr project explorer",
+      "domain": "chezmoi",
+      "kind": "project-explorer",
+      "root": "chezmoi/private_dot_config/xplr",
+      "entrypoints": [
+        "chezmoi/private_dot_config/xplr/init.lua"
+      ],
+      "responsibilities": [
+        "root the explorer at the active project",
+        "open selected files in the active Neovim server"
+      ],
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/xplr/init.lua",
+          "line": 3
+        },
+        {
+          "path": "chezmoi/private_dot_config/xplr/init.lua",
+          "line": 27
+        }
+      ]
+    },
+    "nvim-workspace-client": {
+      "id": "nvim-workspace-client",
+      "title": "Neovim workspace client",
+      "domain": "chezmoi",
+      "kind": "editor",
+      "root": "chezmoi/private_dot_config/nvim",
+      "entrypoints": [
+        "chezmoi/private_dot_config/nvim/init.lua",
+        "chezmoi/private_dot_config/nvim/lua/workflow/init.lua"
+      ],
+      "responsibilities": [
+        "provide the project editing surface",
+        "integrate split movement with WezTerm"
+      ],
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/nvim/lua/workflow/smart_splits.lua",
+          "line": 6
+        }
+      ]
+    },
+    "wezterm-smart-splits-adapter": {
+      "id": "wezterm-smart-splits-adapter",
+      "title": "WezTerm smart-splits adapter",
+      "domain": "chezmoi",
+      "kind": "terminal-pane-navigation-adapter",
+      "root": "chezmoi/private_dot_config/wezterm/modules",
+      "entrypoints": [
+        "chezmoi/private_dot_config/wezterm/modules/smart_splits.lua",
+        "chezmoi/private_dot_config/wezterm/wezterm.lua"
+      ],
+      "responsibilities": [
+        "route pane movement and resizing between Neovim and WezTerm",
+        "forward navigation keys into Neovim-owned panes",
+        "activate or resize native WezTerm panes"
+      ],
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/smart_splits.lua",
+          "line": 12
+        },
+        {
+          "path": "chezmoi/private_dot_config/wezterm/wezterm.lua",
+          "line": 23
+        }
+      ]
+    },
+    "nvim-smart-splits-client": {
+      "id": "nvim-smart-splits-client",
+      "title": "Neovim smart-splits client",
+      "domain": "chezmoi",
+      "kind": "editor-pane-navigation-client",
+      "root": "chezmoi/private_dot_config/nvim/lua/workflow",
+      "entrypoints": [
+        "chezmoi/private_dot_config/nvim/lua/workflow/smart_splits.lua"
+      ],
+      "responsibilities": [
+        "configure smart-splits multiplexer integration for WezTerm",
+        "bind editor split movement and resizing"
+      ],
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/nvim/lua/workflow/smart_splits.lua",
+          "line": 6
+        }
+      ]
+    },
+    "hypr-desktop-bindings": {
+      "id": "hypr-desktop-bindings",
+      "title": "Hyprland desktop bindings",
+      "domain": "chezmoi",
+      "kind": "desktop-adapter",
+      "root": "chezmoi/private_dot_config/hypr",
+      "entrypoints": [
+        "chezmoi/private_dot_config/hypr/hyprland.lua",
+        "chezmoi/private_dot_config/hypr/modules/binds.lua"
+      ],
+      "responsibilities": [
+        "launch terminal and editor surfaces",
+        "route media and brightness actions to the session CLI"
+      ],
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/hypr/modules/binds.lua",
+          "line": 7
+        },
+        {
+          "path": "chezmoi/private_dot_config/hypr/modules/binds.lua",
+          "line": 39
+        }
+      ]
+    },
+    "hypr-idle-lock-adapter": {
+      "id": "hypr-idle-lock-adapter",
+      "title": "Hypridle lock adapter",
+      "domain": "chezmoi",
+      "kind": "desktop-session-adapter",
+      "root": "chezmoi/private_dot_config/hypr",
+      "entrypoints": [
+        "chezmoi/private_dot_config/hypr/hypridle.conf"
+      ],
+      "responsibilities": [
+        "translate logind lock events into session CLI calls",
+        "invoke post-unlock cleanup",
+        "manage display power around idle and sleep"
+      ],
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/hypr/hypridle.conf",
+          "line": 1
+        }
+      ]
+    },
+    "zsh-environment-resolver": {
+      "id": "zsh-environment-resolver",
+      "title": "Zsh environment resolver",
+      "domain": "chezmoi",
+      "kind": "shell-environment",
+      "root": "chezmoi/private_dot_config/zsh",
+      "entrypoints": [
+        "chezmoi/dot_zshenv",
+        "chezmoi/private_dot_config/zsh/dot_zshenv",
+        "chezmoi/private_dot_config/zsh/zload.zsh/loader.zsh",
+        "chezmoi/private_dot_config/zsh/zload.zsh/env.zsh"
+      ],
+      "responsibilities": [
+        "establish ZDOTDIR",
+        "load the shared environment",
+        "construct PATH",
+        "import selected environment into D-Bus and systemd activation"
+      ],
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/dot_zshenv",
+          "line": 8
+        },
+        {
+          "path": "chezmoi/private_dot_config/zsh/zload.zsh/env.zsh",
+          "line": 128
+        }
+      ]
+    },
+    "session-cli-source": {
+      "id": "session-cli-source",
+      "title": "Session CLI source",
+      "domain": "shell-wrap",
+      "kind": "bashly-source",
+      "root": "shell-wrap/src/session/src",
+      "entrypoints": [
+        "shell-wrap/src/session/src/bashly.yml"
+      ],
+      "responsibilities": [
+        "declare lock, unlock, lockout, break, startup, and OSD commands",
+        "implement session command dispatch",
+        "generate the executable session adapter"
+      ],
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "shell-wrap/src/session/src/bashly.yml",
+          "line": 1
+        }
+      ]
+    },
+    "session-cli-generated": {
+      "id": "session-cli-generated",
+      "title": "Generated session CLI",
+      "domain": "shell-wrap",
+      "kind": "generated-executable",
+      "root": "shell-wrap/src/session",
+      "entrypoints": [
+        "shell-wrap/src/session/session"
+      ],
+      "responsibilities": [
+        "provide the executable session command surface"
+      ],
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "shell-wrap/src/session/session",
+          "line": 1,
+          "note": "Generated by Bashly; do not edit directly."
+        }
+      ]
+    },
+    "session-system-integration": {
+      "id": "session-system-integration",
+      "title": "Session system integration",
+      "domain": "shell-wrap",
+      "kind": "system-adapter",
+      "root": "shell-wrap/src/session/system",
+      "entrypoints": [
+        "shell-wrap/src/session/system/install-session-lockout",
+        "shell-wrap/src/session/system/check-session-lockout-install",
+        "shell-wrap/src/session/system/tomat/session-post-unlock"
+      ],
+      "responsibilities": [
+        "install and verify lockout integration",
+        "provide PAM and sudo policy examples",
+        "bridge Tomat break hooks and post-unlock behavior"
+      ],
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "shell-wrap/src/session/system/ACTIVATION.md"
+        }
+      ]
+    }
+  },
+  "artifacts": {
+    "wezterm-config-source": {
+      "id": "wezterm-config-source",
+      "domain": "chezmoi",
+      "kind": "source",
+      "path": "chezmoi/private_dot_config/wezterm",
+      "targetPath": "~/.config/wezterm",
+      "authority": "source",
+      "editable": true
+    },
+    "nvim-config-source": {
+      "id": "nvim-config-source",
+      "domain": "chezmoi",
+      "kind": "source",
+      "path": "chezmoi/private_dot_config/nvim",
+      "targetPath": "~/.config/nvim",
+      "authority": "source",
+      "editable": true
+    },
+    "wezterm-smart-splits-lua": {
+      "id": "wezterm-smart-splits-lua",
+      "domain": "chezmoi",
+      "kind": "source",
+      "path": "chezmoi/private_dot_config/wezterm/modules/smart_splits.lua",
+      "targetPath": "~/.config/wezterm/modules/smart_splits.lua",
+      "authority": "source",
+      "editable": true,
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/smart_splits.lua",
+          "line": 48
+        }
+      ]
+    },
+    "nvim-smart-splits-config": {
+      "id": "nvim-smart-splits-config",
+      "domain": "chezmoi",
+      "kind": "source",
+      "path": "chezmoi/private_dot_config/nvim/lua/workflow/smart_splits.lua",
+      "targetPath": "~/.config/nvim/lua/workflow/smart_splits.lua",
+      "authority": "source",
+      "editable": true,
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/nvim/lua/workflow/smart_splits.lua",
+          "line": 6
+        }
+      ]
+    },
+    "hypr-config-source": {
+      "id": "hypr-config-source",
+      "domain": "chezmoi",
+      "kind": "source",
+      "path": "chezmoi/private_dot_config/hypr",
+      "targetPath": "~/.config/hypr",
+      "authority": "source",
+      "editable": true
+    },
+    "zsh-config-source": {
+      "id": "zsh-config-source",
+      "domain": "chezmoi",
+      "kind": "source",
+      "path": "chezmoi/private_dot_config/zsh",
+      "targetPath": "~/.config/zsh",
+      "authority": "source",
+      "editable": true
+    },
+    "xplr-config-source": {
+      "id": "xplr-config-source",
+      "domain": "chezmoi",
+      "kind": "source",
+      "path": "chezmoi/private_dot_config/xplr",
+      "targetPath": "~/.config/xplr",
+      "authority": "source",
+      "editable": true
+    },
+    "session-bashly-source": {
+      "id": "session-bashly-source",
+      "domain": "shell-wrap",
+      "kind": "source",
+      "path": "shell-wrap/src/session/src",
+      "authority": "source",
+      "editable": true
+    },
+    "session-generated-executable": {
+      "id": "session-generated-executable",
+      "domain": "shell-wrap",
+      "kind": "generated",
+      "path": "shell-wrap/src/session/session",
+      "authority": "generated",
+      "editable": false,
+      "evidence": [
+        {
+          "path": "shell-wrap/src/session/session",
+          "line": 2
+        }
+      ]
+    },
+    "session-symlink-template": {
+      "id": "session-symlink-template",
+      "domain": "chezmoi",
+      "kind": "template",
+      "path": "chezmoi/dot_local/bin/symlink_session.tmpl",
+      "targetPath": "~/.local/bin/session",
+      "authority": "source",
+      "editable": true,
+      "evidence": [
+        {
+          "path": "chezmoi/dot_local/bin/symlink_session.tmpl",
+          "line": 1
+        }
+      ]
+    }
+  },
+  "interfaces": {
+    "term-project-id": {
+      "id": "term-project-id",
+      "kind": "environment",
+      "name": "TERM_PROJECT_ID",
+      "producers": [
+        "wezterm-project-catalog"
+      ],
+      "consumers": [
+        "wezterm-sessionizer",
+        "wezterm-ide-controller",
+        "wezterm-runtime-registry"
+      ],
+      "purpose": "Stable identity for the active declared project",
+      "lifetime": "workspace",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/workspaces/projects.lua",
+          "line": 124
+        }
+      ]
+    },
+    "term-project-root": {
+      "id": "term-project-root",
+      "kind": "environment",
+      "name": "TERM_PROJECT_ROOT",
+      "producers": [
+        "wezterm-project-catalog"
+      ],
+      "consumers": [
+        "wezterm-ide-controller",
+        "xplr-project-explorer"
+      ],
+      "purpose": "Canonical root for the active project",
+      "lifetime": "workspace",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/workspaces/projects.lua",
+          "line": 125
+        },
+        {
+          "path": "chezmoi/private_dot_config/xplr/init.lua",
+          "line": 3
+        }
+      ]
+    },
+    "term-project-cwd": {
+      "id": "term-project-cwd",
+      "kind": "environment",
+      "name": "TERM_PROJECT_CWD",
+      "producers": [
+        "wezterm-project-catalog"
+      ],
+      "consumers": [
+        "wezterm-sessionizer",
+        "wezterm-ide-controller"
+      ],
+      "purpose": "Initial working directory for the project workspace",
+      "lifetime": "workspace",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/workspaces/projects.lua",
+          "line": 126
+        }
+      ]
+    },
+    "term-nvim-socket": {
+      "id": "term-nvim-socket",
+      "kind": "socket",
+      "name": "TERM_NVIM_SOCKET",
+      "producers": [
+        "wezterm-project-catalog",
+        "wezterm-ide-controller"
+      ],
+      "consumers": [
+        "xplr-project-explorer"
+      ],
+      "purpose": "Address the project-specific Neovim server",
+      "lifetime": "runtime",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/workspaces/projects.lua",
+          "line": 129
+        },
+        {
+          "path": "chezmoi/private_dot_config/xplr/init.lua",
+          "line": 27
+        }
+      ]
+    },
+    "session-command": {
+      "id": "session-command",
+      "kind": "command",
+      "name": "~/.local/bin/session",
+      "producers": [
+        "session-cli-source",
+        "session-cli-generated",
+        "chezmoi-materializer"
+      ],
+      "consumers": [
+        "hypr-desktop-bindings",
+        "hypr-idle-lock-adapter",
+        "session-system-integration"
+      ],
+      "purpose": "Stable command boundary for desktop session actions",
+      "lifetime": "configuration",
+      "evidence": [
+        {
+          "path": "chezmoi/dot_local/bin/symlink_session.tmpl",
+          "line": 1
+        },
+        {
+          "path": "chezmoi/private_dot_config/hypr/hypridle.conf",
+          "line": 3
+        }
+      ]
+    },
+    "wezterm-smart-splits": {
+      "id": "wezterm-smart-splits",
+      "kind": "module",
+      "name": "smart-splits",
+      "producers": [
+        "nvim-workspace-client"
+      ],
+      "consumers": [
+        "nvim-workspace-client",
+        "wezterm-ide-controller"
+      ],
+      "purpose": "Cross-boundary movement and resize behavior",
+      "lifetime": "process",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/nvim/lua/workflow/smart_splits.lua",
+          "line": 6
+        },
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/smart_splits.lua",
+          "line": 12
+        }
+      ]
+    }
+  },
+  "relationships": {
+    "chezmoi-materializes-wezterm": {
+      "id": "chezmoi-materializes-wezterm",
+      "from": "chezmoi-materializer",
+      "type": "materializes",
+      "to": "wezterm-config-source",
+      "via": "~/.config/wezterm",
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/wezterm/wezterm.lua"
+        }
+      ]
+    },
+    "project-catalog-loads-projects": {
+      "id": "project-catalog-loads-projects",
+      "from": "wezterm-project-catalog",
+      "type": "loads",
+      "to": "wezterm-config-source",
+      "via": "modules/projects/*.lua",
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/workspaces/projects.lua",
+          "line": 168
+        }
+      ]
+    },
+    "sessionizer-consumes-project-catalog": {
+      "id": "sessionizer-consumes-project-catalog",
+      "from": "wezterm-sessionizer",
+      "type": "consumes",
+      "to": "wezterm-project-catalog",
+      "via": "projects.sessions()",
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/workspaces/sessionizer.lua",
+          "line": 35
+        }
+      ]
+    },
+    "sessionizer-launches-workspace": {
+      "id": "sessionizer-launches-workspace",
+      "from": "wezterm-sessionizer",
+      "type": "launches",
+      "to": "wezterm-ide-controller",
+      "via": "WezTerm workspace plus projected environment",
+      "confidence": "annotated",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/workspaces/sessionizer.lua",
+          "line": 84
+        }
+      ]
+    },
+    "controller-launches-nvim": {
+      "id": "controller-launches-nvim",
+      "from": "wezterm-ide-controller",
+      "type": "launches",
+      "to": "nvim-workspace-client",
+      "via": "nvim --listen TERM_NVIM_SOCKET",
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/workspaces/controller.lua",
+          "line": 145
+        }
+      ]
+    },
+    "controller-launches-xplr": {
+      "id": "controller-launches-xplr",
+      "from": "wezterm-ide-controller",
+      "type": "launches",
+      "to": "xplr-project-explorer",
+      "via": "xplr TERM_PROJECT_ROOT",
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/workspaces/controller.lua",
+          "line": 213
+        }
+      ]
+    },
+    "smart-splits-cross-tool-navigation": {
+      "id": "smart-splits-cross-tool-navigation",
+      "from": "nvim-smart-splits-client",
+      "type": "integrates-with",
+      "to": "wezterm-smart-splits-adapter",
+      "via": "smart-splits multiplexer integration plus IS_NVIM pane routing",
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/nvim/lua/workflow/smart_splits.lua",
+          "line": 6
+        },
+        {
+          "path": "chezmoi/private_dot_config/wezterm/modules/smart_splits.lua",
+          "line": 12
+        }
+      ]
+    },
+    "bashly-generates-session": {
+      "id": "bashly-generates-session",
+      "from": "session-cli-source",
+      "type": "generates",
+      "to": "session-cli-generated",
+      "via": "bashly generate",
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "shell-wrap/src/session/session",
+          "line": 2
+        },
+        {
+          "path": "shell-wrap/AGENTS.md",
+          "line": 79
+        }
+      ]
+    },
+    "chezmoi-materializes-session-command": {
+      "id": "chezmoi-materializes-session-command",
+      "from": "chezmoi-materializer",
+      "type": "materializes",
+      "to": "session-cli-generated",
+      "via": "chezmoi/dot_local/bin/symlink_session.tmpl",
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/dot_local/bin/symlink_session.tmpl",
+          "line": 1
+        }
+      ]
+    },
+    "hypr-binds-invoke-session": {
+      "id": "hypr-binds-invoke-session",
+      "from": "hypr-desktop-bindings",
+      "type": "invokes",
+      "to": "session-cli-generated",
+      "via": "session osd",
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/hypr/modules/binds.lua",
+          "line": 3
+        }
+      ]
+    },
+    "hypridle-invokes-session": {
+      "id": "hypridle-invokes-session",
+      "from": "hypr-idle-lock-adapter",
+      "type": "invokes",
+      "to": "session-cli-generated",
+      "via": "session lock",
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/hypr/hypridle.conf",
+          "line": 3
+        }
+      ]
+    },
+    "zsh-loads-environment": {
+      "id": "zsh-loads-environment",
+      "from": "zsh-environment-resolver",
+      "type": "loads",
+      "to": "zsh-config-source",
+      "via": "zload.zsh/loader.zsh",
+      "confidence": "observed",
+      "evidence": [
+        {
+          "path": "chezmoi/private_dot_config/zsh/dot_zshenv",
+          "line": 10
+        }
+      ]
+    }
+  },
+  "capabilities": {
+    "workspace-lifecycle": {
+      "id": "workspace-lifecycle",
+      "title": "Workspace lifecycle",
+      "purpose": "Declare, select, activate, and attach tools to project workspaces.",
+      "references": {
+        "domains": [
+          "chezmoi"
+        ],
+        "components": [
+          "wezterm-project-catalog",
+          "wezterm-sessionizer",
+          "wezterm-ide-controller",
+          "wezterm-runtime-registry",
+          "xplr-project-explorer",
+          "nvim-workspace-client",
+          "wezterm-smart-splits-adapter",
+          "nvim-smart-splits-client"
+        ],
+        "interfaces": [
+          "term-project-id",
+          "term-project-root",
+          "term-project-cwd",
+          "term-nvim-socket"
+        ],
+        "relationships": [
+          "smart-splits-cross-tool-navigation"
+        ]
+      },
+      "agentUse": [
+        "Start here for project discovery, session selection, workspace launch, editor attachment, or project-root propagation.",
+        "Treat modules/projects/*.lua as current project declarations.",
+        "Keep WezTerm runtime pane identifiers out of durable project definitions."
+      ],
+      "children": {
+        "project-discovery": {
+          "id": "project-discovery",
+          "title": "Project discovery",
+          "purpose": "Load declared projects and resolve a project from a filesystem path.",
+          "references": {
+            "components": [
+              "wezterm-project-catalog"
+            ],
+            "interfaces": [
+              "term-project-id",
+              "term-project-root",
+              "term-project-cwd"
+            ],
+            "relationships": [
+              "project-catalog-loads-projects"
+            ]
+          },
+          "agentUse": [
+            "Inspect this projection when adding or changing project declarations."
+          ]
+        },
+        "session-selection": {
+          "id": "session-selection",
+          "title": "Session selection",
+          "purpose": "Present active and declared workspaces and switch or spawn them.",
+          "references": {
+            "components": [
+              "wezterm-sessionizer",
+              "wezterm-runtime-registry"
+            ],
+            "relationships": [
+              "sessionizer-consumes-project-catalog",
+              "sessionizer-launches-workspace"
+            ]
+          },
+          "agentUse": [
+            "Inspect this projection for workspace chooser behavior and environment propagation."
+          ]
+        },
+        "ide-attachment": {
+          "id": "ide-attachment",
+          "title": "IDE attachment",
+          "purpose": "Launch or focus project-specific Neovim and Xplr surfaces.",
+          "references": {
+            "components": [
+              "wezterm-ide-controller",
+              "nvim-workspace-client",
+              "xplr-project-explorer",
+              "wezterm-runtime-registry"
+            ],
+            "interfaces": [
+              "term-project-root",
+              "term-nvim-socket"
+            ],
+            "relationships": [
+              "controller-launches-nvim",
+              "controller-launches-xplr"
+            ]
+          },
+          "agentUse": [
+            "Inspect this projection for socket lifecycle, stale editor recovery, pane caching, or explorer-to-editor routing."
+          ]
+        },
+        "cross-tool-pane-navigation": {
+          "id": "cross-tool-pane-navigation",
+          "title": "Cross-tool pane navigation",
+          "purpose": "Coordinate pane movement and resizing across Neovim splits and native WezTerm panes.",
+          "references": {
+            "components": [
+              "wezterm-smart-splits-adapter",
+              "nvim-smart-splits-client"
+            ],
+            "relationships": [
+              "smart-splits-cross-tool-navigation"
+            ]
+          },
+          "agentUse": [
+            "Treat terminal-side and editor-side smart-splits implementations as distinct cooperating components.",
+            "Do not infer that smart-splits is confined to Neovim when the WezTerm adapter is in scope."
+          ]
+        }
+      }
+    },
+    "desktop-session-lifecycle": {
+      "id": "desktop-session-lifecycle",
+      "title": "Desktop session lifecycle",
+      "purpose": "Coordinate lock, unlock, break lockout, startup, and OSD behavior.",
+      "references": {
+        "domains": [
+          "chezmoi",
+          "shell-wrap"
+        ],
+        "components": [
+          "hypr-desktop-bindings",
+          "hypr-idle-lock-adapter",
+          "session-cli-source",
+          "session-cli-generated",
+          "session-system-integration"
+        ],
+        "interfaces": [
+          "session-command"
+        ],
+        "relationships": [
+          "bashly-generates-session",
+          "chezmoi-materializes-session-command",
+          "hypr-binds-invoke-session",
+          "hypridle-invokes-session"
+        ]
+      },
+      "agentUse": [
+        "Start here for lock, unlock, Pomodoro lockout, startup, media OSD, or brightness behavior.",
+        "Edit shell-wrap/src/session/src, never shell-wrap/src/session/session directly.",
+        "Changes can span Bashly source, system adapters, Hyprland configuration, tests, and chezmoi materialization."
+      ],
+      "children": {
+        "lock-unlock": {
+          "id": "lock-unlock",
+          "title": "Lock and unlock",
+          "purpose": "Route lock events through the session CLI and system integration.",
+          "references": {
+            "components": [
+              "hypr-idle-lock-adapter",
+              "session-cli-source",
+              "session-system-integration"
+            ],
+            "interfaces": [
+              "session-command"
+            ],
+            "relationships": [
+              "hypridle-invokes-session"
+            ]
+          },
+          "agentUse": [
+            "Include PAM, post-unlock hooks, and installation checks when changing lock semantics."
+          ]
+        },
+        "break-lockout": {
+          "id": "break-lockout",
+          "title": "Break lockout",
+          "purpose": "Coordinate Tomat break state with unlock policy.",
+          "references": {
+            "components": [
+              "session-cli-source",
+              "session-system-integration"
+            ]
+          },
+          "agentUse": [
+            "Inspect Bashly commands, lockout libraries, Tomat hooks, PAM policy, and Bats tests together."
+          ]
+        },
+        "osd-actions": {
+          "id": "osd-actions",
+          "title": "OSD actions",
+          "purpose": "Route Hyprland media and brightness keys through the session CLI.",
+          "references": {
+            "components": [
+              "hypr-desktop-bindings",
+              "session-cli-source"
+            ],
+            "relationships": [
+              "hypr-binds-invoke-session"
+            ]
+          },
+          "agentUse": [
+            "Inspect Hyprland bindings and the Bashly OSD command as one capability."
+          ]
+        }
+      }
+    },
+    "configuration-materialization": {
+      "id": "configuration-materialization",
+      "title": "Configuration materialization",
+      "purpose": "Map repository source artifacts into live user configuration and executable targets.",
+      "references": {
+        "domains": [
+          "chezmoi",
+          "shell-wrap"
+        ],
+        "components": [
+          "chezmoi-materializer",
+          "session-cli-source",
+          "session-cli-generated"
+        ],
+        "artifacts": [
+          "wezterm-config-source",
+          "nvim-config-source",
+          "hypr-config-source",
+          "zsh-config-source",
+          "xplr-config-source",
+          "session-bashly-source",
+          "session-generated-executable",
+          "session-symlink-template"
+        ],
+        "relationships": [
+          "bashly-generates-session",
+          "chezmoi-materializes-session-command"
+        ]
+      },
+      "agentUse": [
+        "Use source paths as edit authorities and target paths only as rendered evidence.",
+        "Regenerate Bashly output before assessing the chezmoi symlink target."
+      ],
+      "children": {
+        "managed-config": {
+          "id": "managed-config",
+          "title": "Managed configuration",
+          "purpose": "Materialize Hyprland, WezTerm, Neovim, Xplr, and Zsh source state.",
+          "references": {
+            "components": [
+              "chezmoi-materializer"
+            ],
+            "artifacts": [
+              "wezterm-config-source",
+              "nvim-config-source",
+              "hypr-config-source",
+              "zsh-config-source",
+              "xplr-config-source"
+            ]
+          },
+          "agentUse": [
+            "Run chezmoi diff and status after changing managed configuration."
+          ]
+        },
+        "generated-session-cli": {
+          "id": "generated-session-cli",
+          "title": "Generated session CLI",
+          "purpose": "Generate the session executable from Bashly source and expose it through chezmoi.",
+          "references": {
+            "components": [
+              "session-cli-source",
+              "session-cli-generated",
+              "chezmoi-materializer"
+            ],
+            "artifacts": [
+              "session-bashly-source",
+              "session-generated-executable",
+              "session-symlink-template"
+            ],
+            "relationships": [
+              "bashly-generates-session",
+              "chezmoi-materializes-session-command"
+            ]
+          },
+          "agentUse": [
+            "Do not patch generated shell output as the durable fix."
+          ]
+        }
+      }
+    },
+    "shell-environment": {
+      "id": "shell-environment",
+      "title": "Shell environment",
+      "purpose": "Establish deterministic Zsh startup, PATH, and activation environment state.",
+      "references": {
+        "domains": [
+          "chezmoi"
+        ],
+        "components": [
+          "zsh-environment-resolver"
+        ],
+        "artifacts": [
+          "zsh-config-source"
+        ],
+        "relationships": [
+          "zsh-loads-environment"
+        ]
+      },
+      "agentUse": [
+        "Start here for ZDOTDIR, PATH, environment.d parsing, or D-Bus/systemd environment import."
+      ],
+      "children": {
+        "startup-chain": {
+          "id": "startup-chain",
+          "title": "Startup chain",
+          "purpose": "Route home .zshenv into the XDG Zsh loader.",
+          "references": {
+            "components": [
+              "zsh-environment-resolver"
+            ],
+            "artifacts": [
+              "zsh-config-source"
+            ]
+          },
+          "agentUse": [
+            "Preserve silent and cheap universal startup behavior."
+          ]
+        },
+        "environment-import": {
+          "id": "environment-import",
+          "title": "Environment import",
+          "purpose": "Parse trusted environment.d values and import selected names into activation services.",
+          "references": {
+            "components": [
+              "zsh-environment-resolver"
+            ]
+          },
+          "agentUse": [
+            "Review parsing safety gates when expanding supported environment syntax."
+          ]
+        }
+      }
+    },
+    "editing-integration": {
+      "id": "editing-integration",
+      "title": "Editing integration",
+      "purpose": "Compose WezTerm, Neovim, and Xplr into a project editing surface.",
+      "references": {
+        "domains": [
+          "chezmoi"
+        ],
+        "components": [
+          "wezterm-ide-controller",
+          "nvim-workspace-client",
+          "xplr-project-explorer"
+        ],
+        "interfaces": [
+          "term-project-root",
+          "term-nvim-socket",
+          "wezterm-smart-splits"
+        ],
+        "relationships": [
+          "controller-launches-nvim",
+          "controller-launches-xplr",
+          "nvim-integrates-wezterm"
+        ]
+      },
+      "agentUse": [
+        "Use this projection for cross-tool navigation, editor socket behavior, and project explorer integration."
+      ]
+    }
+  },
+  "validationProfiles": {
+    "chezmoi-closeout": {
+      "id": "chezmoi-closeout",
+      "scope": {
+        "domains": [
+          "chezmoi"
+        ]
+      },
+      "commands": [
+        {
+          "argv": [
+            "chezmoi",
+            "diff"
+          ],
+          "cwd": ".",
+          "purpose": "Inspect source-to-target drift"
+        },
+        {
+          "argv": [
+            "chezmoi",
+            "status"
+          ],
+          "cwd": ".",
+          "purpose": "List managed target state"
+        }
+      ]
+    },
+    "session-bashly": {
+      "id": "session-bashly",
+      "scope": {
+        "domains": [
+          "shell-wrap"
+        ],
+        "components": [
+          "session-cli-source",
+          "session-cli-generated"
+        ]
+      },
+      "commands": [
+        {
+          "argv": [
+            "shellharden",
+            "--check",
+            "src/session/src"
+          ],
+          "cwd": "shell-wrap",
+          "purpose": "Check shell source hardening"
+        },
+        {
+          "argv": [
+            "shfmt",
+            "-d",
+            "src/session/src"
+          ],
+          "cwd": "shell-wrap",
+          "purpose": "Check shell source formatting"
+        },
+        {
+          "argv": [
+            "shellcheck",
+            "src/session/src/commands/*.sh",
+            "src/session/src/lib/*.sh"
+          ],
+          "cwd": "shell-wrap",
+          "purpose": "Check Bashly source scripts"
+        },
+        {
+          "argv": [
+            "bashly",
+            "generate"
+          ],
+          "cwd": "shell-wrap/src/session",
+          "purpose": "Regenerate the session executable"
+        }
+      ]
+    }
+  },
+  "agentContext": {
+    "defaultProjection": "configuration-materialization",
+    "selectionRule": "Select the smallest capability whose references contain the task path, then include parent capability references and any nested instruction boundary covering the path.",
+    "requiredFields": [
+      "purpose",
+      "domains",
+      "components",
+      "artifacts",
+      "interfaces",
+      "relationships",
+      "agentUse",
+      "validationProfiles",
+      "evidence"
+    ]
+  }
+}

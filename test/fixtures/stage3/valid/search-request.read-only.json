@@ -1,0 +1,16 @@
+{
+  "schema": "agent.search-implementation.request.v1",
+  "projection_id": "sha256:0942cc8ee46075d687eb27847124eff5eb30ad6202d66d771ce73dae1f0db572",
+  "artifact_ids": [
+    "df:artifact/wezterm-config-source"
+  ],
+  "intent": "find whether sessionizer uses smart-splits mux API",
+  "terms": [
+    "smart-splits",
+    "smart_splits",
+    "mux",
+    "SwitchToWorkspace",
+    "get_workspace_names"
+  ],
+  "result_limit": 50
+}

@@ -1,0 +1,29 @@
+{
+  "schema": "agent.search-implementation.response.v1",
+  "projection_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "execution": {
+    "backend": "rg",
+    "backend_version": "ripgrep 14.1.1",
+    "argv": "rg --json mux chezmoi/private_dot_config/wezterm",
+    "searched_paths": [
+      "chezmoi/private_dot_config/wezterm"
+    ],
+    "shell": false
+  },
+  "pagination": {
+    "result_limit": 10,
+    "returned": 0,
+    "truncated": false,
+    "next_cursor": null
+  },
+  "ordering": {
+    "policy": "agent.ranking-policy.v1",
+    "sort": [
+      "rank_tuple desc",
+      "path asc",
+      "line asc",
+      "id asc"
+    ]
+  },
+  "results": []
+}
