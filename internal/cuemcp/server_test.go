@@ -66,6 +66,59 @@ func TestResolveAndSearchImplementation(t *testing.T) {
 	}
 }
 
+func TestResolverArtifactsAuthorizeCUESearchPlan(t *testing.T) {
+	root := filepath.Clean(filepath.Join("..", ".."))
+	runtime := New(root)
+	record, projection, err := runtime.Resolve(context.Background(), resolveInput{
+		Prompt:     "Inspect the WezTerm sessionizer implementation",
+		CWD:        "/home/_404/src/dotfiles",
+		Candidates: []string{"workspace-lifecycle"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	artifactID := "df:artifact/wezterm-smart-splits-lua"
+	artifacts := projection["artifacts"].([]any)
+	var projectedPath string
+	for _, item := range artifacts {
+		artifact := item.(map[string]any)
+		if artifact["id"] == artifactID {
+			projectedPath = artifact["path"].(string)
+			break
+		}
+	}
+	if projectedPath == "" {
+		t.Fatalf("resolver projection omitted %s", artifactID)
+	}
+
+	input := searchInput{
+		Schema:       "agent.search-implementation.request.v1",
+		ProjectionID: record.ID,
+		ArtifactIDs:  []string{artifactID},
+		Intent:       "inspect implementation evidence",
+		Terms:        []string{"IS_NVIM"},
+		ResultLimit:  10,
+	}
+	plan, err := runtime.authorizeSearchPlan(context.Background(), map[string]any{"searchPlanInput": map[string]any{
+		"envelope": record.Envelope,
+		"request":  input,
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if plan.Backend != "rg" || plan.Shell || len(plan.Targets) != 1 {
+		t.Fatalf("CUE search plan = %#v", plan)
+	}
+	if plan.Targets[0].ArtifactID != artifactID || plan.Targets[0].Path != projectedPath {
+		t.Fatalf("CUE target = %#v, projected path = %q", plan.Targets[0], projectedPath)
+	}
+	argv := rgArgv(plan.Terms, plan.Targets[0].Path)
+	if argv[0] != "rg" || argv[len(argv)-1] != projectedPath {
+		t.Fatalf("Go rg argv = %#v", argv)
+	}
+}
+
 func TestSearchRejectsUnknownProjection(t *testing.T) {
 	runtime := New(filepath.Clean(filepath.Join("..", "..")))
 	_, searchErr := runtime.Search(context.Background(), searchInput{

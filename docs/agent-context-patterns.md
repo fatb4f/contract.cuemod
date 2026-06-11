@@ -30,6 +30,26 @@ The resolver is not a search box. It is a control surface for deciding what the 
 
 ---
 
+# Controlled implementation discovery
+
+Implementation text discovery is exposed only through the `cue.search_implementation` MCP tool. Raw `rg` is a private backend and is not agent-visible.
+
+```text
+resolver projection
+→ selected graph artifact IDs
+→ cue.search_implementation MCP request
+→ CUE searchExecutionPlan
+→ Go validates the plan
+→ Go executes argv-based rg without a shell
+→ contract-valid MCP evidence result
+```
+
+The CUE plan resolves every requested artifact ID against the immutable projection and emits only relative artifact paths. The Go runtime rejects unsafe or incomplete plans before invoking `rg`. Empty text-search results are observations, not proof of semantic absence.
+
+`cue.search_implementation` is not a `cue cmd` command. It is a Go-registered MCP tool whose request, plan, execution, and result are constrained by CUE contracts.
+
+---
+
 # 1. Task intent extraction
 
 | Field                  | Description                                                                                                                                             |

@@ -392,11 +392,8 @@ func (r *Runtime) Search(ctx context.Context, input searchInput) (map[string]any
 		"envelope": record.Envelope,
 		"request":  input,
 	}}
-	var plan executionPlan
-	if err := r.cueExport(ctx, "searchExecutionPlan", planInput, &plan); err != nil {
-		return nil, searchError("invalid_search_contract", err.Error(), input.ProjectionID, map[string]any{})
-	}
-	if err := validatePlan(plan); err != nil {
+	plan, err := r.authorizeSearchPlan(ctx, planInput)
+	if err != nil {
 		return nil, searchError("invalid_search_contract", err.Error(), input.ProjectionID, map[string]any{})
 	}
 
@@ -468,6 +465,17 @@ func (r *Runtime) Search(ctx context.Context, input searchInput) (map[string]any
 		return nil, searchError("invalid_search_contract", err.Error(), input.ProjectionID, map[string]any{})
 	}
 	return response, nil
+}
+
+func (r *Runtime) authorizeSearchPlan(ctx context.Context, input map[string]any) (executionPlan, error) {
+	var plan executionPlan
+	if err := r.cueExport(ctx, "searchExecutionPlan", input, &plan); err != nil {
+		return executionPlan{}, err
+	}
+	if err := validatePlan(plan); err != nil {
+		return executionPlan{}, err
+	}
+	return plan, nil
 }
 
 func (r *Runtime) lookup(id string) (projectionRecord, bool) {

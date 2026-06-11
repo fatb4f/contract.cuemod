@@ -46,6 +46,18 @@ func TestMCPResolveThenSearch(t *testing.T) {
 	if len(tools.Tools) != 5 {
 		t.Fatalf("tool count = %d, want 5", len(tools.Tools))
 	}
+	foundSearch := false
+	for _, available := range tools.Tools {
+		if available.Name == "rg" {
+			t.Fatal("raw rg must not be agent-visible")
+		}
+		if available.Name == "search_implementation" {
+			foundSearch = true
+		}
+	}
+	if !foundSearch {
+		t.Fatal("search_implementation MCP tool is missing")
+	}
 
 	providers := mcp.CallToolRequest{}
 	providers.Params.Name = "list_semantic_providers"

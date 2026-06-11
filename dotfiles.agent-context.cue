@@ -412,6 +412,7 @@ codexSkill: """
 
 	- Resolve first; inspect second.
 	- For implementation evidence, select graph artifact IDs from the projection and call `cue.search_implementation` with `projection_id` and `artifact_ids`; do not invoke `rg` directly.
+	- `cue.search_implementation` is an MCP tool registered by the Go runtime, not a `cue cmd` command. CUE authorizes its internal search plan before Go executes `rg`.
 	- Cite returned evidence IDs with exact paths and lines.
 	- Treat hook candidates as hints, never authority.
 	- Do not invoke `cue cmd` directly or hand-write temporary CUE input.
