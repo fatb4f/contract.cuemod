@@ -176,3 +176,27 @@ patch identity, commit identity, and prepared evidence.
 The transaction snapshots the previous stack ref and metadata artifact.
 Mutation or postflight failure restores the prior ref and metadata, or deletes
 newly created state, while retaining the immutable commit object for diagnosis.
+
+## Transactional Rollback
+
+The `stack_rollback` MCP tool selects a committed target by transaction ID,
+loads its immutable transaction, snapshot, journal, and operation evidence, and
+requires the caller's rollback class to match the class declared by that
+evidence. The active patch identity must also match the recorded stage or
+finalize operation. Successful mutations seal a postflight index, worktree,
+untracked-path, and relevant-ref fingerprint; rollback refuses to proceed when
+the current repository no longer matches that recorded post-state.
+
+Current stack mutations provide two executable recovery classes:
+
+- `index_only` restores the index tree captured before `stack.stage`. It first
+  rejects any later staged changes outside the paths recorded by that stage
+  operation.
+- `ref_only` restores or deletes the stack ref and restores or removes patch
+  metadata captured before `stack.finalizePatch`. It first proves that the
+  current ref and metadata still describe the finalized patch.
+
+Other rollback classes produce `rollback_partial` with
+`manualRequired: true`; they do not fall back to reset or reflog behavior.
+Every attempt writes a separate rollback journal and immutable transaction,
+rollback, and recovery evidence under `.git/git-mcp-transactions/<tx-id>`.

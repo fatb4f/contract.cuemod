@@ -115,6 +115,51 @@ func TestStackFinalizePatchHandlerRunsTransaction(t *testing.T) {
 	}
 }
 
+func TestStackRollbackHandlerRestoresStageTransaction(t *testing.T) {
+	for _, mode := range []string{"shell", "go-git"} {
+		t.Run(mode, func(t *testing.T) {
+			repoDir := t.TempDir()
+			initRepoWithCommit(t, repoDir)
+			require.NoError(t, os.WriteFile(filepath.Join(repoDir, "test.txt"), []byte("changed\n"), 0o644))
+			indexBefore := gitOutput(t, repoDir, "write-tree")
+
+			gitServer := NewGitServer([]string{repoDir}, gitOperationsForMode(t, mode), false)
+			gitServer.RegisterTools()
+			stageRequest := mcp.CallToolRequest{}
+			stageRequest.Params.Name = "stack_stage"
+			stageRequest.Params.Arguments = map[string]interface{}{
+				"repo_path":       repoDir,
+				"active_patch_id": "patch-1",
+				"paths":           "test.txt",
+			}
+			stageResult, err := gitServer.stackStageHandler(context.Background(), stageRequest)
+			stageText := callToolText(t, stageResult, err)
+			var stageResponse transaction.StageResponse
+			require.NoError(t, json.Unmarshal([]byte(stageText), &stageResponse))
+
+			rollbackRequest := mcp.CallToolRequest{}
+			rollbackRequest.Params.Name = "stack_rollback"
+			rollbackRequest.Params.Arguments = map[string]interface{}{
+				"repo_path":             repoDir,
+				"active_patch_id":       "patch-1",
+				"target_transaction_id": stageResponse.Transaction.TransactionID,
+				"rollback_class":        "index_only",
+			}
+			rollbackResult, err := gitServer.stackRollbackHandler(context.Background(), rollbackRequest)
+			rollbackText := callToolText(t, rollbackResult, err)
+			var rollbackResponse transaction.RollbackResponse
+			require.NoError(t, json.Unmarshal([]byte(rollbackText), &rollbackResponse))
+			require.True(t, rollbackResponse.OK)
+			require.Equal(t, transaction.StateRolledBack, rollbackResponse.State)
+			require.Equal(t, indexBefore, gitOutput(t, repoDir, "write-tree"))
+			require.FileExists(t, filepath.Join(
+				repoDir, ".git", "git-mcp-transactions",
+				rollbackResponse.TransactionID, "rollback.json",
+			))
+		})
+	}
+}
+
 // createCommit creates a file and commits it
 func createCommit(t *testing.T, repoDir, filename, content, message string) {
 	filePath := filepath.Join(repoDir, filename)

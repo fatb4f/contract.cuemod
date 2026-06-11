@@ -9,6 +9,7 @@ import (
 )
 
 var oidPattern = regexp.MustCompile(`^[0-9a-f]{40}$`)
+var transactionIDPattern = regexp.MustCompile(`^tx-[0-9a-f]{32}$`)
 
 type State string
 

@@ -120,12 +120,16 @@ func (r *Runner) Run(ctx context.Context, req Request) (*Result, error) {
 	if err := tx.append(ctx, PhasePostflight, "validate", req.Validator.Name(), "started", "passed", RollbackNone); err != nil {
 		return r.failAndRollback(ctx, tx, req, FailureJournal, err)
 	}
-	evidence, emitErr := r.evidence.Emit(ctx, tx, nil, "")
+	rollbackClass := classifyRollback(req.Mutation.AffectedSurfaces())
+	if !slices.Contains(req.Policy.AllowedRollbackClasses, rollbackClass) {
+		rollbackClass = RollbackManualRequired
+	}
+	if err := tx.append(ctx, PhaseCommit, "commit", req.Command, "", "committed", rollbackClass); err != nil {
+		return r.failAndRollback(ctx, tx, req, FailureJournal, err)
+	}
+	evidence, emitErr := r.evidence.Emit(ctx, stateView{View: tx, state: StateCommitted}, nil, "")
 	if emitErr != nil {
 		return r.failAndRollback(ctx, tx, req, FailureJournal, fmt.Errorf("emit transaction evidence: %w", emitErr))
-	}
-	if err := tx.append(ctx, PhaseCommit, "commit", req.Command, "", "committed", RollbackNone); err != nil {
-		return r.failAndRollback(ctx, tx, req, FailureJournal, err)
 	}
 	if err := tx.transition(StateCommitted); err != nil {
 		return nil, err
@@ -134,6 +138,13 @@ func (r *Runner) Run(ctx context.Context, req Request) (*Result, error) {
 	result := tx.result(true, "", RollbackNone, nil, evidence)
 	return result, nil
 }
+
+type stateView struct {
+	View
+	state State
+}
+
+func (v stateView) State() State { return v.state }
 
 func (r *Runner) abort(ctx context.Context, tx *runtimeTransaction, class FailureClass, cause error) (*Result, error) {
 	if err := tx.transition(StateAborted); err != nil {

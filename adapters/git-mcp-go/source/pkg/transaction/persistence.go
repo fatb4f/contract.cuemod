@@ -86,11 +86,31 @@ func readJournal(path string) ([]JournalEntry, error) {
 }
 
 type DirectoryEvidenceEmitter struct {
-	Root string
+	Root           string
+	SealPostflight bool
+}
+
+type StoredEvidence struct {
+	TransactionID string           `json:"transaction_id"`
+	Command       string           `json:"command"`
+	State         State            `json:"state"`
+	FailureClass  FailureClass     `json:"failure_class,omitempty"`
+	Preflight     Preflight        `json:"preflight"`
+	Postflight    *RepositoryState `json:"postflight,omitempty"`
+	Snapshot      Snapshot         `json:"snapshot"`
+	Journal       []JournalEntry   `json:"journal"`
+	Recovery      *RecoveryReport  `json:"recovery,omitempty"`
+}
+
+type RepositoryState struct {
+	IndexTreeOID  string            `json:"indexTreeOID"`
+	WorktreePatch string            `json:"worktreePatch"`
+	Untracked     []string          `json:"untracked"`
+	Refs          map[string]string `json:"refs"`
 }
 
 func (e DirectoryEvidenceEmitter) Emit(
-	_ context.Context,
+	ctx context.Context,
 	tx View,
 	recovery *RecoveryReport,
 	failure FailureClass,
@@ -102,19 +122,17 @@ func (e DirectoryEvidenceEmitter) Emit(
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return nil, fmt.Errorf("create evidence directory: %w", err)
 	}
-	payload := struct {
-		TransactionID string          `json:"transaction_id"`
-		Command       string          `json:"command"`
-		State         State           `json:"state"`
-		FailureClass  FailureClass    `json:"failure_class,omitempty"`
-		Preflight     Preflight       `json:"preflight"`
-		Snapshot      Snapshot        `json:"snapshot"`
-		Journal       []JournalEntry  `json:"journal"`
-		Recovery      *RecoveryReport `json:"recovery,omitempty"`
-	}{
+	payload := StoredEvidence{
 		TransactionID: tx.ID(), Command: tx.Command(), State: tx.State(),
 		FailureClass: failure, Preflight: tx.Preflight(), Snapshot: tx.Snapshot(),
 		Journal: tx.Journal(), Recovery: recovery,
+	}
+	if e.SealPostflight && tx.State() == StateCommitted && failure == "" {
+		postflight, err := captureRepositoryState(ctx, tx)
+		if err != nil {
+			return nil, fmt.Errorf("capture postflight state: %w", err)
+		}
+		payload.Postflight = &postflight
 	}
 	encoded, err := json.MarshalIndent(payload, "", "  ")
 	if err != nil {
@@ -125,7 +143,7 @@ func (e DirectoryEvidenceEmitter) Emit(
 	refs := make([]EvidenceRef, 0, len(kinds))
 	for _, kind := range kinds {
 		path := filepath.Join(dir, kind+".json")
-		if err := os.WriteFile(path, append(encoded, '\n'), 0o400); err != nil {
+		if err := writeImmutable(path, append(encoded, '\n')); err != nil {
 			return nil, fmt.Errorf("write %s evidence: %w", kind, err)
 		}
 		absolute, err := filepath.Abs(path)
@@ -138,4 +156,88 @@ func (e DirectoryEvidenceEmitter) Emit(
 		})
 	}
 	return refs, nil
+}
+
+func captureRepositoryState(ctx context.Context, tx View) (RepositoryState, error) {
+	root := tx.Preflight().RepoRoot
+	indexTree, err := git(ctx, root, "write-tree")
+	if err != nil {
+		return RepositoryState{}, err
+	}
+	worktree, err := git(ctx, root, "diff", "HEAD", "--binary")
+	if err != nil {
+		return RepositoryState{}, err
+	}
+	untracked, err := git(ctx, root, "ls-files", "--others", "--exclude-standard")
+	if err != nil {
+		return RepositoryState{}, err
+	}
+	refs := map[string]string{}
+	for ref := range tx.Snapshot().Refs {
+		oid, refErr := git(ctx, root, "rev-parse", "--verify", ref)
+		if refErr == nil {
+			refs[ref] = oid
+		}
+	}
+	if tx.Command() == "stack.finalizePatch" {
+		var request FinalizePatchRequest
+		if json.Unmarshal([]byte(tx.Snapshot().Operation), &request) == nil {
+			ref := "refs/stack/patches/" + request.PatchID
+			oid, refErr := git(ctx, root, "rev-parse", "--verify", ref)
+			if refErr == nil {
+				refs[ref] = oid
+			}
+		}
+	}
+	return RepositoryState{
+		IndexTreeOID: indexTree, WorktreePatch: worktree,
+		Untracked: lines(untracked), Refs: refs,
+	}, nil
+}
+
+func writeImmutable(path string, content []byte) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return err
+	}
+	temp, err := os.CreateTemp(filepath.Dir(path), ".evidence-*")
+	if err != nil {
+		return err
+	}
+	tempPath := temp.Name()
+	defer os.Remove(tempPath)
+	if err := temp.Chmod(0o400); err != nil {
+		_ = temp.Close()
+		return err
+	}
+	if _, err := temp.Write(content); err != nil {
+		_ = temp.Close()
+		return err
+	}
+	if err := temp.Sync(); err != nil {
+		_ = temp.Close()
+		return err
+	}
+	if err := temp.Close(); err != nil {
+		return err
+	}
+	return os.Rename(tempPath, path)
+}
+
+func LoadStoredEvidence(root, transactionID string) (StoredEvidence, error) {
+	if !transactionIDPattern.MatchString(transactionID) {
+		return StoredEvidence{}, fmt.Errorf("invalid transaction ID %q", transactionID)
+	}
+	path := filepath.Join(root, transactionID, "transaction.json")
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return StoredEvidence{}, fmt.Errorf("read transaction evidence: %w", err)
+	}
+	var evidence StoredEvidence
+	if err := json.Unmarshal(content, &evidence); err != nil {
+		return StoredEvidence{}, fmt.Errorf("decode transaction evidence: %w", err)
+	}
+	if evidence.TransactionID != transactionID || evidence.Snapshot.TransactionID != transactionID {
+		return StoredEvidence{}, errors.New("transaction evidence identity mismatch")
+	}
+	return evidence, nil
 }

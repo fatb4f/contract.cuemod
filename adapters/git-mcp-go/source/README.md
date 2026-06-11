@@ -13,6 +13,9 @@ This MCP server provides the following Git operations as tools:
 - **git_commit**: Records changes to the repository
 - **git_add**: Adds file contents to the staging area
 - **git_reset**: Unstages all staged changes
+- **stack_stage**: Stages selected content through a durable transaction
+- **stack_finalize_patch**: Creates a patch commit and stack ref transactionally
+- **stack_rollback**: Restores a committed stack transaction from recorded evidence
 - **git_log**: Shows the commit logs
 - **git_create_branch**: Creates a new branch from an optional base branch
 - **git_checkout**: Switches branches

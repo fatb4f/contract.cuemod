@@ -173,6 +173,7 @@ func GetLocalOnlyToolNames() map[string]bool {
 		"git_reset":            true,
 		"stack_stage":          true,
 		"stack_finalize_patch": true,
+		"stack_rollback":       true,
 		"git_worktree_add":     true,
 		"git_worktree_remove":  true,
 		"git_worktree_prune":   true,
@@ -395,6 +396,27 @@ func (s *GitServer) RegisterTools() {
 		),
 	)
 	s.server.AddTool(stackFinalizePatchTool, s.stackFinalizePatchHandler)
+
+	stackRollbackTool := mcp.NewTool("stack_rollback",
+		mcp.WithDescription("Restores a committed stack transaction from recorded evidence"),
+		mcp.WithString("repo_path",
+			mcp.Required(),
+			mcp.Description("Path to Git repository"),
+		),
+		mcp.WithString("active_patch_id",
+			mcp.Required(),
+			mcp.Description("Stable identity of the active patch"),
+		),
+		mcp.WithString("target_transaction_id",
+			mcp.Required(),
+			mcp.Description("Committed transaction identity to restore"),
+		),
+		mcp.WithString("rollback_class",
+			mcp.Required(),
+			mcp.Description("Declared rollback class from target transaction evidence"),
+		),
+	)
+	s.server.AddTool(stackRollbackTool, s.stackRollbackHandler)
 
 	// Register git_log tool
 	logTool := mcp.NewTool("git_log",
@@ -795,7 +817,7 @@ func (s *GitServer) stackStageHandler(ctx context.Context, request mcp.CallToolR
 		transaction.Dispatcher{Handlers: map[transaction.RollbackClass]transaction.RollbackHandler{
 			transaction.RollbackIndexOnly: transaction.IndexSnapshotRollback{},
 		}},
-		transaction.DirectoryEvidenceEmitter{Root: artifactRoot},
+		transaction.DirectoryEvidenceEmitter{Root: artifactRoot, SealPostflight: true},
 	)
 	result, runErr := runner.Run(ctx, stageRequest)
 	if runErr != nil {
@@ -838,7 +860,7 @@ func (s *GitServer) stackFinalizePatchHandler(ctx context.Context, request mcp.C
 		transaction.Dispatcher{Handlers: map[transaction.RollbackClass]transaction.RollbackHandler{
 			transaction.RollbackRefOnly: transaction.FinalizePatchRollback{},
 		}},
-		transaction.DirectoryEvidenceEmitter{Root: artifactRoot},
+		transaction.DirectoryEvidenceEmitter{Root: artifactRoot, SealPostflight: true},
 	)
 	result, runErr := runner.Run(ctx, transactionRequest)
 	if runErr != nil {
@@ -848,6 +870,29 @@ func (s *GitServer) stackFinalizePatchHandler(ctx context.Context, request mcp.C
 	encoded, err := json.Marshal(transaction.NewFinalizePatchResponse(result, finalizeRequest, outcome))
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Encode stack.finalizePatch response: %v", err)), nil
+	}
+	return mcp.NewToolResultText(string(encoded)), nil
+}
+
+func (s *GitServer) stackRollbackHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	requestedPath, _ := request.Params.Arguments["repo_path"].(string)
+	repoPath, err := s.getRepoPathForOperation(requestedPath)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Repository path error: %v", err)), nil
+	}
+	activePatchID, _ := request.Params.Arguments["active_patch_id"].(string)
+	targetTransactionID, _ := request.Params.Arguments["target_transaction_id"].(string)
+	rollbackClass, _ := request.Params.Arguments["rollback_class"].(string)
+	artifactRoot := filepath.Join(repoPath, ".git", "git-mcp-transactions")
+	result, runErr := (transaction.RollbackService{
+		RepoRoot: repoPath, ArtifactRoot: artifactRoot,
+	}).Run(ctx, transaction.RollbackRequest{
+		ActivePatchID: activePatchID, TargetTransactionID: targetTransactionID,
+		RollbackClass: transaction.RollbackClass(rollbackClass),
+	})
+	encoded, _ := json.Marshal(result)
+	if runErr != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("stack.rollback failed: %v\n%s", runErr, encoded)), nil
 	}
 	return mcp.NewToolResultText(string(encoded)), nil
 }
