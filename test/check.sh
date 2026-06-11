@@ -11,9 +11,9 @@ cue vet ./contracts/providers
 cue vet ./contracts/resolver
 cue vet ./contracts/validation
 cue vet ./contracts/agent-skill
-cue vet ./contract/repo
-cue vet ./contract/vcs
-cue export ./contract/vcs >/dev/null
+cue vet ./contracts/repo
+cue vet ./contracts/vcs
+cue export ./contracts/vcs >/dev/null
 cue vet ./providers/cue-lsp
 cue vet ./providers/cue-rg
 cue vet ./providers/lua-lsp

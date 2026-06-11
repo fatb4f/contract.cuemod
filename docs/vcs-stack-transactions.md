@@ -1,7 +1,7 @@
 # VCS Stack Transaction And Rollback Contract
 
 The normative contract is
-[`contract/vcs/transaction.cue`](../contract/vcs/transaction.cue). It applies
+[`contracts/vcs/transaction.cue`](../contracts/vcs/transaction.cue). It applies
 to every `stack.*` operation that can mutate refs, HEAD, the index, the
 worktree, conflict state, or adapter-owned artifacts.
 
@@ -107,7 +107,7 @@ that is required for diagnosis. Missing or partial required snapshots select
 ## Go Adapter Projection
 
 The normative Go-facing projection is
-[`contract/vcs/transaction_adapter.cue`](../contract/vcs/transaction_adapter.cue).
+[`contracts/vcs/transaction_adapter.cue`](../contracts/vcs/transaction_adapter.cue).
 It exposes only guarded transaction lifecycle methods:
 
 ```go

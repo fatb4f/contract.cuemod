@@ -1,10 +1,9 @@
-<!-- Code generated from contract/repo and projections/repo. DO NOT EDIT. -->
+<!-- Code generated from contracts/repo and projections/repo. DO NOT EDIT. -->
 
 # Repository Layout
 
 | Surface | Role | Lifecycle | Authority |
 | --- | --- | --- | --- |
-| `contract/` | authority | source | authoritative |
 | `contracts/` | authority | source | authoritative |
 | `providers/` | provider | source | authoritative |
 | `adapters/` | adapter | managed-snapshot | non-authority |

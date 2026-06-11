@@ -12,7 +12,7 @@ agent intent
 ```
 
 The normative contract is
-[`contract/vcs/patch_stack_skill.cue`](../contract/vcs/patch_stack_skill.cue).
+[`contracts/vcs/patch_stack_skill.cue`](../contracts/vcs/patch_stack_skill.cue).
 
 ## Public API
 

@@ -8,8 +8,8 @@
             "lifecycle": "source",
             "authority": "authoritative",
             "generated": false,
-            "owner": "contract/repo",
-            "description": "Active shared runtime schemas imported across providers, projections, and fixtures.",
+            "owner": "contracts/repo",
+            "description": "The repository's only contract authority root.",
             "allowedFileKinds": [
                 "file",
                 "directory"
@@ -80,7 +80,7 @@
             "lifecycle": "source",
             "authority": "derived",
             "generated": false,
-            "owner": "contract/repo",
+            "owner": "contracts/repo",
             "description": "Bounded views derived from contracts.",
             "allowedFileKinds": [
                 "file",
@@ -125,7 +125,7 @@
             "lifecycle": "quarantine",
             "authority": "quarantined",
             "generated": false,
-            "owner": "contract/repo",
+            "owner": "contracts/repo",
             "description": "Quarantined observations awaiting classification.",
             "allowedFileKinds": [
                 "file",
@@ -167,7 +167,7 @@
             "lifecycle": "source",
             "authority": "non-authority",
             "generated": false,
-            "owner": "contract/repo",
+            "owner": "contracts/repo",
             "description": "Explanatory non-authority documentation.",
             "allowedFileKinds": [
                 "file",
@@ -227,31 +227,6 @@
             ]
         },
         {
-            "path": "contract/",
-            "kind": "directory",
-            "role": "authority",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "contract/repo",
-            "description": "Active domain contracts and the preferred root for new contract families.",
-            "allowedFileKinds": [
-                "file",
-                "directory"
-            ],
-            "allowedImports": [],
-            "allowedExtensions": [
-                ".cue",
-                ".md"
-            ],
-            "validatesWith": [
-                "cue vet ./contract/..."
-            ],
-            "prunesWith": [
-                "reject undeclared children"
-            ]
-        },
-        {
             "path": "cmd/",
             "kind": "directory",
             "role": "tooling",
@@ -300,7 +275,7 @@
             "lifecycle": "source",
             "authority": "non-authority",
             "generated": false,
-            "owner": "contract/repo",
+            "owner": "contracts/repo",
             "description": "Developer-only tooling; never agent-visible.",
             "allowedFileKinds": [
                 "file",
@@ -683,28 +658,28 @@
         },
         {
             "path": "fixtures/vcs/valid",
-            "targetContract": "contract/vcs",
+            "targetContract": "contracts/vcs",
             "polarity": "valid",
             "expected": "pass",
             "validatesWith": "cue vet ./fixtures/vcs/valid"
         },
         {
             "path": "fixtures/vcs/invalid-unpushed",
-            "targetContract": "contract/vcs",
+            "targetContract": "contracts/vcs",
             "polarity": "invalid",
             "expected": "fail",
             "validatesWith": "cue vet ./fixtures/vcs/invalid-unpushed"
         },
         {
             "path": "fixtures/vcs/invalid-reflog-only",
-            "targetContract": "contract/vcs",
+            "targetContract": "contracts/vcs",
             "polarity": "invalid",
             "expected": "fail",
             "validatesWith": "cue vet ./fixtures/vcs/invalid-reflog-only"
         },
         {
             "path": "fixtures/vcs/invalid-missing-transaction-policy",
-            "targetContract": "contract/vcs",
+            "targetContract": "contracts/vcs",
             "polarity": "invalid",
             "expected": "fail",
             "validatesWith": "cue vet ./fixtures/vcs/invalid-missing-transaction-policy"
@@ -735,7 +710,7 @@
         {
             "path": ".repo/manifest.json",
             "generated": true,
-            "source": "contract/repo",
+            "source": "contracts/repo",
             "projection": "projections/repo:manifest",
             "command": "cue export ./projections/repo -e manifest",
             "editable": false,
@@ -746,7 +721,7 @@
         {
             "path": ".repo/inventory.json",
             "generated": true,
-            "source": "contract/repo",
+            "source": "contracts/repo",
             "projection": "projections/repo:inventory",
             "command": "cue export ./projections/repo -e inventory",
             "editable": false,
@@ -757,7 +732,7 @@
         {
             "path": ".repo/layout.md",
             "generated": true,
-            "source": "contract/repo",
+            "source": "contracts/repo",
             "projection": "projections/repo:layoutMarkdown",
             "command": "cue export ./projections/repo -e layoutMarkdown --out text",
             "editable": false,

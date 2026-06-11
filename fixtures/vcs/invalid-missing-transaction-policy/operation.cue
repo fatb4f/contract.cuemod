@@ -1,6 +1,6 @@
 package invalidmissingtransactionpolicy
 
-import "github.com/fatb4f/contract.cuemod/contract/vcs"
+import "github.com/fatb4f/contract.cuemod/contracts/vcs"
 
 operation: vcs.#SkillOperation & {
 	id:          "stack.stage"
