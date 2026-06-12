@@ -1,0 +1,65 @@
+{
+  "generatedFrom": "registry.index.json",
+  "fragments": [
+    {
+      "id": "agent-context-resolver.authority",
+      "sourceContract": "agent-context-resolver",
+      "sourcePath": "contracts/agent-context-resolver/contract.cue",
+      "role": "authority",
+      "surface": "turn_start",
+      "summary": "Authoritative resolver lifecycle and context selection boundary.",
+      "authorityRoot": "contracts/agent-context-resolver",
+      "contractPath": "contracts/agent-context-resolver/contract.cue"
+    },
+    {
+      "id": "code-intel.workflow",
+      "sourceContract": "code-intel",
+      "sourcePath": "contracts/code-intel/contract.cue",
+      "role": "workflow",
+      "surface": "turn_start",
+      "summary": "Code intelligence discovery and evidence workflow.",
+      "authorityRoot": "contracts/code-intel",
+      "contractPath": "contracts/code-intel/contract.cue"
+    },
+    {
+      "id": "generator-projects.constraints",
+      "sourceContract": "generator-projects",
+      "sourcePath": "contracts/generators/contract.cue",
+      "role": "constraint",
+      "surface": "turn_start",
+      "summary": "Generator source, generated output, and validation boundaries.",
+      "authorityRoot": "contracts/generators",
+      "contractPath": "contracts/generators/contract.cue"
+    },
+    {
+      "id": "mcp-toolbox.base-server",
+      "sourceContract": "mcp-toolbox",
+      "sourcePath": "contracts/mcp-toolbox/base-server.cue",
+      "role": "constraint",
+      "surface": "turn_start",
+      "summary": "Base MCP server capability and evidence-plane constraints.",
+      "authorityRoot": "contracts/mcp-toolbox",
+      "contractPath": "contracts/mcp-toolbox/base-server.cue"
+    },
+    {
+      "id": "plugin-bundle.orientation",
+      "sourceContract": "plugin-bundle",
+      "sourcePath": "contracts/plugin-bundle/contract.cue",
+      "role": "orientation",
+      "surface": "turn_start",
+      "summary": "Plugin bundle discovery and ownership orientation.",
+      "authorityRoot": "contracts/plugin-bundle",
+      "contractPath": "contracts/plugin-bundle/contract.cue"
+    },
+    {
+      "id": "vcs-patch-stack.workflow",
+      "sourceContract": "vcs-patch-stack",
+      "sourcePath": "contracts/vcs-patch-stack/contract.cue",
+      "role": "workflow",
+      "surface": "turn_start",
+      "summary": "Patch stack ownership, ordering, and validation workflow.",
+      "authorityRoot": "contracts/vcs-patch-stack",
+      "contractPath": "contracts/vcs-patch-stack/contract.cue"
+    }
+  ]
+}

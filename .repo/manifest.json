@@ -119,6 +119,27 @@
             ]
         },
         {
+            "path": "seeds/",
+            "kind": "directory",
+            "role": "fixture",
+            "lifecycle": "test-fixture",
+            "authority": "non-authority",
+            "generated": false,
+            "owner": "contracts/validation",
+            "description": "Imported seed bundles that validate independently.",
+            "allowedFileKinds": [
+                "file",
+                "directory"
+            ],
+            "allowedImports": [],
+            "validatesWith": [
+                "./seeds/contract-cuemod/agent-context-resolver/scripts/validate.sh"
+            ],
+            "prunesWith": [
+                "reject undeclared children"
+            ]
+        },
+        {
             "path": "migration/",
             "kind": "directory",
             "role": "migration",

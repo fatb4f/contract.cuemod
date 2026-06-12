@@ -1,0 +1,132 @@
+{
+  "generatedFrom": "turn_start_fragments.json",
+  "routes": [
+    {
+      "id": "resolver",
+      "terms": [
+        "resolver",
+        "context",
+        "prompt",
+        "hook",
+        "turnstart"
+      ],
+      "selects": [
+        "agent-context-resolver.authority"
+      ],
+      "hint": "Apply the resolver lifecycle and generated-fragment boundary.",
+      "priority": 100
+    },
+    {
+      "id": "patch-stack",
+      "terms": [
+        "patch",
+        "stack",
+        "rebase"
+      ],
+      "selects": [
+        "vcs-patch-stack.workflow"
+      ],
+      "hint": "Apply the declared patch-stack workflow.",
+      "priority": 80
+    },
+    {
+      "id": "mcp",
+      "terms": [
+        "mcp",
+        "tool",
+        "server"
+      ],
+      "selects": [
+        "mcp-toolbox.base-server"
+      ],
+      "hint": "Keep MCP results in the evidence plane.",
+      "priority": 80
+    },
+    {
+      "id": "plugin",
+      "terms": [
+        "plugin",
+        "bundle"
+      ],
+      "selects": [
+        "plugin-bundle.orientation"
+      ],
+      "hint": "Use the plugin bundle authority for discovery.",
+      "priority": 70
+    },
+    {
+      "id": "code-intel",
+      "terms": [
+        "code intel",
+        "search",
+        "symbol"
+      ],
+      "selects": [
+        "code-intel.workflow"
+      ],
+      "hint": "Apply the code-intelligence evidence workflow.",
+      "priority": 70
+    },
+    {
+      "id": "generator",
+      "terms": [
+        "generator",
+        "generated",
+        "generate"
+      ],
+      "selects": [
+        "generator-projects.constraints"
+      ],
+      "hint": "Preserve source and generated-output boundaries.",
+      "priority": 70
+    }
+  ],
+  "classifications": [
+    {
+      "prompt": "Update the resolver hook without allowing MCP tool output to become context.",
+      "selectedFragments": [
+        "agent-context-resolver.authority",
+        "mcp-toolbox.base-server"
+      ],
+      "compactHints": [
+        "Apply the resolver lifecycle and generated-fragment boundary.",
+        "Keep MCP results in the evidence plane."
+      ],
+      "evidence": [
+        {
+          "kind": "prompt_term",
+          "value": "resolver",
+          "source": "user_prompt"
+        },
+        {
+          "kind": "prompt_term",
+          "value": "mcp",
+          "source": "user_prompt"
+        }
+      ]
+    },
+    {
+      "prompt": "Regenerate the plugin bundle and validate the generated output.",
+      "selectedFragments": [
+        "plugin-bundle.orientation",
+        "generator-projects.constraints"
+      ],
+      "compactHints": [
+        "Use the plugin bundle authority for discovery.",
+        "Preserve source and generated-output boundaries."
+      ],
+      "evidence": [
+        {
+          "kind": "prompt_term",
+          "value": "plugin",
+          "source": "user_prompt"
+        },
+        {
+          "kind": "prompt_term",
+          "value": "generated",
+          "source": "user_prompt"
+        }
+      ]
+    }
+  ]
+}

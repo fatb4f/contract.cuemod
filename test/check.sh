@@ -32,6 +32,7 @@ cue vet ./fixtures/resolver/agent-context-resolver
 cue vet ./fixtures/vcs/valid
 cue vet ./fixtures/resolver/workspace-lifecycle
 cue vet ./migration
+./seeds/contract-cuemod/agent-context-resolver/scripts/validate.sh
 
 ./test/agent-context-hook.sh
 ./test/repo-layout.sh

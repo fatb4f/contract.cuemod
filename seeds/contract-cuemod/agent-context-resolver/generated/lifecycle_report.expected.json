@@ -1,0 +1,41 @@
+{
+  "version": "contract-cuemod.agent-context-resolver-proof/v1",
+  "checks": [
+    {
+      "id": "repo_wide_registry_exists",
+      "pass": true
+    },
+    {
+      "id": "all_declared_authorities_present",
+      "pass": true
+    },
+    {
+      "id": "fragment_inventory_generated_from_registry",
+      "pass": true
+    },
+    {
+      "id": "turn_start_consumes_registry_projection",
+      "pass": true
+    },
+    {
+      "id": "turn_start_precedes_prompt_classification",
+      "pass": true
+    },
+    {
+      "id": "prompt_selects_generated_ids_only",
+      "pass": true
+    },
+    {
+      "id": "prompt_cannot_emit_full_registry",
+      "pass": true
+    },
+    {
+      "id": "prompt_cannot_assemble_context_bodies",
+      "pass": true
+    },
+    {
+      "id": "mcp_tool_output_not_implied_context",
+      "pass": true
+    }
+  ]
+}

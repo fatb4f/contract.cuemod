@@ -65,6 +65,19 @@
         "status": "declared"
     },
     {
+        "path": "seeds/",
+        "kind": "directory",
+        "role": "fixture",
+        "lifecycle": "test-fixture",
+        "authority": "non-authority",
+        "generated": false,
+        "owner": "contracts/validation",
+        "validatesWith": [
+            "./seeds/contract-cuemod/agent-context-resolver/scripts/validate.sh"
+        ],
+        "status": "declared"
+    },
+    {
         "path": "migration/",
         "kind": "directory",
         "role": "migration",
