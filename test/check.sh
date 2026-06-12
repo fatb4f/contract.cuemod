@@ -38,6 +38,7 @@ cue vet ./migration
 ./test/agent-context-hook.sh
 ./test/agent-context-projection.sh
 ./test/prompt-classifier.sh
+go test ./internal/codexcontext
 ./test/repo-layout.sh
 
 if find adapters/git-mcp-go/source -name .git -print -quit | grep -q .; then

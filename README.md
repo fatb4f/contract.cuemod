@@ -42,6 +42,12 @@ selected IDs, compact hints, and rule evidence only; unknown, ambiguous, and
 empty prompts safely select no fragments. Memories and heuristic text remain
 non-authoritative, and MCP/tool routing receives no unvalidated prompt data.
 
+Stage 5 adds a deterministic Codex lifecycle harness. It loads generated
+turn-start fragment IDs before invoking the prompt classifier, validates every
+selected ID against that native inventory, expands selected fragment metadata
+inside the runtime, and exposes only that scoped expansion to a subagent.
+Classifier callbacks receive IDs only and cannot assemble context bodies.
+
 The managed `git-mcp-go` adapter is pinned to the `fatb4f/git-mcp-go`
 `worktree-v0` branch. Its source is materialized without nested `.git`
 metadata and remains an internal backend rather than a default agent surface.
