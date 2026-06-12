@@ -80,6 +80,8 @@ manifest: repocontract.#RepoLayout & {
 		{path: "fixtures/agent-context/invalid-undeclared", targetContract: "contracts/agent-context", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/agent-context/invalid-undeclared"},
 		{path: "fixtures/agent-context/invalid-turn-start-undeclared", targetContract: "contracts/agent-context", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/agent-context/invalid-turn-start-undeclared"},
 		{path: "fixtures/agent-context/invalid-turn-start-full-registry", targetContract: "contracts/agent-context", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/agent-context/invalid-turn-start-full-registry"},
+		{path: "fixtures/agent-context/prompt-classifier/valid", targetContract: "contracts/agent-context", polarity: "valid", expected: "pass", validatesWith: "cue vet ./fixtures/agent-context/prompt-classifier/valid"},
+		{path: "fixtures/agent-context/prompt-classifier/invalid-fragment", targetContract: "contracts/agent-context", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/agent-context/prompt-classifier/invalid-fragment"},
 		{path: "fixtures/resolver/workspace-lifecycle", targetContract: "contracts/resolver", polarity: "valid", expected: "pass", validatesWith: "cue vet ./fixtures/resolver/workspace-lifecycle"},
 	]
 
@@ -90,5 +92,6 @@ manifest: repocontract.#RepoLayout & {
 		{path: "generated/agent_context_projection.json", generated: true, source: "contracts/agent-context", projection: "projections/agent-context:agentContextProjection", command: "cue export ./projections/agent-context -e agentContextProjection", editable: false, validatesWith: ["./test/check.sh"]},
 		{path: "generated/turn_start_context_fragments.json", generated: true, source: "contracts/agent-context", projection: "projections/agent-context:turnStartContextFragments", command: "cue export ./projections/agent-context -e turnStartContextFragments", editable: false, validatesWith: ["./test/check.sh"]},
 		{path: "generated/stage3_expected_report.json", generated: true, source: "contracts/agent-context", projection: "projections/agent-context:stage3ExpectedReport", command: "cue export ./projections/agent-context -e stage3ExpectedReport", editable: false, validatesWith: ["./test/check.sh"]},
+		{path: "generated/prompt_classifier_registry.json", generated: true, source: "contracts/agent-context", projection: "projections/agent-context:promptClassifierRegistry", command: "cue export ./projections/agent-context -e promptClassifierRegistry", editable: false, validatesWith: ["./test/check.sh"]},
 	]
 }

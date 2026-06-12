@@ -30,12 +30,14 @@ cue vet ./fixtures/mcp/valid
 cue vet ./fixtures/mcp/adapter-output
 cue vet ./fixtures/agent-skill/valid
 cue vet ./fixtures/agent-context/valid
+cue vet ./fixtures/agent-context/prompt-classifier/valid
 cue vet ./fixtures/vcs/valid
 cue vet ./fixtures/resolver/workspace-lifecycle
 cue vet ./migration
 
 ./test/agent-context-hook.sh
 ./test/agent-context-projection.sh
+./test/prompt-classifier.sh
 ./test/repo-layout.sh
 
 if find adapters/git-mcp-go/source -name .git -print -quit | grep -q .; then
@@ -83,6 +85,11 @@ fi
 
 if cue vet ./fixtures/agent-context/invalid-turn-start-full-registry >/dev/null 2>&1; then
 	printf '%s\n' "full-registry turn-start fragment unexpectedly passed" >&2
+	exit 1
+fi
+
+if cue vet ./fixtures/agent-context/prompt-classifier/invalid-fragment >/dev/null 2>&1; then
+	printf '%s\n' "invalid prompt classifier fragment unexpectedly passed" >&2
 	exit 1
 fi
 

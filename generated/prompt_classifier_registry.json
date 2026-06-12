@@ -1,0 +1,39 @@
+{
+    "schema": "agent.prompt-classifier-registry.v1",
+    "rules": [
+        {
+            "id": "resolve-agent-context",
+            "terms": [
+                "context",
+                "resolver"
+            ],
+            "selectedFragments": [
+                "registry.agent-capability-routes",
+                "skill.resolve-agent-context"
+            ],
+            "hints": {
+                "domain": "agent-context",
+                "workflow": "resolve-agent-context",
+                "authorityRoot": "contracts/agent-context",
+                "risk": "read-only"
+            }
+        },
+        {
+            "id": "agent-runtime",
+            "terms": [
+                "runtime",
+                "mcp",
+                "tool"
+            ],
+            "selectedFragments": [
+                "generated.agent-runtime-assets"
+            ],
+            "hints": {
+                "domain": "agent-context",
+                "workflow": "agent-runtime",
+                "authorityRoot": "contracts/mcp",
+                "risk": "read-only"
+            }
+        }
+    ]
+}

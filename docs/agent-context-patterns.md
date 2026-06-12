@@ -28,6 +28,27 @@ user request / task intent
 
 The resolver is not a search box. It is a control surface for deciding what the agent is allowed to know, what it must know, what is stale, what is missing, and what evidence supports the selected context.
 
+## Stage 3 to Stage 4 boundary
+
+Stage 3 deterministically generates compact turn-start fragments from the CUE
+registry. Stage 4 does not rebuild that context. At `UserPromptSubmit`, it
+normalizes the submitted prompt, evaluates declared classifier rules, validates
+selected IDs against the Stage 3 turn-start fragment inventory, and emits only
+compact hints and rule evidence.
+
+```text
+stable Stage 3 turn-start fragments
+→ generated Stage 4 classifier registry
+→ prompt-specific rule matches
+→ CUE-validated fragment IDs and hints
+→ runtime exposure
+```
+
+Unknown and empty prompts select nothing. Ambiguous prompts report all matched
+rules but also select nothing, so heuristic overlap cannot become authority.
+Prompt text, memories, and classifier terms are evidence inputs only; CUE
+contracts remain the authority boundary before MCP or tool routing.
+
 ---
 
 # Controlled implementation discovery

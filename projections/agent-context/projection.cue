@@ -1,6 +1,9 @@
 package agentcontextprojection
 
-import agentcontext "github.com/fatb4f/contract.cuemod/contracts/agent-context:agentcontext"
+import (
+	agentcontext "github.com/fatb4f/contract.cuemod/contracts/agent-context:agentcontext"
+	"strings"
+)
 
 agentContextProjection: agentcontext.#AgentContextProjection & {
 	schema: "agent.context-fragment-projection.v1"
@@ -83,19 +86,107 @@ stage3ExpectedReport: agentcontext.#Stage3ExpectedReport & {
 	]
 }
 
-promptRoute: agentcontext.#PromptRoute & {
-	id:         "route.resolve-agent-context"
-	projection: agentContextProjection
-	selectedFragments: [
-		"registry.agent-capability-routes",
-		"skill.resolve-agent-context",
-		"hook.user-prompt-routing-hint",
+promptClassifierRegistry: agentcontext.#PromptClassifierRegistry & {
+	#turnStart: turnStartContextFragments
+	rules: [
+		{
+			id: "resolve-agent-context"
+			terms: ["context", "resolver"]
+			selectedFragments: [
+				"registry.agent-capability-routes",
+				"skill.resolve-agent-context",
+			]
+			hints: {
+				domain:        "agent-context"
+				workflow:      "resolve-agent-context"
+				authorityRoot: "contracts/agent-context"
+				risk:          "read-only"
+			}
+		},
+		{
+			id: "agent-runtime"
+			terms: ["runtime", "mcp", "tool"]
+			selectedFragments: ["generated.agent-runtime-assets"]
+			hints: {
+				domain:        "agent-context"
+				workflow:      "agent-runtime"
+				authorityRoot: "contracts/mcp"
+				risk:          "read-only"
+			}
+		},
 	]
 }
 
-promptDerivation: agentcontext.#PromptDerivation & {
-	id:                "derivation.resolve-agent-context"
-	routeID:           promptRoute.id
-	projection:        agentContextProjection
-	selectedFragments: promptRoute.selectedFragments
+promptClassifierInput: {
+	prompt: string | *""
+}
+
+let normalizedPrompt = strings.ToLower(strings.TrimSpace(promptClassifierInput.prompt))
+
+promptClassifierMatches: [
+	for rule in promptClassifierRegistry.rules
+	let matchedTerms = [
+		for term in rule.terms
+		if strings.Contains(normalizedPrompt, term) {
+			term
+		},
+	]
+	if len(matchedTerms) > 0 {
+		id:                rule.id
+		selectedFragments: rule.selectedFragments
+		hints:             rule.hints
+		matchedTerms:      matchedTerms
+	},
+]
+
+promptClassification: agentcontext.#PromptClassification & {
+	#turnStart: turnStartContextFragments
+	schema:     "agent.prompt-classification.v1"
+	prompt:     promptClassifierInput.prompt
+
+	if normalizedPrompt == "" {
+		status: "noop"
+		selectedFragments: []
+		hints: {
+			risk: "none"
+		}
+		evidence: {
+			matchedRules: []
+			rejectedRules: ["empty-prompt"]
+		}
+	}
+
+	if normalizedPrompt != "" && len(promptClassifierMatches) == 0 {
+		status: "unknown"
+		selectedFragments: []
+		evidence: {
+			matchedRules: []
+			rejectedRules: ["no-rule-match"]
+		}
+	}
+
+	if len(promptClassifierMatches) == 1 {
+		status:            "selected"
+		selectedFragments: promptClassifierMatches[0].selectedFragments
+		hints:             promptClassifierMatches[0].hints
+		evidence: {
+			matchedRules: [promptClassifierMatches[0].id]
+		}
+	}
+
+	if len(promptClassifierMatches) > 1 {
+		status: "ambiguous"
+		selectedFragments: []
+		hints: {
+			risk: "ambiguous"
+		}
+		evidence: {
+			matchedRules: [
+				for match in promptClassifierMatches {
+					match.id
+				},
+			]
+			rejectedRules: ["ambiguous-rule-match"]
+		}
+	}
 }

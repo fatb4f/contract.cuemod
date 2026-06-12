@@ -1,4 +1,4 @@
-package invalidundeclared
+package promptclassifierinvalidfragment
 
 import (
 	agentcontext "github.com/fatb4f/contract.cuemod/contracts/agent-context:agentcontext"
@@ -10,7 +10,7 @@ classification: agentcontext.#PromptClassification & {
 	schema:     "agent.prompt-classification.v1"
 	prompt:     "resolve agent context"
 	status:     "selected"
-	selectedFragments: ["fragment.not-declared"]
+	selectedFragments: ["fragment.not-generated-at-turn-start"]
 	evidence: {
 		matchedRules: ["invalid-fragment"]
 	}

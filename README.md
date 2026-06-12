@@ -35,6 +35,13 @@ The agent-context projection has three distinct boundaries:
 The generated fragment inventory and Stage 3 proof report are deterministic
 projections of `projections/agent-context`.
 
+Stage 4 adds a deterministic prompt classifier over that stable inventory.
+The generated classifier registry may select only fragment IDs already emitted
+by the Stage 3 turn-start projection. Prompt-derived output contains the prompt,
+selected IDs, compact hints, and rule evidence only; unknown, ambiguous, and
+empty prompts safely select no fragments. Memories and heuristic text remain
+non-authoritative, and MCP/tool routing receives no unvalidated prompt data.
+
 The managed `git-mcp-go` adapter is pinned to the `fatb4f/git-mcp-go`
 `worktree-v0` branch. Its source is materialized without nested `.git`
 metadata and remains an internal backend rather than a default agent surface.

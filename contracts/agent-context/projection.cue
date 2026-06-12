@@ -86,30 +86,99 @@ import "list"
 	proofs: [#Stage3Proof, ...#Stage3Proof]
 })
 
-#PromptSelection: {
-	projection: #AgentContextProjection
+#PromptClassifierHints: close({
+	domain?:        =~"^[a-z0-9][a-z0-9._/-]*$"
+	workflow?:      =~"^[a-z0-9][a-z0-9._/-]*$"
+	authorityRoot?: string
+	risk?:          "read-only" | "mutation" | "ambiguous" | "none"
+})
+
+#PromptClassifierEvidence: close({
+	matchedRules: [...string]
+	rejectedRules?: [...string]
+})
+
+#PromptClassificationShape: close({
+	schema: "agent.prompt-classification.v1"
+	prompt: string
+	status: "selected" | "unknown" | "ambiguous" | "noop"
+
 	selectedFragments: [...string]
+	hints?:   #PromptClassifierHints
+	evidence: #PromptClassifierEvidence
+})
+
+#PromptClassification: {
+	#PromptClassificationShape
+	#turnStart:        #TurnStartContextGeneration
+	status:            #PromptClassificationShape.status
+	selectedFragments: #PromptClassificationShape.selectedFragments
+	evidence:          #PromptClassificationShape.evidence
 
 	let declaredFragmentIDs = [
-		for fragment in projection.fragments {
-			fragment.id
+		for generatedFragment in #turnStart.fragments
+		for fragmentID in generatedFragment.content.fragmentIDs {
+			fragmentID
 		},
 	]
 
 	for selectedFragment in selectedFragments {
 		if !list.Contains(declaredFragmentIDs, selectedFragment) {
-			_selectionError: _|_
+			_unknownTurnStartFragment: _|_
+		}
+	}
+
+	if status == "selected" {
+		if len(selectedFragments) == 0 {
+			_selectedWithoutFragments: _|_
+		}
+		if len(evidence.matchedRules) != 1 {
+			_selectedWithoutSingleRule: _|_
+		}
+	}
+
+	if status != "selected" {
+		if len(selectedFragments) != 0 {
+			_unselectedWithFragments: _|_
+		}
+	}
+
+	if status == "ambiguous" {
+		if len(evidence.matchedRules) < 2 {
+			_ambiguousWithoutMultipleRules: _|_
 		}
 	}
 }
 
-#PromptRoute: close({
-	#PromptSelection
+#PromptClassifierRule: close({
 	id: =~"^[a-z0-9][a-z0-9._/-]*$"
+	terms: [string, ...string]
+	selectedFragments: [string, ...string]
+	hints: #PromptClassifierHints
 })
 
-#PromptDerivation: close({
-	#PromptSelection
-	id:      =~"^[a-z0-9][a-z0-9._/-]*$"
-	routeID: =~"^[a-z0-9][a-z0-9._/-]*$"
+#PromptClassifierRegistryShape: close({
+	schema: "agent.prompt-classifier-registry.v1"
+	rules: [#PromptClassifierRule, ...#PromptClassifierRule]
 })
+
+#PromptClassifierRegistry: {
+	#PromptClassifierRegistryShape
+	#turnStart: #TurnStartContextGeneration
+	rules:      #PromptClassifierRegistryShape.rules
+
+	let declaredFragmentIDs = [
+		for generatedFragment in #turnStart.fragments
+		for fragmentID in generatedFragment.content.fragmentIDs {
+			fragmentID
+		},
+	]
+
+	for rule in rules {
+		for selectedFragment in rule.selectedFragments {
+			if !list.Contains(declaredFragmentIDs, selectedFragment) {
+				_unknownRuleFragment: _|_
+			}
+		}
+	}
+}

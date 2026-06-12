@@ -5,18 +5,22 @@ import (
 	contextprojection "github.com/fatb4f/contract.cuemod/projections/agent-context:agentcontextprojection"
 )
 
-route: agentcontext.#PromptRoute & {
-	id:         "route.valid"
-	projection: contextprojection.agentContextProjection
+classification: agentcontext.#PromptClassification & {
+	#turnStart: contextprojection.turnStartContextFragments
+	schema:     "agent.prompt-classification.v1"
+	prompt:     "resolve agent context"
+	status:     "selected"
 	selectedFragments: [
 		"registry.agent-capability-routes",
-		"hook.user-prompt-routing-hint",
+		"skill.resolve-agent-context",
 	]
-}
-
-derivation: agentcontext.#PromptDerivation & {
-	id:                "derivation.valid"
-	routeID:           route.id
-	projection:        contextprojection.agentContextProjection
-	selectedFragments: route.selectedFragments
+	hints: {
+		domain:        "agent-context"
+		workflow:      "resolve-agent-context"
+		authorityRoot: "contracts/agent-context"
+		risk:          "read-only"
+	}
+	evidence: {
+		matchedRules: ["resolve-agent-context"]
+	}
 }
