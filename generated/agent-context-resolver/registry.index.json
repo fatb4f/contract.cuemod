@@ -113,6 +113,45 @@
                     "summary": "Patch stack ownership, ordering, and validation workflow."
                 }
             ]
+        },
+        {
+            "authorityRoot": "contracts/repo",
+            "contractPath": "contracts/repo/contract.cue",
+            "fragments": [
+                {
+                    "id": "vb-contract.authority",
+                    "role": "authority",
+                    "sourceContract": "vb-contract",
+                    "sourcePath": "contracts/repo/contract.cue",
+                    "summary": "Temporary virtual-branch contract root and registry contribution.",
+                    "surface": "turn_start"
+                },
+                {
+                    "id": "vb-contract.contract-seed",
+                    "role": "constraint",
+                    "sourceContract": "vb-contract",
+                    "sourcePath": "contracts/repo/contract_seed.cue",
+                    "summary": "Temporary contract, template, instance, and projection bootstrap seed.",
+                    "surface": "turn_start"
+                },
+                {
+                    "id": "vb-contract.component-seed",
+                    "role": "constraint",
+                    "sourceContract": "vb-contract",
+                    "sourcePath": "contracts/repo/component_seed.cue",
+                    "summary": "Shared component ownership, dependency, glue, and gate schema.",
+                    "surface": "turn_start"
+                },
+                {
+                    "id": "vb-contract.virtual-branch",
+                    "role": "constraint",
+                    "sourceContract": "vb-contract",
+                    "sourcePath": "contracts/repo/virtual_branch.cue",
+                    "summary": "Shared temporary virtual-branch seed schema for component migration.",
+                    "surface": "turn_start"
+                }
+            ],
+            "id": "vb-contract"
         }
     ]
 }

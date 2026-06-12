@@ -29,6 +29,7 @@ cue export ./projections/repo -e inventory >/dev/null
 cue vet ./fixtures/mcp/valid
 cue vet ./fixtures/mcp/adapter-output
 cue vet ./fixtures/agent-skill/valid
+cue vet ./fixtures/vb-contract/valid
 cue vet ./fixtures/resolver/agent-context-resolver
 cue vet ./fixtures/vcs/valid
 cue vet ./fixtures/resolver/workspace-lifecycle

@@ -1,5 +1,7 @@
 package registry
 
+import vbcontract "github.com/fatb4f/contract.cuemod/contracts/repo:repo"
+
 #RepoContractRegistry: {
 	repo: {
 		id:   string
@@ -140,5 +142,6 @@ repoRegistry: #RepoContractRegistry & {
 				summary:        "Patch stack ownership, ordering, and validation workflow."
 			}]
 		},
+		vbcontract.vbContract.registryContribution,
 	]
 }

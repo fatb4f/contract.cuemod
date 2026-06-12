@@ -75,6 +75,46 @@
       "contractPath": "contracts/resolver/resolver.cue"
     },
     {
+      "id": "vb-contract.authority",
+      "sourceContract": "vb-contract",
+      "sourcePath": "contracts/repo/contract.cue",
+      "role": "authority",
+      "surface": "turn_start",
+      "summary": "Temporary virtual-branch contract root and registry contribution.",
+      "authorityRoot": "contracts/repo",
+      "contractPath": "contracts/repo/contract.cue"
+    },
+    {
+      "id": "vb-contract.component-seed",
+      "sourceContract": "vb-contract",
+      "sourcePath": "contracts/repo/component_seed.cue",
+      "role": "constraint",
+      "surface": "turn_start",
+      "summary": "Shared component ownership, dependency, glue, and gate schema.",
+      "authorityRoot": "contracts/repo",
+      "contractPath": "contracts/repo/contract.cue"
+    },
+    {
+      "id": "vb-contract.contract-seed",
+      "sourceContract": "vb-contract",
+      "sourcePath": "contracts/repo/contract_seed.cue",
+      "role": "constraint",
+      "surface": "turn_start",
+      "summary": "Temporary contract, template, instance, and projection bootstrap seed.",
+      "authorityRoot": "contracts/repo",
+      "contractPath": "contracts/repo/contract.cue"
+    },
+    {
+      "id": "vb-contract.virtual-branch",
+      "sourceContract": "vb-contract",
+      "sourcePath": "contracts/repo/virtual_branch.cue",
+      "role": "constraint",
+      "surface": "turn_start",
+      "summary": "Shared temporary virtual-branch seed schema for component migration.",
+      "authorityRoot": "contracts/repo",
+      "contractPath": "contracts/repo/contract.cue"
+    },
+    {
       "id": "vcs.patch-stack",
       "sourceContract": "vcs",
       "sourcePath": "contracts/vcs/patch_stack_skill.cue",

@@ -11,11 +11,7 @@ package repo
 		renderer: "none"
 	}
 
-	templateSeed: {
-		id:       string & !=""
-		source:   string & !=""
-		renderer: "none"
-	}
+	templateSeed: #ContractTemplateSeed
 
 	instanceSeed: {
 		id:       string & !=""
@@ -23,19 +19,14 @@ package repo
 		renderer: "none"
 	}
 
-	projectionSeed: {
-		id:            string & !=""
-		source:        string & !=""
-		renderer:      "none"
-		targetFragment: string & !=""
-	}
+	projectionSeed: #ProjectionSeed
 
 	registryFragmentSeed: {
-		id:             string & !=""
-		authorityRoot:   string & !=""
-		contractPath:    string & !=""
-		sourcePath:      string & !=""
-		fragmentID:      string & !=""
+		id:            string & !=""
+		authorityRoot: string & !=""
+		contractPath:  string & !=""
+		sourcePath:    string & !=""
+		fragmentID:    string & !=""
 	}
 
 	rebaseTarget: {
@@ -69,9 +60,9 @@ contractSeed: #ContractSeed & {
 	}
 
 	projectionSeed: {
-		id:            "repo.contract-seed.projection"
-		source:        "contracts/repo/contract_seed.cue"
-		renderer:      "none"
+		id:             "repo.contract-seed.projection"
+		source:         "contracts/repo/contract_seed.cue"
+		renderer:       "none"
 		targetFragment: "repo.contract-seed"
 	}
 
