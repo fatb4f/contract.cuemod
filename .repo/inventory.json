@@ -65,6 +65,20 @@
         "status": "declared"
     },
     {
+        "path": "generated/",
+        "kind": "directory",
+        "role": "generated",
+        "lifecycle": "generated",
+        "authority": "derived",
+        "generated": true,
+        "owner": "contracts/agent-context-resolver",
+        "validatesWith": [
+            "cue vet ./contracts",
+            "./test/check.sh"
+        ],
+        "status": "generated"
+    },
+    {
         "path": "seeds/",
         "kind": "directory",
         "role": "fixture",

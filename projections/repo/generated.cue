@@ -14,6 +14,7 @@ layoutMarkdown: """
 	| `adapters/` | adapter | managed-snapshot | non-authority |
 	| `projections/` | projection | source | derived |
 	| `fixtures/` | fixture | test-fixture | non-authority |
+	| `generated/` | generated | generated | derived |
 	| `migration/` | migration | quarantine | quarantined |
 	| `test/` | validation | source | non-authority |
 	| `docs/` | documentation | source | non-authority |

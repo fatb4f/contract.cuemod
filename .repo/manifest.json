@@ -119,6 +119,28 @@
             ]
         },
         {
+            "path": "generated/",
+            "kind": "directory",
+            "role": "generated",
+            "lifecycle": "generated",
+            "authority": "derived",
+            "generated": true,
+            "owner": "contracts/agent-context-resolver",
+            "description": "Generated resolver projections and lifecycle outputs.",
+            "allowedFileKinds": [
+                "file",
+                "directory"
+            ],
+            "allowedImports": [],
+            "validatesWith": [
+                "cue vet ./contracts",
+                "./test/check.sh"
+            ],
+            "prunesWith": [
+                "reject undeclared children"
+            ]
+        },
+        {
             "path": "seeds/",
             "kind": "directory",
             "role": "fixture",

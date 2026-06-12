@@ -5,6 +5,7 @@ repo_root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd -P)
 cd "$repo_root"
 
 cue vet ./contracts/graph
+cue vet ./contracts
 cue vet ./contracts/adapters
 cue vet ./contracts/mcp
 cue vet ./contracts/providers
