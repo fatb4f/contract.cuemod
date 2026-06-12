@@ -1,4 +1,4 @@
-package agentcontextresolver
+package invalidfullregistry
 
 import "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver:agentcontextresolver"
 
@@ -10,7 +10,7 @@ registry: agentcontextresolver.#Registry & {
 }
 
 classification: agentcontextresolver.#PromptClassification & {
-	selectedFragments: ["fragment-workspace-lifecycle"]
+	selectedFragments: ["fragment-workspace-lifecycle", "fragment-unknown"]
 	hints: {
 		domain:        "workspace"
 		workflow:      "sessionizer"
@@ -18,7 +18,6 @@ classification: agentcontextresolver.#PromptClassification & {
 	}
 	evidence: {
 		matchedRules: ["turn_start_fragment", "known_fragment"]
-		rejectedRules: ["mcp_tool_output", "assembled_context_body"]
 	}
 }
 
@@ -35,8 +34,6 @@ output: agentcontextresolver.#ResolverOutput & {
 		classification: classification
 		assertions: [
 			{name: "turn_start_available", passed: true},
-			{name: "known_fragment_selected", passed: true},
-			{name: "context_body_not_assembled", passed: true},
 		]
 	}
 	hook: {
@@ -44,6 +41,7 @@ output: agentcontextresolver.#ResolverOutput & {
 		selectedFragments: classification.selectedFragments
 		hints:             classification.hints
 		evidence:          classification.evidence
-		additionalContext: "Agent context lifecycle report: selected fragment IDs only"
+		additionalContext:  "Agent context lifecycle report: selected fragment IDs only"
+		fullRegistry:      registry
 	}
 }

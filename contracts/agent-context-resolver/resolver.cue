@@ -17,6 +17,12 @@ import "list"
 		itemKind: "message"
 		expectedNativeContextInjection: true
 	}
+	if surface != "turn_start" {
+		expectedNativeContextInjection: false
+	}
+	if itemKind == "tool_output" {
+		expectedNativeContextInjection: false
+	}
 })
 
 #Registry: close({
@@ -45,18 +51,27 @@ import "list"
 	evidence: #PromptEvidence
 })
 
+#LifecycleAssertionName:
+	"turn_start_available" |
+	"known_fragment_selected" |
+	"context_body_not_assembled" |
+	"mcp_tool_output_not_implied_context" |
+	"subagent_scope_preserved"
+
 #LifecycleAssertion: close({
-	name: string & !=""
-	passed: bool
+	name: #LifecycleAssertionName
+	passed: true
 	detail?: string & !=""
 })
 
 #ResolverLifecycleReport: close({
 	schema: "agent.context-resolver.lifecycle-report.v1"
+	registry: #Registry
 	turnStart: #TurnStartContextFragmentSet
 	classification: #PromptClassification
 	assertions: [#LifecycleAssertion, ...#LifecycleAssertion]
 	for _, id in classification.selectedFragments {
+		list.Contains([for fragment in registry.fragments {fragment.id}], id)
 		list.Contains([for fragment in turnStart.fragments {fragment.id}], id)
 	}
 })
@@ -65,10 +80,13 @@ import "list"
 	schema:   "agent.context-resolver.output.v1"
 	prompt:   string & !=""
 	report:   #ResolverLifecycleReport
-	hook: {
+	hook: close({
 		hook_event_name: "UserPromptSubmit"
+		selectedFragments: [...#DeclaredID]
+		hints: #PromptHint
+		evidence: #PromptEvidence
 		additionalContext: string & !=""
-	}
+	})
 })
 
 #RegistryMatch: {
