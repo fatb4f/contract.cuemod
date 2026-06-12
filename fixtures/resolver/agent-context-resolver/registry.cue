@@ -4,49 +4,42 @@ import "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver:agent
 
 registry: agentcontextresolver.#Registry & {
 	fragments: [
-		{id: "fragment-workspace-lifecycle", kind: "fragment", label: "workspace lifecycle fragment"},
-		{id: "fragment-desktop-session", kind: "fragment", label: "desktop session fragment"},
-	]
-	roles: [
-		{id: "role-routed-context", kind: "role", label: "routed context role"},
-	]
-	pipelines: [
-		{id: "pipeline-hook-adapter", kind: "pipeline", label: "hook adapter pipeline"},
-	]
-	functionGroups: [
-		{id: "function-group-minimal", kind: "function-group", label: "minimal function group"},
+		{id: "fragment-workspace-lifecycle", surface: "turn_start", channel: "message", itemKind: "message", expectedNativeContextInjection: true, label: "workspace lifecycle fragment"},
+		{id: "fragment-desktop-session", surface: "turn_start", channel: "message", itemKind: "message", expectedNativeContextInjection: true, label: "desktop session fragment"},
 	]
 }
 
-chosenSelection: agentcontextresolver.#Selection & {
-	fragment_ids:      ["fragment-workspace-lifecycle"]
-	role_ids:          ["role-routed-context"]
-	pipeline_ids:      ["pipeline-hook-adapter"]
-	function_group_ids: ["function-group-minimal"]
-}
-
-resolverReport: agentcontextresolver.#ResolverReport & {
-	schema: "agent.context-resolver.report.v1"
-	query:  "How does the WezTerm sessionizer switch workspaces?"
-	selection: chosenSelection
-	routing: {
-		fallback: false
+classification: agentcontextresolver.#PromptClassification & {
+	selectedFragments: ["fragment-workspace-lifecycle"]
+	hints: {
+		domain:        "workspace"
+		workflow:      "sessionizer"
+		authorityRoot: "contracts/agent-context-resolver"
 	}
+	evidence: {
+		matchedRules: ["turn_start_fragment", "known_fragment"]
+		rejectedRules: ["mcp_tool_output", "assembled_context_body"]
+	}
+}
+
+turnStart: agentcontextresolver.#TurnStartContextFragmentSet & {
+	fragments: registry.fragments
 }
 
 output: agentcontextresolver.#ResolverOutput & {
-	schema: "agent.context-resolver.output.v1"
 	prompt: "How does the WezTerm sessionizer switch workspaces?"
 	report: {
-		schema: "agent.context-resolver.report.v1"
-		query:  "How does the WezTerm sessionizer switch workspaces?"
-		selection: chosenSelection
-		routing: {
-			fallback: false
-		}
+		schema:       "agent.context-resolver.lifecycle-report.v1"
+		turnStart:    turnStart
+		classification: classification
+		assertions: [
+			{name: "turn_start_available", passed: true},
+			{name: "known_fragment_selected", passed: true},
+			{name: "context_body_not_assembled", passed: true},
+		]
 	}
 	hook: {
 		hook_event_name: "UserPromptSubmit"
-		additionalContext: "Agent context routing report:\n{\"schema\":\"agent.context-resolver.report.v1\",\"query\":\"How does the WezTerm sessionizer switch workspaces?\"}"
+		additionalContext: "Agent context lifecycle report: selected fragment IDs only"
 	}
 }

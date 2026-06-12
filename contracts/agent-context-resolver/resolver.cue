@@ -4,39 +4,67 @@ import "list"
 
 #DeclaredID: string & =~"^[a-z0-9][a-z0-9._-]*$"
 
-#RegistryEntry: close({
+#ContextFragment: close({
 	id:    #DeclaredID
-	kind:  "fragment" | "role" | "pipeline" | "function-group"
+	surface: "turn_start" | "prompt" | "mcp"
+	channel: "message" | "item" | "resource"
+	itemKind: "message" | "resource" | "tool_output"
+	expectedNativeContextInjection: bool
 	label: string & !=""
+
+	if surface == "turn_start" {
+		channel: "message"
+		itemKind: "message"
+		expectedNativeContextInjection: true
+	}
 })
 
 #Registry: close({
-	fragments:      [...#RegistryEntry]
-	roles:          [...#RegistryEntry]
-	pipelines:      [...#RegistryEntry]
-	functionGroups: [...#RegistryEntry]
+	fragments: [...#ContextFragment]
 })
 
-#Selection: close({
-	fragment_ids:      [...#DeclaredID]
-	role_ids:          [...#DeclaredID]
-	pipeline_ids:      [...#DeclaredID]
-	function_group_ids: [...#DeclaredID]
+#TurnStartContextFragmentSet: close({
+	fragments: [...#ContextFragment & {surface: "turn_start"}]
 })
 
-#ResolverReport: close({
-	schema: "agent.context-resolver.report.v1"
-	query:  string & !=""
-	selection: #Selection
-	routing: {
-		fallback: bool
+#PromptHint: close({
+	domain?: string
+	workflow?: string
+	authorityRoot?: string
+	risk?: string
+})
+
+#PromptEvidence: close({
+	matchedRules: [...string & !=""]
+	rejectedRules?: [...string & !=""]
+})
+
+#PromptClassification: close({
+	selectedFragments: [...#DeclaredID]
+	hints: #PromptHint
+	evidence: #PromptEvidence
+})
+
+#LifecycleAssertion: close({
+	name: string & !=""
+	passed: bool
+	detail?: string & !=""
+})
+
+#ResolverLifecycleReport: close({
+	schema: "agent.context-resolver.lifecycle-report.v1"
+	turnStart: #TurnStartContextFragmentSet
+	classification: #PromptClassification
+	assertions: [#LifecycleAssertion, ...#LifecycleAssertion]
+	for _, id in classification.selectedFragments {
+		list.Contains([for fragment in turnStart.fragments {fragment.id}], id)
 	}
 })
 
 #ResolverOutput: close({
 	schema:   "agent.context-resolver.output.v1"
 	prompt:   string & !=""
-	report:   #ResolverReport
+	report:   #ResolverLifecycleReport
 	hook: {
 		hook_event_name: "UserPromptSubmit"
 		additionalContext: string & !=""
@@ -45,23 +73,11 @@ import "list"
 
 #RegistryMatch: {
 	registry: #Registry
-	selection: #Selection
+	classification: #PromptClassification
 
 	allowedFragmentIDs: [for entry in registry.fragments {entry.id}]
-	allowedRoleIDs: [for entry in registry.roles {entry.id}]
-	allowedPipelineIDs: [for entry in registry.pipelines {entry.id}]
-	allowedFunctionGroupIDs: [for entry in registry.functionGroups {entry.id}]
 
-	for _, id in selection.fragment_ids {
+	for _, id in classification.selectedFragments {
 		list.Contains(allowedFragmentIDs, id)
-	}
-	for _, id in selection.role_ids {
-		list.Contains(allowedRoleIDs, id)
-	}
-	for _, id in selection.pipeline_ids {
-		list.Contains(allowedPipelineIDs, id)
-	}
-	for _, id in selection.function_group_ids {
-		list.Contains(allowedFunctionGroupIDs, id)
 	}
 }

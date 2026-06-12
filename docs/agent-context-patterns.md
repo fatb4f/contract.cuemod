@@ -724,6 +724,14 @@ context://policy/allowed-tools
 
 MCP resources are the read-only projection of the resolver.
 
+The `agent-context-resolver` slice in this repo now models that boundary as a lifecycle:
+
+```text
+turn-start native fragments -> prompt classification -> selected known IDs -> scoped report
+```
+
+That keeps context authority in the contract layer and keeps runtime/tool output out of the implied model context path.
+
 ---
 
 # Relationship map
