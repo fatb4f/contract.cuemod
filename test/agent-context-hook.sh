@@ -2,10 +2,11 @@
 set -eu
 
 repo_root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd -P)
-hook="$repo_root/.codex/skills/resolve-agent-context/scripts/dotfiles-agent-context-hook"
+hook="$repo_root/.codex/skills/resolve-agent-context/scripts/agent-context-resolver-hook"
 resolver="$repo_root/.codex/skills/resolve-agent-context/scripts/resolve-agent-context"
 generated_hooks="$repo_root/.codex/hooks.json"
 generated_skill="$repo_root/.codex/skills/resolve-agent-context/SKILL.md"
+generated_dir="$repo_root/generated/agent-context-resolver"
 
 run_hook() {
 	prompt=$1
@@ -14,102 +15,69 @@ run_hook() {
 		"$hook"
 }
 
-hint=$(run_hook "How are environment variables injected when switching WezTerm sessions?")
+hint=$(run_hook "Update the resolver hook without allowing MCP tool output to become context.")
 hint_context=$(printf '%s\n' "$hint" | jq -r '.hookSpecificOutput.additionalContext | sub("^Agent context routing hint:\\n"; "") | fromjson')
 printf '%s\n' "$hint_context" | jq -e '
-	.schema == "agent.hook-hint.v1" and
-	.candidates == ["workspace-lifecycle"] and
-	.matchedTerms == ["wezterm"] and
-	.resolver.tool == "cue.resolve_agent_context" and
-	(.resolver.fallbackCommand | endswith("/resolve-agent-context")) and
-	.resolver.skill == ".codex/skills/resolve-agent-context/SKILL.md" and
-	(has("components") | not) and
-	(has("validation") | not)
+	.schema == "agent.context-resolver.hint.v1" and
+	(.availableFragmentIDs | index("agent-context-resolver.authority") != null) and
+	(.availableFragmentIDs | index("agent-skill.projection") != null) and
+	(.availableFragmentIDs | index("mcp.evidence-plane") != null) and
+	(.selectedFragments | index("agent-context-resolver.authority") != null) and
+	(.selectedFragments | index("agent-skill.projection") != null) and
+	(.selectedFragments | index("mcp.evidence-plane") != null) and
+	([.selectedFragments[] as $id | .availableFragmentIDs | index($id) != null] | all) and
+	.generatedFrom.turnStart == "generated/agent-context-resolver/turn_start_fragments.json" and
+	.generatedFrom.routes == "generated/agent-context-resolver/prompt_routes.json"
 ' >/dev/null
 
-hint_size=$(printf '%s\n' "$hint_context" | jq -c . | wc -c)
-[ "$hint_size" -lt 1024 ]
-
-read_only=$(
-	"$resolver" \
-		--prompt "How are environment variables injected when switching WezTerm sessions?" \
-		--cwd /home/_404/src/dotfiles \
-		--candidate workspace-lifecycle
-)
-printf '%s\n' "$read_only" | jq -e '
-	.schema == "agent.context-projection.v1" and
-	.decision.capability == "workspace-lifecycle" and
-	.decision.mode == "read-only" and
-	.validation.required == false and
-	.validation.commands == [] and
-	([.components[].id] | index("wezterm-sessionizer") != null)
-' >/dev/null
-
-implementation_read_only=$(
-	"$resolver" \
-		--prompt "Cite exact implementation evidence for the WezTerm sessionizer" \
-		--cwd /home/_404/src/dotfiles \
-		--candidate workspace-lifecycle
-)
-printf '%s\n' "$implementation_read_only" | jq -e '
-	.decision.mode == "read-only" and
-	.validation.required == false
-' >/dev/null
-
-candidate_is_hint=$(
-	"$resolver" \
-		--prompt "How does the WezTerm sessionizer switch workspaces?" \
-		--cwd /home/_404/src/dotfiles \
-		--candidate desktop-session-lifecycle
-)
-printf '%s\n' "$candidate_is_hint" | jq -e '
-	.decision.capability == "workspace-lifecycle"
-' >/dev/null
-
-mutation=$(
-	"$resolver" \
-		--prompt "Fix Hyprland brightness through the session CLI" \
-		--cwd /home/_404/src/dotfiles \
-		--candidate desktop-session-lifecycle
-)
-printf '%s\n' "$mutation" | jq -e '
-	.decision.capability == "desktop-session-lifecycle" and
-	.decision.mode == "mutation" and
-	.validation.required == true and
-	(.validation.commands | length > 0) and
-	([.boundaries.source[]] | index("shell-wrap/src/session/src") != null) and
-	([.boundaries.generated[]] | index("shell-wrap/src/session/session") != null) and
-	([.mutationPolicy.neverEditDirectly[]] | index("shell-wrap/src/session/session") != null)
+resolved=$("$resolver" --prompt "Update the resolver hook without allowing MCP tool output to become context.")
+printf '%s\n' "$resolved" | jq -e '
+	.schema == "agent.context-resolver.hint.v1" and
+	([.selectedFragments[] as $id | .availableFragmentIDs | index($id) != null] | all)
 ' >/dev/null
 
 run_hook "Update README wording" | jq -e '. == {}' >/dev/null
-run_hook "Change Hyprland and the WezTerm workspace" | jq -e '. == {}' >/dev/null
 
-tmp_root=$(mktemp -d "${TMPDIR:-/tmp}/agent-context-projections.XXXXXX")
+tmp_root=$(mktemp -d "${TMPDIR:-/tmp}/agent-context-resolver.XXXXXX")
 trap 'rm -rf "$tmp_root"' EXIT HUP INT TERM
+mkdir -p "$tmp_root/generated"
 (
 	cd "$repo_root"
-	cue export . dotfiles.schema-map.json -e codexHooks --out json >"$tmp_root/hooks.json"
-	cue export . dotfiles.schema-map.json -e codexSkill --out text >"$tmp_root/SKILL.md"
-	cue export . dotfiles.schema-map.json -e agentContextHookScript.content --out text >"$tmp_root/dotfiles-agent-context-hook"
-	cue export . dotfiles.schema-map.json -e resolveAgentContextScript.content --out text >"$tmp_root/resolve-agent-context"
-	cue export ./projections/agent-skill -e 'projection.scripts["dotfiles-agent-context-hook"].content' --out text >"$tmp_root/projected-dotfiles-agent-context-hook"
-	cue export ./projections/agent-skill -e 'projection.scripts["resolve-agent-context"].content' --out text >"$tmp_root/projected-resolve-agent-context"
+	cue export ./contracts/registry.cue -e repoRegistry --force --out json --outfile "$tmp_root/generated/registry.index.json"
+	go run ./seeds/contract-cuemod/agent-context-resolver/cmd/seed-resolver/main.go generate \
+		--registry "$tmp_root/generated/registry.index.json" \
+		--out "$tmp_root/generated"
+	cue export ./projections/agent-skill -e projection.hooks --out json >"$tmp_root/hooks.json"
+	cue export ./projections/agent-skill -e skillContent --out text >"$tmp_root/SKILL.md"
+	cue export ./projections/agent-skill -e 'projection.scripts["agent-context-resolver-hook"].content' --out text >"$tmp_root/agent-context-resolver-hook"
+	cue export ./projections/agent-skill -e 'projection.scripts["resolve-agent-context"].content' --out text >"$tmp_root/resolve-agent-context"
 )
+
+diff -ru "$generated_dir" "$tmp_root/generated"
 jq -S . "$tmp_root/hooks.json" >"$tmp_root/hooks.generated.sorted"
 jq -S . "$generated_hooks" >"$tmp_root/hooks.installed.sorted"
 cmp "$tmp_root/hooks.generated.sorted" "$tmp_root/hooks.installed.sorted"
 cmp "$tmp_root/SKILL.md" "$generated_skill"
-cmp "$tmp_root/dotfiles-agent-context-hook" "$hook"
+cmp "$tmp_root/agent-context-resolver-hook" "$hook"
 cmp "$tmp_root/resolve-agent-context" "$resolver"
-cmp "$tmp_root/projected-dotfiles-agent-context-hook" "$hook"
-cmp "$tmp_root/projected-resolve-agent-context" "$resolver"
+
+jq -r '
+	.contracts[]
+	| .authorityRoot, .contractPath, (.fragments[].sourcePath)
+' "$generated_dir/registry.index.json" |
+	while IFS= read -r path; do
+		[ -e "$repo_root/$path" ] || {
+			printf 'registry references missing authority path: %s\n' "$path" >&2
+			exit 1
+		}
+	done
 
 [ -x "$hook" ]
 [ -x "$resolver" ]
+[ ! -e "$repo_root/.codex/skills/resolve-agent-context/scripts/dotfiles-agent-context-hook" ]
 
-if grep -R "/home/_404/src/contract.cuemod\\|bin/resolve-agent-context\\|bin/dotfiles-agent-context-hook" "$repo_root/.codex"; then
-	printf '%s\n' "generated agent assets reference repo-local source paths" >&2
+if grep -R "dotfiles-agent-context-hook" "$repo_root/.codex"; then
+	printf '%s\n' "generated agent assets reference the stale dotfiles hook" >&2
 	exit 1
 fi
 

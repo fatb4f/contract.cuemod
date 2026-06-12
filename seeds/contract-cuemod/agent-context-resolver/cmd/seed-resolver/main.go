@@ -103,11 +103,11 @@ type promptFixture struct {
 
 var classifierRoutes = []route{
 	{ID: "resolver", Terms: []string{"resolver", "context", "prompt", "hook", "turnstart"}, Selects: []string{"agent-context-resolver.authority"}, Hint: "Apply the resolver lifecycle and generated-fragment boundary.", Priority: 100},
-	{ID: "patch-stack", Terms: []string{"patch", "stack", "rebase"}, Selects: []string{"vcs-patch-stack.workflow"}, Hint: "Apply the declared patch-stack workflow.", Priority: 80},
-	{ID: "mcp", Terms: []string{"mcp", "tool", "server"}, Selects: []string{"mcp-toolbox.base-server"}, Hint: "Keep MCP results in the evidence plane.", Priority: 80},
-	{ID: "plugin", Terms: []string{"plugin", "bundle"}, Selects: []string{"plugin-bundle.orientation"}, Hint: "Use the plugin bundle authority for discovery.", Priority: 70},
-	{ID: "code-intel", Terms: []string{"code intel", "search", "symbol"}, Selects: []string{"code-intel.workflow"}, Hint: "Apply the code-intelligence evidence workflow.", Priority: 70},
-	{ID: "generator", Terms: []string{"generator", "generated", "generate"}, Selects: []string{"generator-projects.constraints"}, Hint: "Preserve source and generated-output boundaries.", Priority: 70},
+	{ID: "patch-stack", Terms: []string{"patch", "stack", "rebase"}, Selects: []string{"vcs.patch-stack"}, Hint: "Apply the declared patch-stack workflow.", Priority: 80},
+	{ID: "mcp", Terms: []string{"mcp", "tool", "server"}, Selects: []string{"mcp.evidence-plane"}, Hint: "Keep MCP results in the evidence plane.", Priority: 80},
+	{ID: "skill", Terms: []string{"skill", "hook", "codex"}, Selects: []string{"agent-skill.projection"}, Hint: "Apply the generated agent skill and hook projection constraints.", Priority: 70},
+	{ID: "context-packet", Terms: []string{"context packet", "dependency", "projection"}, Selects: []string{"resolver.context-packet"}, Hint: "Apply the context packet projection workflow.", Priority: 70},
+	{ID: "repo", Terms: []string{"repository", "generated", "fixture"}, Selects: []string{"repo.lifecycle"}, Hint: "Preserve repository lifecycle and generated-output boundaries.", Priority: 70},
 }
 
 func main() {
@@ -298,11 +298,11 @@ func validateRegistry(reg registry) error {
 	}
 	required := map[string]bool{
 		"agent-context-resolver": false,
-		"vcs-patch-stack":        false,
-		"mcp-toolbox":            false,
-		"plugin-bundle":          false,
-		"code-intel":             false,
-		"generator-projects":     false,
+		"agent-skill":            false,
+		"mcp":                    false,
+		"resolver":               false,
+		"repo":                   false,
+		"vcs":                    false,
 	}
 	fragmentIDs := map[string]bool{}
 	for _, contract := range reg.Contracts {

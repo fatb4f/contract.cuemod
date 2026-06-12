@@ -1,0 +1,63 @@
+#!/bin/sh
+set -eu
+
+script_dir=$(CDPATH= cd -- "$(dirname "$0")" && pwd -P)
+repo_root=${CONTRACT_CUEMOD_ROOT:-$(CDPATH= cd -- "$script_dir/../../../.." && pwd -P)}
+generated_dir="$repo_root/generated/agent-context-resolver"
+input_json=$(mktemp "${TMPDIR:-/tmp}/agent-context-resolver.XXXXXX.json")
+trap 'rm -f "$input_json"' EXIT HUP INT TERM
+cat >"$input_json"
+
+prompt=$(jq -er 'select(.hook_event_name == "UserPromptSubmit") | .prompt' "$input_json") || {
+	printf '{}\n'
+	exit 0
+}
+
+classification=$(
+	jq -cn \
+		--arg prompt "$prompt" \
+		--slurpfile turnStart "$generated_dir/turn_start_fragments.json" \
+		--slurpfile promptRoutes "$generated_dir/prompt_routes.json" '
+		($prompt | ascii_downcase) as $lower |
+		[$turnStart[0].fragments[].id] as $available |
+		[
+			$promptRoutes[0].routes[]
+			| . as $route
+			| select(any($route.terms[]; . as $term | $lower | contains($term)))
+		] as $matched |
+		{
+			schema: "agent.context-resolver.hint.v1",
+			availableFragmentIDs: $available,
+			selectedFragments: [
+				$matched[].selects[] as $id
+				| select($available | index($id) != null)
+				| $id
+			] | unique,
+			compactHints: [$matched[].hint] | unique,
+			evidence: [
+				$matched[]
+				| {kind: "prompt_route", value: .id, source: "user_prompt"}
+			],
+			generatedFrom: {
+				turnStart: "generated/agent-context-resolver/turn_start_fragments.json",
+				routes: "generated/agent-context-resolver/prompt_routes.json"
+			},
+			resolver: {
+				command: ".codex/skills/resolve-agent-context/scripts/resolve-agent-context",
+				skill: ".codex/skills/resolve-agent-context/SKILL.md"
+			}
+		}'
+)
+
+[ "$(printf '%s' "$classification" | jq '.selectedFragments | length')" -gt 0 ] || {
+	printf '{}\n'
+	exit 0
+}
+
+jq -cn --arg context "Agent context routing hint:
+$classification" '{
+	hookSpecificOutput: {
+		hookEventName: "UserPromptSubmit",
+		additionalContext: $context
+	}
+}'

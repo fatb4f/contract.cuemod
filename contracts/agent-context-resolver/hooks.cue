@@ -1,5 +1,7 @@
 package agentcontextresolver
 
+import "list"
+
 #TurnStartInput: {
 	registryIndex: "registry.index.json"
 }
@@ -24,4 +26,13 @@ package agentcontextresolver
 
 	fullRegistry?:  _|_
 	contextBodies?: _|_
+}
+
+#UserPromptSubmitContract: {
+	input:  #UserPromptSubmitInput
+	output: #UserPromptSubmitOutput
+
+	for _, id in output.selectedFragments {
+		list.Contains(input.availableFragmentIDs, id)
+	}
 }

@@ -24,7 +24,7 @@
         "rebase"
       ],
       "selects": [
-        "vcs-patch-stack.workflow"
+        "vcs.patch-stack"
       ],
       "hint": "Apply the declared patch-stack workflow.",
       "priority": 80
@@ -37,47 +37,48 @@
         "server"
       ],
       "selects": [
-        "mcp-toolbox.base-server"
+        "mcp.evidence-plane"
       ],
       "hint": "Keep MCP results in the evidence plane.",
       "priority": 80
     },
     {
-      "id": "plugin",
+      "id": "skill",
       "terms": [
-        "plugin",
-        "bundle"
+        "skill",
+        "hook",
+        "codex"
       ],
       "selects": [
-        "plugin-bundle.orientation"
+        "agent-skill.projection"
       ],
-      "hint": "Use the plugin bundle authority for discovery.",
+      "hint": "Apply the generated agent skill and hook projection constraints.",
       "priority": 70
     },
     {
-      "id": "code-intel",
+      "id": "context-packet",
       "terms": [
-        "code intel",
-        "search",
-        "symbol"
+        "context packet",
+        "dependency",
+        "projection"
       ],
       "selects": [
-        "code-intel.workflow"
+        "resolver.context-packet"
       ],
-      "hint": "Apply the code-intelligence evidence workflow.",
+      "hint": "Apply the context packet projection workflow.",
       "priority": 70
     },
     {
-      "id": "generator",
+      "id": "repo",
       "terms": [
-        "generator",
+        "repository",
         "generated",
-        "generate"
+        "fixture"
       ],
       "selects": [
-        "generator-projects.constraints"
+        "repo.lifecycle"
       ],
-      "hint": "Preserve source and generated-output boundaries.",
+      "hint": "Preserve repository lifecycle and generated-output boundaries.",
       "priority": 70
     }
   ],
@@ -86,11 +87,13 @@
       "prompt": "Update the resolver hook without allowing MCP tool output to become context.",
       "selectedFragments": [
         "agent-context-resolver.authority",
-        "mcp-toolbox.base-server"
+        "mcp.evidence-plane",
+        "agent-skill.projection"
       ],
       "compactHints": [
         "Apply the resolver lifecycle and generated-fragment boundary.",
-        "Keep MCP results in the evidence plane."
+        "Keep MCP results in the evidence plane.",
+        "Apply the generated agent skill and hook projection constraints."
       ],
       "evidence": [
         {
@@ -102,25 +105,23 @@
           "kind": "prompt_term",
           "value": "mcp",
           "source": "user_prompt"
+        },
+        {
+          "kind": "prompt_term",
+          "value": "hook",
+          "source": "user_prompt"
         }
       ]
     },
     {
       "prompt": "Regenerate the plugin bundle and validate the generated output.",
       "selectedFragments": [
-        "plugin-bundle.orientation",
-        "generator-projects.constraints"
+        "repo.lifecycle"
       ],
       "compactHints": [
-        "Use the plugin bundle authority for discovery.",
-        "Preserve source and generated-output boundaries."
+        "Preserve repository lifecycle and generated-output boundaries."
       ],
       "evidence": [
-        {
-          "kind": "prompt_term",
-          "value": "plugin",
-          "source": "user_prompt"
-        },
         {
           "kind": "prompt_term",
           "value": "generated",

@@ -68,7 +68,8 @@ for invalid_fixture in \
 	./fixtures/resolver/agent-context-resolver/invalid-mcp-tool-output \
 	./fixtures/resolver/agent-context-resolver/invalid-hook-context-body \
 	./fixtures/resolver/agent-context-resolver/invalid-full-registry \
-	./fixtures/resolver/agent-context-resolver/invalid-assertion-false
+	./fixtures/resolver/agent-context-resolver/invalid-assertion-false \
+	./fixtures/resolver/agent-context-resolver/invalid-unavailable-selection
 do
 	if cue vet "$invalid_fixture" >/dev/null 2>&1; then
 		printf '%s\n' "$invalid_fixture unexpectedly passed" >&2

@@ -19,36 +19,36 @@ promptRoutes: [...#PromptRoute] & [
 	{
 		id: "patch-stack"
 		terms: ["patch", "stack", "rebase"]
-		selects: ["vcs-patch-stack.workflow"]
+		selects: ["vcs.patch-stack"]
 		hint:     "Apply the declared patch-stack workflow."
 		priority: 80
 	},
 	{
 		id: "mcp"
 		terms: ["mcp", "tool", "server"]
-		selects: ["mcp-toolbox.base-server"]
+		selects: ["mcp.evidence-plane"]
 		hint:     "Keep MCP results in the evidence plane."
 		priority: 80
 	},
 	{
-		id: "plugin"
-		terms: ["plugin", "bundle"]
-		selects: ["plugin-bundle.orientation"]
-		hint:     "Use the plugin bundle authority for discovery."
+		id: "skill"
+		terms: ["skill", "hook", "codex"]
+		selects: ["agent-skill.projection"]
+		hint:     "Apply the generated agent skill and hook projection constraints."
 		priority: 70
 	},
 	{
-		id: "code-intel"
-		terms: ["code intel", "search", "symbol"]
-		selects: ["code-intel.workflow"]
-		hint:     "Apply the code-intelligence evidence workflow."
+		id: "context-packet"
+		terms: ["context packet", "dependency", "projection"]
+		selects: ["resolver.context-packet"]
+		hint:     "Apply the context packet projection workflow."
 		priority: 70
 	},
 	{
-		id: "generator"
-		terms: ["generator", "generated", "generate"]
-		selects: ["generator-projects.constraints"]
-		hint:     "Preserve source and generated-output boundaries."
+		id: "repo"
+		terms: ["repository", "generated", "fixture"]
+		selects: ["repo.lifecycle"]
+		hint:     "Preserve repository lifecycle and generated-output boundaries."
 		priority: 70
 	},
 ]

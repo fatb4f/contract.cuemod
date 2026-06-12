@@ -5,9 +5,9 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": ".codex/skills/resolve-agent-context/scripts/dotfiles-agent-context-hook",
+                        "command": ".codex/skills/resolve-agent-context/scripts/agent-context-resolver-hook",
                         "timeout": 10,
-                        "statusMessage": "Routing dotfiles capability context"
+                        "statusMessage": "Routing repository contract context"
                     }
                 ]
             }
