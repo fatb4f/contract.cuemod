@@ -1,0 +1,4 @@
+{"schema":"agent.codex-lifecycle-event.v1","type":"turn_start.fragments_available","fragmentIDs":["registry.agent-capability-routes","skill.resolve-agent-context","generated.agent-runtime-assets"]}
+{"schema":"agent.codex-lifecycle-event.v1","type":"user_prompt_submit.classified","fragmentIDs":["generated.agent-runtime-assets"]}
+{"schema":"agent.codex-lifecycle-event.v1","type":"runtime.selected_fragments_expanded","context":[{"id":"generated.agent-runtime-assets","source":"generated","surface":"turn_start","expectedChannel":"message","expectedItemKind":"message","expectedNativeContextInjection":true}]}
+{"schema":"agent.codex-lifecycle-event.v1","type":"subagent.scoped_context_expanded","context":[{"id":"generated.agent-runtime-assets","source":"generated","surface":"turn_start","expectedChannel":"message","expectedItemKind":"message","expectedNativeContextInjection":true}]}

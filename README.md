@@ -48,6 +48,37 @@ selected ID against that native inventory, expands selected fragment metadata
 inside the runtime, and exposes only that scoped expansion to a subagent.
 Classifier callbacks receive IDs only and cannot assemble context bodies.
 
+Stage 6 adds an opt-in live runtime adapter. A Codex SDK/runtime probe receives
+a versioned request on stdin and emits four versioned JSONL lifecycle events:
+turn-start availability, prompt classification, runtime expansion, and
+subagent expansion. The adapter validates event order, declared IDs, canonical
+fragment metadata, and subagent scoping before projecting the observation into
+the same `agent.codex-lifecycle-report.v1` schema as the deterministic harness.
+Normal CI does not require a live runtime or credentials.
+
+Run the live comparison with a probe command configured as a JSON argv array:
+
+```bash
+CODEX_CONTEXT_LIVE_COMMAND_JSON='["/path/to/codex-runtime-probe"]' \
+  go test ./internal/codexcontext -tags=integration
+```
+
+The probe request schema is `agent.codex-lifecycle-request.v1`; emitted event
+records use `agent.codex-lifecycle-event.v1`. The integration test compares the
+validated live report to the deterministic report for the same prompt.
+The probe must emit exactly these events in order:
+
+```text
+turn_start.fragments_available
+user_prompt_submit.classified
+runtime.selected_fragments_expanded
+subagent.scoped_context_expanded
+```
+
+The first two events carry `fragmentIDs`; the final two carry canonical
+fragment metadata in `context`. See
+`internal/codexcontext/testdata/live_events.jsonl` for the wire format.
+
 The managed `git-mcp-go` adapter is pinned to the `fatb4f/git-mcp-go`
 `worktree-v0` branch. Its source is materialized without nested `.git`
 metadata and remains an internal backend rather than a default agent surface.

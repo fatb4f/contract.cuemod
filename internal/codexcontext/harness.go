@@ -10,6 +10,7 @@ import (
 const (
 	projectionSchema = "agent.context-fragment-projection.v1"
 	turnStartSchema  = "agent.turn-start-context-fragments.v1"
+	ReportSchema     = "agent.codex-lifecycle-report.v1"
 )
 
 type Fragment struct {
@@ -40,11 +41,12 @@ type turnStartFragment struct {
 type Classifier func(prompt string, availableFragmentIDs []string) ([]string, error)
 
 type Result struct {
-	Events                  []string
-	AvailableFragmentIDs    []string
-	SelectedFragmentIDs     []string
-	ExpandedContext         []Fragment
-	SubagentExpandedContext []Fragment
+	Schema                  string     `json:"schema"`
+	Events                  []string   `json:"events"`
+	AvailableFragmentIDs    []string   `json:"availableFragmentIDs"`
+	SelectedFragmentIDs     []string   `json:"selectedFragmentIDs"`
+	ExpandedContext         []Fragment `json:"expandedContext"`
+	SubagentExpandedContext []Fragment `json:"subagentExpandedContext"`
 }
 
 type Harness struct {
@@ -110,6 +112,7 @@ func Load(projectionJSON, turnStartJSON []byte) (*Harness, error) {
 
 func (h *Harness) Run(prompt string, classify Classifier) (Result, error) {
 	result := Result{
+		Schema:               ReportSchema,
 		Events:               []string{"turn_start.fragments_available"},
 		AvailableFragmentIDs: slices.Clone(h.availableIDs),
 	}
@@ -137,5 +140,48 @@ func (h *Harness) Run(prompt string, classify Classifier) (Result, error) {
 
 	result.SubagentExpandedContext = slices.Clone(result.ExpandedContext)
 	result.Events = append(result.Events, "subagent.scoped_context_expanded")
+	if err := h.Validate(result); err != nil {
+		return result, fmt.Errorf("validate deterministic lifecycle report: %w", err)
+	}
 	return result, nil
+}
+
+func (h *Harness) Validate(result Result) error {
+	if result.Schema != ReportSchema {
+		return fmt.Errorf("report schema %q is not %q", result.Schema, ReportSchema)
+	}
+
+	wantEvents := []string{
+		"turn_start.fragments_available",
+		"user_prompt_submit.classified",
+		"runtime.selected_fragments_expanded",
+		"subagent.scoped_context_expanded",
+	}
+	if !slices.Equal(result.Events, wantEvents) {
+		return fmt.Errorf("lifecycle events = %v, want %v", result.Events, wantEvents)
+	}
+	if !slices.Equal(result.AvailableFragmentIDs, h.availableIDs) {
+		return fmt.Errorf("available fragments = %v, want %v", result.AvailableFragmentIDs, h.availableIDs)
+	}
+
+	seen := make(map[string]struct{}, len(result.SelectedFragmentIDs))
+	wantExpanded := make([]Fragment, 0, len(result.SelectedFragmentIDs))
+	for _, id := range result.SelectedFragmentIDs {
+		fragment, exists := h.fragments[id]
+		if !exists {
+			return fmt.Errorf("report selected unavailable fragment %q", id)
+		}
+		if _, duplicate := seen[id]; duplicate {
+			return fmt.Errorf("report selected duplicate fragment %q", id)
+		}
+		seen[id] = struct{}{}
+		wantExpanded = append(wantExpanded, fragment)
+	}
+	if !slices.Equal(result.ExpandedContext, wantExpanded) {
+		return fmt.Errorf("expanded context does not match selected fragments")
+	}
+	if !slices.Equal(result.SubagentExpandedContext, wantExpanded) {
+		return fmt.Errorf("subagent context is not scoped to selected fragments")
+	}
+	return nil
 }
