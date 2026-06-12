@@ -45,11 +45,13 @@ let contractSeedInstance = contractSeed
 })
 
 vbContract: #VBContractSeed & {
+	temporary:    true
 	contractSeed: contractSeedInstance
 
 	componentSeed: {
 		id:        "vb-contract.component"
 		component: "vb-contract"
+		temporary: true
 		owns: [
 			"contracts/repo/contract.cue",
 			"contracts/repo/contract_seed.cue",
@@ -83,6 +85,7 @@ vbContract: #VBContractSeed & {
 		id:                     "vb-contract.branch"
 		branchName:             "vb-contract"
 		component:              "vb-contract"
+		temporary:              true
 		owns:                   componentSeed.owns
 		dependsOn:              componentSeed.dependsOn
 		allowedGlue:            componentSeed.allowedGlue
@@ -114,7 +117,7 @@ vbContract: #VBContractSeed & {
 				sourcePath:     "contracts/repo/component_seed.cue"
 				role:           "constraint"
 				surface:        "turn_start"
-				summary:        "Shared component ownership, dependency, glue, and gate schema."
+				summary:        "Shared reusable component ownership, dependency, glue, and gate schema."
 			},
 			{
 				id:             "vb-contract.virtual-branch"
@@ -122,7 +125,7 @@ vbContract: #VBContractSeed & {
 				sourcePath:     "contracts/repo/virtual_branch.cue"
 				role:           "constraint"
 				surface:        "turn_start"
-				summary:        "Shared temporary virtual-branch seed schema for component migration."
+				summary:        "Shared reusable virtual-branch schema with separate temporary bootstrap instances."
 			},
 		]
 	}

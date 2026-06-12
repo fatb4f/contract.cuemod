@@ -2,10 +2,9 @@ package valid
 
 import repo "github.com/fatb4f/contract.cuemod/contracts/repo:repo"
 
-virtualBranch: repo.#VirtualBranchSeed & {
-	id:         "vb-contract-fixture.branch"
-	branchName: "vb-contract-fixture"
-	component:  "vb-contract-fixture"
+componentFixture: repo.#Component & {
+	id:        "vb-contract-fixture.component"
+	component: "vb-contract-fixture"
 	owns: ["fixtures/vb-contract/valid"]
 	dependsOn: ["vb-contract"]
 	allowedGlue: [{
@@ -26,4 +25,15 @@ virtualBranch: repo.#VirtualBranchSeed & {
 		state: "pending"
 		criteria: ["Migration evidence supports promotion or removal."]
 	}
+}
+
+virtualBranch: repo.#VirtualBranch & {
+	id:                     "vb-contract-fixture.branch"
+	branchName:             "vb-contract-fixture"
+	component:              componentFixture.component
+	owns:                   componentFixture.owns
+	dependsOn:              componentFixture.dependsOn
+	allowedGlue:            componentFixture.allowedGlue
+	mergeGate:              componentFixture.mergeGate
+	removalOrPromotionGate: componentFixture.removalOrPromotionGate
 }

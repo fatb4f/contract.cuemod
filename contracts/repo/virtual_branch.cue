@@ -2,14 +2,24 @@ package repo
 
 #BranchName: string & =~"^[a-z0-9][a-z0-9-]*$"
 
-#VirtualBranchSeed: close({
+#virtualBranchSchema: {
 	id:         string & !=""
 	branchName: #BranchName
 	component:  #ComponentID
 	owns: [#OwnedPath, ...#OwnedPath]
 	dependsOn: [...#ComponentID]
 	allowedGlue: [...#GlueAllowance]
-	mergeGate:              #LifecycleGate
-	temporary:              true
-	removalOrPromotionGate: #LifecycleGate
+	mergeGate:              #MergeGate
+	removalOrPromotionGate: #PromotionOrRemovalGate
+}
+
+// #VirtualBranch is the reusable schema downstream branches consume.
+#VirtualBranch: close({
+	#virtualBranchSchema
+})
+
+// #VirtualBranchSeed is restricted to temporary bootstrap instances.
+#VirtualBranchSeed: close({
+	#virtualBranchSchema
+	temporary: true
 })

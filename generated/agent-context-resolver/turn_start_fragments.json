@@ -77,7 +77,7 @@
       "sourcePath": "contracts/repo/component_seed.cue",
       "role": "constraint",
       "surface": "turn_start",
-      "summary": "Shared component ownership, dependency, glue, and gate schema.",
+      "summary": "Shared reusable component ownership, dependency, glue, and gate schema.",
       "authorityRoot": "contracts/repo",
       "contractPath": "contracts/repo/contract.cue"
     },
@@ -97,7 +97,7 @@
       "sourcePath": "contracts/repo/virtual_branch.cue",
       "role": "constraint",
       "surface": "turn_start",
-      "summary": "Shared temporary virtual-branch seed schema for component migration.",
+      "summary": "Shared reusable virtual-branch schema with separate temporary bootstrap instances.",
       "authorityRoot": "contracts/repo",
       "contractPath": "contracts/repo/contract.cue"
     },

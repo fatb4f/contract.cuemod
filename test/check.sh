@@ -14,6 +14,8 @@ cue vet ./contracts/validation
 cue vet ./contracts/agent-skill
 cue vet ./contracts/agent-context-resolver
 cue vet ./contracts/repo
+cue export ./contracts/repo -e vbContract >/dev/null
+cue export ./contracts/registry.cue -e repoRegistry >/dev/null
 cue vet ./contracts/vcs
 cue export ./contracts/vcs >/dev/null
 cue vet ./providers/cue-lsp

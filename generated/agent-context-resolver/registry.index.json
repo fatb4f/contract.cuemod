@@ -139,7 +139,7 @@
                     "role": "constraint",
                     "sourceContract": "vb-contract",
                     "sourcePath": "contracts/repo/component_seed.cue",
-                    "summary": "Shared component ownership, dependency, glue, and gate schema.",
+                    "summary": "Shared reusable component ownership, dependency, glue, and gate schema.",
                     "surface": "turn_start"
                 },
                 {
@@ -147,7 +147,7 @@
                     "role": "constraint",
                     "sourceContract": "vb-contract",
                     "sourcePath": "contracts/repo/virtual_branch.cue",
-                    "summary": "Shared temporary virtual-branch seed schema for component migration.",
+                    "summary": "Shared reusable virtual-branch schema with separate temporary bootstrap instances.",
                     "surface": "turn_start"
                 }
             ],
