@@ -32,15 +32,17 @@ package repo
 
 	registryFragmentSeed: {
 		id:             string & !=""
-		authorityRoot:  string & !=""
-		contractPath:   string & !=""
-		fragmentID:     string & !=""
+		authorityRoot:   string & !=""
+		contractPath:    string & !=""
+		sourcePath:      string & !=""
+		fragmentID:      string & !=""
 	}
 
 	rebaseTarget: {
-		component: string & !=""
-		branch:    string & !=""
-		state:     "temporary"
+		component:    string & !=""
+		sourceBranch: string & !=""
+		targetBranch: string & !=""
+		state:        "temporary"
 	}
 })
 
@@ -77,12 +79,14 @@ contractSeed: #ContractSeed & {
 		id:            "repo.contract-seed.registry-fragment"
 		authorityRoot: "contracts/repo"
 		contractPath:  "contracts/repo/lifecycle.cue"
+		sourcePath:    "contracts/repo/contract_seed.cue"
 		fragmentID:    "repo.contract-seed"
 	}
 
 	rebaseTarget: {
-		component: "vb-contract"
-		branch:    "main"
-		state:     "temporary"
+		component:    "vb-contract"
+		sourceBranch: "main"
+		targetBranch: "vb-contract"
+		state:        "temporary"
 	}
 }
