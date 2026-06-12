@@ -1,6 +1,7 @@
 package registry
 
 import vbcontract "github.com/fatb4f/contract.cuemod/contracts/repo:repo"
+import vbreference "github.com/fatb4f/contract.cuemod/contracts/vb-reference:vbreference"
 
 #RepoContractRegistry: {
 	repo: {
@@ -143,5 +144,6 @@ repoRegistry: #RepoContractRegistry & {
 			}]
 		},
 		vbcontract.vbContract.registryContribution,
+		vbreference.registryContribution,
 	]
 }

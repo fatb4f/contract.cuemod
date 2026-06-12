@@ -6,6 +6,7 @@ package repo
 	id:         string & !=""
 	branchName: #BranchName
 	component:  #ComponentID
+	temporary:  bool
 	owns: [#OwnedPath, ...#OwnedPath]
 	dependsOn: [...#ComponentID]
 	allowedGlue: [...#GlueAllowance]
@@ -16,6 +17,7 @@ package repo
 // #VirtualBranch is the reusable schema downstream branches consume.
 #VirtualBranch: close({
 	#virtualBranchSchema
+	temporary: false
 })
 
 // #VirtualBranchSeed is restricted to temporary bootstrap instances.

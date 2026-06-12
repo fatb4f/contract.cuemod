@@ -19,7 +19,7 @@ let contractSeedInstance = contractSeed
 
 #RegistryFragmentContribution: close({
 	id:             string & !=""
-	sourceContract: "vb-contract"
+	sourceContract: #ComponentID
 	sourcePath:     #OwnedPath
 	role:           "authority" | "orientation" | "workflow" | "constraint" | "evidence"
 	surface:        "turn_start" | "prompt" | "subagent"
@@ -27,10 +27,13 @@ let contractSeedInstance = contractSeed
 })
 
 #RegistryContribution: close({
-	id:            "vb-contract"
-	authorityRoot: "contracts/repo"
-	contractPath:  "contracts/repo/contract.cue"
-	fragments: [#RegistryFragmentContribution, ...#RegistryFragmentContribution]
+	id:            #ComponentID
+	authorityRoot: #OwnedPath
+	contractPath:  #OwnedPath
+	fragments: [
+		#RegistryFragmentContribution & {sourceContract: id},
+		...#RegistryFragmentContribution & {sourceContract: id},
+	]
 })
 
 #VBContractSeed: close({
@@ -94,6 +97,9 @@ vbContract: #VBContractSeed & {
 	}
 
 	registryContribution: {
+		id:            "vb-contract"
+		authorityRoot: "contracts/repo"
+		contractPath:  "contracts/repo/contract.cue"
 		fragments: [
 			{
 				id:             "vb-contract.authority"

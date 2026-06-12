@@ -35,6 +35,7 @@ package repo
 #componentSchema: {
 	id:        string & !=""
 	component: #ComponentID
+	temporary: bool
 	owns: [#OwnedPath, ...#OwnedPath]
 	dependsOn: [...#ComponentID]
 	allowedGlue: [...#GlueAllowance]
@@ -45,6 +46,7 @@ package repo
 // #Component is the reusable schema downstream components consume.
 #Component: close({
 	#componentSchema
+	temporary: false
 })
 
 // #ComponentSeed is restricted to temporary bootstrap instances.
