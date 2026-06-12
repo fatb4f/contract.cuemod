@@ -14,7 +14,7 @@ import (
 func TestLiveCodexRuntimeMatchesDeterministicHarness(t *testing.T) {
 	commandJSON := os.Getenv("CODEX_CONTEXT_LIVE_COMMAND_JSON")
 	if commandJSON == "" {
-		t.Skip("CODEX_CONTEXT_LIVE_COMMAND_JSON is not configured")
+		commandJSON = `["go","run","./cmd/probe-codex-lifecycle"]`
 	}
 
 	var command []string
@@ -23,7 +23,7 @@ func TestLiveCodexRuntimeMatchesDeterministicHarness(t *testing.T) {
 	}
 
 	harness := loadHarness(t)
-	const prompt = "inspect runtime"
+	const prompt = "How does agent context apply when switching WezTerm sessions?"
 	deterministic, err := harness.Run(prompt, generatedClassifier(t))
 	if err != nil {
 		t.Fatal(err)

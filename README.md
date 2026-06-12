@@ -56,12 +56,20 @@ fragment metadata, and subagent scoping before projecting the observation into
 the same `agent.codex-lifecycle-report.v1` schema as the deterministic harness.
 Normal CI does not require a live runtime or credentials.
 
-Run the live comparison with a probe command configured as a JSON argv array:
+Run the real Codex runtime comparison explicitly:
 
 ```bash
-CODEX_CONTEXT_LIVE_COMMAND_JSON='["/path/to/codex-runtime-probe"]' \
-  go test ./internal/codexcontext -tags=integration
+go test ./internal/codexcontext -tags=integration
 ```
+
+The integration test defaults to `go run ./cmd/probe-codex-lifecycle`. Set
+`CODEX_CONTEXT_LIVE_COMMAND_JSON` to a JSON argv array to test another
+compatible runtime probe, or set `CODEX_CONTEXT_CODEX_BIN` to select a Codex
+CLI binary. The built-in probe runs `codex exec --json`, observes a real
+`UserPromptSubmit` hook, verifies the runtime's `spawn_agent` and `wait`
+events, and rejects subagent prompts containing unselected fragment IDs.
+Default `go test ./...` and `./test/check.sh` do not invoke Codex or require
+runtime credentials.
 
 The probe request schema is `agent.codex-lifecycle-request.v1`; emitted event
 records use `agent.codex-lifecycle-event.v1`. The integration test compares the
