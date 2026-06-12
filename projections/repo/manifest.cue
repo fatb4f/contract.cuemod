@@ -76,6 +76,10 @@ manifest: repocontract.#RepoLayout & {
 		{path: "fixtures/vcs/invalid-missing-transaction-policy", targetContract: "contracts/vcs", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/vcs/invalid-missing-transaction-policy"},
 		{path: "fixtures/agent-skill/valid", targetContract: "contracts/agent-skill", polarity: "valid", expected: "pass", validatesWith: "cue vet ./fixtures/agent-skill/valid"},
 		{path: "fixtures/agent-skill/invalid", targetContract: "contracts/agent-skill", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/agent-skill/invalid"},
+		{path: "fixtures/agent-context/valid", targetContract: "contracts/agent-context", polarity: "valid", expected: "pass", validatesWith: "cue vet ./fixtures/agent-context/valid"},
+		{path: "fixtures/agent-context/invalid-undeclared", targetContract: "contracts/agent-context", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/agent-context/invalid-undeclared"},
+		{path: "fixtures/agent-context/invalid-turn-start-undeclared", targetContract: "contracts/agent-context", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/agent-context/invalid-turn-start-undeclared"},
+		{path: "fixtures/agent-context/invalid-turn-start-full-registry", targetContract: "contracts/agent-context", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/agent-context/invalid-turn-start-full-registry"},
 		{path: "fixtures/resolver/workspace-lifecycle", targetContract: "contracts/resolver", polarity: "valid", expected: "pass", validatesWith: "cue vet ./fixtures/resolver/workspace-lifecycle"},
 	]
 
@@ -84,5 +88,7 @@ manifest: repocontract.#RepoLayout & {
 		{path: ".repo/inventory.json", generated: true, source: "contracts/repo", projection: "projections/repo:inventory", command: "cue export ./projections/repo -e inventory", editable: false, validatesWith: ["./test/repo-layout.sh"]},
 		{path: ".repo/layout.md", generated: true, source: "contracts/repo", projection: "projections/repo:layoutMarkdown", command: "cue export ./projections/repo -e layoutMarkdown --out text", editable: false, validatesWith: ["./test/repo-layout.sh"]},
 		{path: "generated/agent_context_projection.json", generated: true, source: "contracts/agent-context", projection: "projections/agent-context:agentContextProjection", command: "cue export ./projections/agent-context -e agentContextProjection", editable: false, validatesWith: ["./test/check.sh"]},
+		{path: "generated/turn_start_context_fragments.json", generated: true, source: "contracts/agent-context", projection: "projections/agent-context:turnStartContextFragments", command: "cue export ./projections/agent-context -e turnStartContextFragments", editable: false, validatesWith: ["./test/check.sh"]},
+		{path: "generated/stage3_expected_report.json", generated: true, source: "contracts/agent-context", projection: "projections/agent-context:stage3ExpectedReport", command: "cue export ./projections/agent-context -e stage3ExpectedReport", editable: false, validatesWith: ["./test/check.sh"]},
 	]
 }

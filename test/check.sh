@@ -76,6 +76,16 @@ if cue vet ./fixtures/agent-context/invalid-undeclared >/dev/null 2>&1; then
 	exit 1
 fi
 
+if cue vet ./fixtures/agent-context/invalid-turn-start-undeclared >/dev/null 2>&1; then
+	printf '%s\n' "undeclared turn-start fragment unexpectedly passed" >&2
+	exit 1
+fi
+
+if cue vet ./fixtures/agent-context/invalid-turn-start-full-registry >/dev/null 2>&1; then
+	printf '%s\n' "full-registry turn-start fragment unexpectedly passed" >&2
+	exit 1
+fi
+
 if cue vet ./fixtures/vcs/invalid-unpushed >/dev/null 2>&1; then
 	printf '%s\n' "unpushed mutation turn unexpectedly passed" >&2
 	exit 1

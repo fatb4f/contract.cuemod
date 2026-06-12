@@ -30,6 +30,62 @@ import "list"
 	fragments: [#ContextFragment, ...#ContextFragment]
 })
 
+#TurnStartContextFragment: close({
+	id: =~"^[a-z0-9][a-z0-9._/-]*$"
+
+	source: "registry" | "generated"
+
+	surface: "turn_start"
+
+	expectedChannel:                "message"
+	expectedItemKind:               "message"
+	expectedNativeContextInjection: true
+
+	content: close({
+		title:   string
+		summary: string
+		fragmentIDs: [string, ...string]
+	})
+
+	constraints: close({
+		compact:      true
+		fullRegistry: false
+		generated:    true
+	})
+})
+
+#TurnStartContextGeneration: {
+	schema:      "agent.turn-start-context-fragments.v1"
+	#projection: #AgentContextProjection
+	fragments: [#TurnStartContextFragment, ...#TurnStartContextFragment]
+
+	let declaredFragmentIDs = [
+		for fragment in #projection.fragments {
+			fragment.id
+		},
+	]
+
+	for generatedFragment in fragments {
+		for fragmentID in generatedFragment.content.fragmentIDs {
+			if !list.Contains(declaredFragmentIDs, fragmentID) {
+				_undeclaredFragmentError: _|_
+			}
+		}
+	}
+}
+
+#Stage3Proof: close({
+	id:     =~"^[a-z0-9][a-z0-9._/-]*$"
+	status: "pass"
+})
+
+#Stage3ExpectedReport: close({
+	schema:           "agent.context-delivery-report.v1"
+	projectionSchema: "agent.context-fragment-projection.v1"
+	fragmentSchema:   "agent.turn-start-context-fragments.v1"
+	proofs: [#Stage3Proof, ...#Stage3Proof]
+})
+
 #PromptSelection: {
 	projection: #AgentContextProjection
 	selectedFragments: [...string]

@@ -1,0 +1,43 @@
+{
+    "schema": "agent.context-delivery-report.v1",
+    "projectionSchema": "agent.context-fragment-projection.v1",
+    "fragmentSchema": "agent.turn-start-context-fragments.v1",
+    "proofs": [
+        {
+            "id": "turn_start_fragment_generated",
+            "status": "pass"
+        },
+        {
+            "id": "turn_start_fragment_message_surface",
+            "status": "pass"
+        },
+        {
+            "id": "turn_start_fragment_native_context",
+            "status": "pass"
+        },
+        {
+            "id": "turn_start_fragment_declared_ids_only",
+            "status": "pass"
+        },
+        {
+            "id": "turn_start_fragment_compact",
+            "status": "pass"
+        },
+        {
+            "id": "turn_start_fragment_deterministic",
+            "status": "pass"
+        },
+        {
+            "id": "user_prompt_submit_no_full_registry",
+            "status": "pass"
+        },
+        {
+            "id": "mcp_registry_not_context",
+            "status": "pass"
+        },
+        {
+            "id": "stage3_report_consistency",
+            "status": "pass"
+        }
+    ]
+}

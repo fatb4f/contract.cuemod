@@ -1,0 +1,27 @@
+{
+    "schema": "agent.turn-start-context-fragments.v1",
+    "fragments": [
+        {
+            "id": "generated.turn-start.agent-context",
+            "source": "generated",
+            "surface": "turn_start",
+            "expectedChannel": "message",
+            "expectedItemKind": "message",
+            "expectedNativeContextInjection": true,
+            "content": {
+                "title": "Agent context",
+                "summary": "Load the declared stable agent context fragments before prompt routing.",
+                "fragmentIDs": [
+                    "registry.agent-capability-routes",
+                    "skill.resolve-agent-context",
+                    "generated.agent-runtime-assets"
+                ]
+            },
+            "constraints": {
+                "compact": true,
+                "fullRegistry": false,
+                "generated": true
+            }
+        }
+    ]
+}

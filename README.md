@@ -21,6 +21,20 @@ The repository is intentionally not a source index. `raw_path` exists only as
 provider execution metadata and every artifact access contract fixes
 `access.direct` to `false`.
 
+## Agent context delivery
+
+The agent-context projection has three distinct boundaries:
+
+- Stable registry context is materialized as compact generated `turn_start`
+  fragments on the native `message`/`message` context surface.
+- `UserPromptSubmit` selects declared fragment IDs and compact hints; it does
+  not emit the full registry.
+- MCP resources and tool results remain non-native result surfaces and do not
+  imply model context.
+
+The generated fragment inventory and Stage 3 proof report are deterministic
+projections of `projections/agent-context`.
+
 The managed `git-mcp-go` adapter is pinned to the `fatb4f/git-mcp-go`
 `worktree-v0` branch. Its source is materialized without nested `.git`
 metadata and remains an internal backend rather than a default agent surface.
