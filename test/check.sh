@@ -20,10 +20,7 @@ cue export ./contracts/vb-reference -e referenceComponent >/dev/null
 cue export ./contracts/vb-reference -e referenceVirtualBranch >/dev/null
 cue export ./contracts/vb-reference -e registryContribution >/dev/null
 cue export ./contracts/registry.cue -e repoRegistry >/dev/null
-jq -e '
-	[.fragments[] | select(.sourceContract == "vb-reference") | .id] ==
-	["vb-reference.authority", "vb-reference.virtual-branch"]
-' ./generated/agent-context-resolver/fragment_inventory.json >/dev/null
+./test/vb-reference-workflow.sh
 cue vet ./contracts/vcs
 cue export ./contracts/vcs >/dev/null
 cue vet ./providers/cue-lsp

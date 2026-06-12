@@ -25,10 +25,12 @@ referenceComponent: repo.#Component & {
 		criteria: [
 			"The concrete component and virtual branch export through shared schemas.",
 			"The repository registry contains the vb-reference fragments.",
+			"Registry paths, allowed glue, and generated projections validate.",
 		]
 		evidence: [
 			"cue export ./contracts/vb-reference -e referenceComponent",
 			"cue export ./contracts/vb-reference -e referenceVirtualBranch",
+			"./test/vb-reference-workflow.sh",
 		]
 	}
 	removalOrPromotionGate: {
