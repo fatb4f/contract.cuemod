@@ -108,14 +108,24 @@ repoRegistry: #RepoContractRegistry & {
 			id:            "repo"
 			authorityRoot: "contracts/repo"
 			contractPath:  "contracts/repo/lifecycle.cue"
-			fragments: [{
-				id:             "repo.lifecycle"
-				sourceContract: "repo"
-				sourcePath:     "contracts/repo/lifecycle.cue"
-				role:           "constraint"
-				surface:        "turn_start"
-				summary:        "Repository source, generated, fixture, and lifecycle boundaries."
-			}]
+			fragments: [
+				{
+					id:             "repo.lifecycle"
+					sourceContract: "repo"
+					sourcePath:     "contracts/repo/lifecycle.cue"
+					role:           "constraint"
+					surface:        "turn_start"
+					summary:        "Repository source, generated, fixture, and lifecycle boundaries."
+				},
+				{
+					id:             "repo.contract-seed"
+					sourceContract: "repo"
+					sourcePath:     "contracts/repo/contract_seed.cue"
+					role:           "authority"
+					surface:        "turn_start"
+					summary:        "Temporary shared contract atom seed for later vb-contract rebasing."
+				},
+			]
 		},
 		{
 			id:            "vcs"

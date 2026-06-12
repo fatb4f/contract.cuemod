@@ -22,6 +22,7 @@ printf '%s\n' "$hint_context" | jq -e '
 	(.availableFragmentIDs | index("agent-context-resolver.authority") != null) and
 	(.availableFragmentIDs | index("agent-skill.projection") != null) and
 	(.availableFragmentIDs | index("mcp.evidence-plane") != null) and
+	(.availableFragmentIDs | index("repo.contract-seed") != null) and
 	(.selectedFragments | index("agent-context-resolver.authority") != null) and
 	(.selectedFragments | index("agent-skill.projection") != null) and
 	(.selectedFragments | index("mcp.evidence-plane") != null) and
