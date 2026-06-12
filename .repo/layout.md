@@ -12,6 +12,7 @@
 | `migration/` | migration | quarantine | quarantined |
 | `test/` | validation | source | non-authority |
 | `docs/` | documentation | source | non-authority |
+| `generated/` | generated | generated | derived |
 | `.codex/` | generated | generated | derived |
 | `.repo/` | generated | generated | derived |
 | `cmd/` | tooling | source | non-authority |

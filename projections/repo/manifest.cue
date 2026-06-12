@@ -14,6 +14,7 @@ manifest: repocontract.#RepoLayout & {
 		{path: "migration/", kind: "directory", role: "migration", lifecycle: "quarantine", authority: "quarantined", generated: false, owner: "contracts/repo", description: "Quarantined observations awaiting classification.", validatesWith: ["cue vet ./migration"]},
 		{path: "test/", kind: "directory", role: "validation", lifecycle: "source", authority: "non-authority", generated: false, owner: "contracts/validation", description: "Repository validation harness.", validatesWith: ["./test/check.sh"]},
 		{path: "docs/", kind: "directory", role: "documentation", lifecycle: "source", authority: "non-authority", generated: false, owner: "contracts/repo", description: "Explanatory non-authority documentation.", allowedExtensions: [".md"], validatesWith: ["./test/check.sh"]},
+		{path: "generated/", kind: "directory", role: "generated", lifecycle: "generated", authority: "derived", generated: true, owner: "projections/agent-context", description: "Generated contract projections for external consumers.", validatesWith: ["./test/check.sh"]},
 		{path: ".codex/", kind: "directory", role: "generated", lifecycle: "generated", authority: "derived", generated: true, owner: "projections/agent-skill", description: "Generated agent runtime projection.", validatesWith: ["./test/agent-context-hook.sh"]},
 		{path: ".repo/", kind: "directory", role: "generated", lifecycle: "generated", authority: "derived", generated: true, owner: "projections/repo", description: "Generated repository manifest and inventory.", validatesWith: ["./test/repo-layout.sh"]},
 		{path: "cmd/", kind: "directory", role: "tooling", lifecycle: "source", authority: "non-authority", generated: false, owner: "contracts/mcp", description: "Go command adapters.", validatesWith: ["go test ./..."]},
@@ -82,5 +83,6 @@ manifest: repocontract.#RepoLayout & {
 		{path: ".repo/manifest.json", generated: true, source: "contracts/repo", projection: "projections/repo:manifest", command: "cue export ./projections/repo -e manifest", editable: false, validatesWith: ["./test/repo-layout.sh"]},
 		{path: ".repo/inventory.json", generated: true, source: "contracts/repo", projection: "projections/repo:inventory", command: "cue export ./projections/repo -e inventory", editable: false, validatesWith: ["./test/repo-layout.sh"]},
 		{path: ".repo/layout.md", generated: true, source: "contracts/repo", projection: "projections/repo:layoutMarkdown", command: "cue export ./projections/repo -e layoutMarkdown --out text", editable: false, validatesWith: ["./test/repo-layout.sh"]},
+		{path: "generated/agent_context_projection.json", generated: true, source: "contracts/agent-context", projection: "projections/agent-context:agentContextProjection", command: "cue export ./projections/agent-context -e agentContextProjection", editable: false, validatesWith: ["./test/check.sh"]},
 	]
 }

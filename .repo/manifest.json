@@ -185,6 +185,27 @@
             ]
         },
         {
+            "path": "generated/",
+            "kind": "directory",
+            "role": "generated",
+            "lifecycle": "generated",
+            "authority": "derived",
+            "generated": true,
+            "owner": "projections/agent-context",
+            "description": "Generated contract projections for external consumers.",
+            "allowedFileKinds": [
+                "file",
+                "directory"
+            ],
+            "allowedImports": [],
+            "validatesWith": [
+                "./test/check.sh"
+            ],
+            "prunesWith": [
+                "reject undeclared children"
+            ]
+        },
+        {
             "path": ".codex/",
             "kind": "directory",
             "role": "generated",
@@ -738,6 +759,17 @@
             "editable": false,
             "validatesWith": [
                 "./test/repo-layout.sh"
+            ]
+        },
+        {
+            "path": "generated/agent_context_projection.json",
+            "generated": true,
+            "source": "contracts/agent-context",
+            "projection": "projections/agent-context:agentContextProjection",
+            "command": "cue export ./projections/agent-context -e agentContextProjection",
+            "editable": false,
+            "validatesWith": [
+                "./test/check.sh"
             ]
         }
     ]

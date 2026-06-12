@@ -104,6 +104,19 @@
         "status": "declared"
     },
     {
+        "path": "generated/",
+        "kind": "directory",
+        "role": "generated",
+        "lifecycle": "generated",
+        "authority": "derived",
+        "generated": true,
+        "owner": "projections/agent-context",
+        "validatesWith": [
+            "./test/check.sh"
+        ],
+        "status": "generated"
+    },
+    {
         "path": ".codex/",
         "kind": "directory",
         "role": "generated",

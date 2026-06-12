@@ -11,6 +11,7 @@ cue vet ./contracts/providers
 cue vet ./contracts/resolver
 cue vet ./contracts/validation
 cue vet ./contracts/agent-skill
+cue vet ./contracts/agent-context
 cue vet ./contracts/repo
 cue vet ./contracts/vcs
 cue export ./contracts/vcs >/dev/null
@@ -21,17 +22,20 @@ cue vet ./providers/chezmoi
 cue vet ./adapters/git-mcp-go
 cue vet ./projections/stage3
 cue vet ./projections/agent-skill
+cue vet ./projections/agent-context
 cue vet ./projections/repo
 cue export ./projections/repo -e manifest >/dev/null
 cue export ./projections/repo -e inventory >/dev/null
 cue vet ./fixtures/mcp/valid
 cue vet ./fixtures/mcp/adapter-output
 cue vet ./fixtures/agent-skill/valid
+cue vet ./fixtures/agent-context/valid
 cue vet ./fixtures/vcs/valid
 cue vet ./fixtures/resolver/workspace-lifecycle
 cue vet ./migration
 
 ./test/agent-context-hook.sh
+./test/agent-context-projection.sh
 ./test/repo-layout.sh
 
 if find adapters/git-mcp-go/source -name .git -print -quit | grep -q .; then
@@ -66,6 +70,11 @@ do
 		exit 1
 	fi
 done
+
+if cue vet ./fixtures/agent-context/invalid-undeclared >/dev/null 2>&1; then
+	printf '%s\n' "undeclared prompt fragment unexpectedly passed" >&2
+	exit 1
+fi
 
 if cue vet ./fixtures/vcs/invalid-unpushed >/dev/null 2>&1; then
 	printf '%s\n' "unpushed mutation turn unexpectedly passed" >&2
