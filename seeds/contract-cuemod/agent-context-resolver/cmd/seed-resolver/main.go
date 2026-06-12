@@ -153,6 +153,9 @@ func generate(args []string) error {
 	inventory := projectRegistry(reg)
 	turnStart := generateTurnStart(inventory)
 	available := fragmentIDSet(turnStart.Fragments)
+	if err := validateRouteDeclarations(classifierRoutes, available); err != nil {
+		return err
+	}
 	routes := promptRoutes{
 		GeneratedFrom: "turn_start_fragments.json",
 		Routes:        classifierRoutes,
@@ -169,6 +172,7 @@ func generate(args []string) error {
 			{ID: "fragment_inventory_generated_from_registry", Pass: true},
 			{ID: "turn_start_consumes_registry_projection", Pass: true},
 			{ID: "turn_start_precedes_prompt_classification", Pass: true},
+			{ID: "prompt_route_selects_match_turn_start_inventory", Pass: true},
 			{ID: "prompt_selects_generated_ids_only", Pass: true},
 			{ID: "prompt_cannot_emit_full_registry", Pass: true},
 			{ID: "prompt_cannot_assemble_context_bodies", Pass: true},
@@ -231,6 +235,9 @@ func validate(args []string) error {
 		return errors.New("turn-start fragments are not generated from the inventory")
 	}
 	available := fragmentIDSet(turnStart.Fragments)
+	if err := validateRouteDeclarations(routes.Routes, available); err != nil {
+		return err
+	}
 	for _, result := range routes.Classifications {
 		if err := validateSelection(result.SelectedFragments, available); err != nil {
 			return fmt.Errorf("classification %q: %w", result.Prompt, err)
@@ -239,8 +246,8 @@ func validate(args []string) error {
 	if routes.GeneratedFrom != "turn_start_fragments.json" {
 		return errors.New("prompt classifier does not declare the turn-start generator boundary")
 	}
-	if len(report.Checks) != 9 {
-		return fmt.Errorf("expected 9 lifecycle checks, got %d", len(report.Checks))
+	if len(report.Checks) != 10 {
+		return fmt.Errorf("expected 10 lifecycle checks, got %d", len(report.Checks))
 	}
 	for _, check := range report.Checks {
 		if !check.Pass {
@@ -404,6 +411,15 @@ func validateSelection(ids []string, available map[string]bool) error {
 			return fmt.Errorf("selected fragment %q more than once", id)
 		}
 		seen[id] = true
+	}
+	return nil
+}
+
+func validateRouteDeclarations(routes []route, available map[string]bool) error {
+	for _, r := range routes {
+		if err := validateSelection(r.Selects, available); err != nil {
+			return fmt.Errorf("route %q: %w", r.ID, err)
+		}
 	}
 	return nil
 }

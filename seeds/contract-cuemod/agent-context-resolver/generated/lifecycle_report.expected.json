@@ -22,6 +22,10 @@
       "pass": true
     },
     {
+      "id": "prompt_route_selects_match_turn_start_inventory",
+      "pass": true
+    },
+    {
       "id": "prompt_selects_generated_ids_only",
       "pass": true
     },
