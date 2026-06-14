@@ -97,7 +97,12 @@ for invalid_fixture in \
 	./fixtures/agent-runtime/invalid-result-worker-id-mismatch \
 	./fixtures/agent-runtime/invalid-result-route-ref-mismatch \
 	./fixtures/agent-runtime/invalid-result-budget-mismatch \
-	./fixtures/agent-runtime/invalid-runtime-route-drift
+	./fixtures/agent-runtime/invalid-runtime-route-drift \
+	./fixtures/agent-runtime/invalid-unknown-worker-kind \
+	./fixtures/agent-runtime/invalid-worker-missing-command-budget \
+	./fixtures/agent-runtime/invalid-validation-source-mutation \
+	./fixtures/agent-runtime/invalid-git-commit-permission \
+	./fixtures/agent-runtime/invalid-worker-result-mismatch
 do
 	if cue vet "$invalid_fixture" >/dev/null 2>&1; then
 		printf '%s\n' "$invalid_fixture unexpectedly passed" >&2
