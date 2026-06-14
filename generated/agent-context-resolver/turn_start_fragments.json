@@ -12,6 +12,16 @@
       "contractPath": "contracts/agent-context-resolver/resolver.cue"
     },
     {
+      "id": "agent-runtime.authority",
+      "sourceContract": "agent-runtime",
+      "sourcePath": "contracts/agent-runtime/registry.cue",
+      "role": "authority",
+      "surface": "turn_start",
+      "summary": "Registered worker, route invocation, budget, lifecycle, adapter, and structured-result boundary.",
+      "authorityRoot": "contracts/agent-runtime",
+      "contractPath": "contracts/agent-runtime/registry.cue"
+    },
+    {
       "id": "agent-skill.projection",
       "sourceContract": "agent-skill",
       "sourcePath": "contracts/agent-skill/skill.cue",

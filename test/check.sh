@@ -13,6 +13,8 @@ cue vet ./contracts/resolver
 cue vet ./contracts/validation
 cue vet ./contracts/agent-skill
 cue vet ./contracts/agent-context-resolver
+cue vet ./contracts/agent-runtime
+cue vet ./contracts/agent-runtime/adapters
 cue vet ./contracts/repo
 cue export ./contracts/repo -e vbContract >/dev/null
 cue vet ./contracts/vb-reference
@@ -38,6 +40,7 @@ cue vet ./fixtures/mcp/adapter-output
 cue vet ./fixtures/agent-skill/valid
 cue vet ./fixtures/vb-contract/valid
 cue vet ./fixtures/resolver/agent-context-resolver
+cue vet ./fixtures/agent-runtime
 cue vet ./fixtures/vcs/valid
 cue vet ./fixtures/resolver/workspace-lifecycle
 cue vet ./migration
@@ -84,7 +87,13 @@ for invalid_fixture in \
 	./fixtures/resolver/agent-context-resolver/invalid-route-propagation \
 	./fixtures/resolver/agent-context-resolver/invalid-direct-sdk-spawn \
 	./fixtures/resolver/agent-context-resolver/invalid-runtime-execution \
-	./fixtures/resolver/agent-context-resolver/invalid-route-authority
+	./fixtures/resolver/agent-context-resolver/invalid-route-authority \
+	./fixtures/agent-runtime/invalid-arbitrary-prompt \
+	./fixtures/agent-runtime/invalid-raw-transcript \
+	./fixtures/agent-runtime/invalid-raw-registry \
+	./fixtures/agent-runtime/invalid-unregistered-route \
+	./fixtures/agent-runtime/invalid-unregistered-worker \
+	./fixtures/agent-runtime/invalid-missing-budget
 do
 	if cue vet "$invalid_fixture" >/dev/null 2>&1; then
 		printf '%s\n' "$invalid_fixture unexpectedly passed" >&2

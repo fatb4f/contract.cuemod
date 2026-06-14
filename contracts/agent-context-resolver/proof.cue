@@ -100,6 +100,22 @@ routeCompilerProof: #ResolvedRoutePlan & {
 	}
 	runtime: {
 		mode: "requires-agent-runtime"
+		routeRefs: [
+			{
+				schema:       "agent.runtime-route-reference.v1"
+				routeID:      routeInventory.routes[0].id
+				routeKind:    routeInventory.routes[0].kind
+				context:      routeCompilerProof.propagation.perRoute["resolver.inspect.current"]
+				outputSchema: routeInventory.routes[0].outputSchema
+			},
+			{
+				schema:       "agent.runtime-route-reference.v1"
+				routeID:      routeInventory.routes[1].id
+				routeKind:    routeInventory.routes[1].kind
+				context:      routeCompilerProof.propagation.perRoute["resolver.plan.compile"]
+				outputSchema: routeInventory.routes[1].outputSchema
+			},
+		]
 		requirements: {
 			agentRuntimeRegistry: "absent"
 			mcpRouteExecutor:     "absent"

@@ -187,6 +187,37 @@ agentContextResolverHook: """
 					},
 					runtime: {
 						mode: "requires-agent-runtime",
+						routeRefs: [
+							$routes[] as $route
+							| {
+								schema: "agent.runtime-route-reference.v1",
+								routeID: $route.id,
+								routeKind: $route.kind,
+								context: {
+									includes: {
+										objective: $route.task.objective,
+										acceptedFacts: [],
+										selectedFragments: $route.inputFragments,
+										files: ($route.task.files // []),
+										priorArtifacts: ($route.dependsOn // []),
+										validationCommands: ($route.task.commands // [])
+									},
+									excludes: [
+										"full transcript",
+										"unselected fragments",
+										"raw registry",
+										"unbounded tool logs",
+										"irrelevant route outputs"
+									],
+									return: {
+										schema: $route.outputSchema,
+										maxSummaryTokens: 800,
+										evidenceRequired: true
+									}
+								},
+								outputSchema: $route.outputSchema
+							}
+						],
 						requirements: {
 							agentRuntimeRegistry: "absent",
 							mcpRouteExecutor: "absent"

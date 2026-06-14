@@ -29,9 +29,9 @@ turnStart: agentcontextresolver.#TurnStartContextFragmentSet & {
 output: agentcontextresolver.#ResolverOutput & {
 	prompt: "How does the WezTerm sessionizer switch workspaces?"
 	report: {
-		schema:       "agent.context-resolver.lifecycle-report.v1"
-		registry:     registry
-		turnStart:    turnStart
+		schema:         "agent.context-resolver.lifecycle-report.v1"
+		registry:       registry
+		turnStart:      turnStart
 		classification: classification
 		assertions: [
 			{name: "turn_start_available", passed: true},
@@ -40,7 +40,7 @@ output: agentcontextresolver.#ResolverOutput & {
 		]
 	}
 	hook: {
-		hook_event_name: "UserPromptSubmit"
+		hook_event_name:   "UserPromptSubmit"
 		selectedFragments: classification.selectedFragments
 		hints:             classification.hints
 		evidence:          classification.evidence
@@ -124,6 +124,13 @@ output: agentcontextresolver.#ResolverOutput & {
 	}
 	runtime: {
 		mode: "requires-agent-runtime"
+		routeRefs: [{
+			schema:    "agent.runtime-route-reference.v1"
+			routeID:   "resolver.inspect.current"
+			routeKind: "inspect"
+			context:   validRoutePlan.propagation.perRoute["resolver.inspect.current"]
+			outputSchema: {schema: "agent.route-result.inspect.v1"}
+		}]
 		requirements: {
 			agentRuntimeRegistry: "absent"
 			mcpRouteExecutor:     "absent"

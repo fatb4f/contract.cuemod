@@ -1,7 +1,16 @@
 package agentcontextresolver
 
+#RuntimeRouteReference: close({
+	schema:       "agent.runtime-route-reference.v1"
+	routeID:      #DeclaredID
+	routeKind:    #RouteKind
+	context:      #RouteContextBoundary
+	outputSchema: #RouteOutputSchema
+})
+
 #RuntimeProjection: close({
 	mode: "none" | "eligible" | "requires-agent-runtime"
+	routeRefs: [...#RuntimeRouteReference]
 
 	requirements: close({
 		agentRuntimeRegistry: "absent" | "present"
@@ -32,6 +41,7 @@ package agentcontextresolver
 	}
 	if execution.allowed {
 		mode: "eligible"
+		routeRefs: [_, ...]
 		requirements: {
 			agentRuntimeRegistry: "present"
 			mcpRouteExecutor:     "present"

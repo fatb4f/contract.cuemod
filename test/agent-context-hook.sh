@@ -38,6 +38,8 @@ printf '%s\n' "$hint_context" | jq -e '
 	.controller.propagation.denyUnselectedFragments == true and
 	.controller.runtime.mode == "requires-agent-runtime" and
 	.controller.runtime.execution.allowed == false and
+	([.controller.runtime.routeRefs[].routeID as $id | .controller.routes | map(.id) | index($id) != null] | all) and
+	([.controller.routes[].id as $id | .controller.runtime.routeRefs | map(.routeID) | index($id) != null] | all) and
 	.controller.runtime.deny.directSDKSpawn == true and
 	.controller.expectedMerge.finalAuthority == "root_codex" and
 	.controller.expectedMerge.routeResultsAreAuthority == false and
