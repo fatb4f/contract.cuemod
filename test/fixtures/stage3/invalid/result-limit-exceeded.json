@@ -1,9 +1,0 @@
-{
-  "schema": "agent.search-implementation.request.v1",
-  "projection_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "intent": "find sessionizer mux usage",
-  "terms": [
-    "mux"
-  ],
-  "result_limit": 100000
-}

@@ -30,7 +30,6 @@ cue vet ./providers/cue-rg
 cue vet ./providers/lua-lsp
 cue vet ./providers/chezmoi
 cue vet ./adapters/git-mcp-go
-cue vet ./projections/stage3
 cue vet ./projections/agent-skill
 cue vet ./projections/repo
 cue export ./projections/repo -e manifest >/dev/null
@@ -43,16 +42,10 @@ cue vet ./fixtures/resolver/agent-context-resolver
 cue vet ./fixtures/agent-runtime
 cue vet ./fixtures/vcs/valid
 cue vet ./fixtures/resolver/workspace-lifecycle
-cue vet ./migration
 ./seeds/contract-cuemod/agent-context-resolver/scripts/validate.sh
 
 ./test/agent-context-hook.sh
 ./test/repo-layout.sh
-
-if find adapters/git-mcp-go/source -name .git -print -quit | grep -q .; then
-	printf '%s\n' "managed git-mcp-go adapter contains nested Git metadata" >&2
-	exit 1
-fi
 
 if cue vet ./fixtures/mcp/invalid-negative >/dev/null 2>&1; then
 	printf '%s\n' "invalid negative claim unexpectedly passed" >&2

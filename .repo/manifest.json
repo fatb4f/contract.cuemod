@@ -53,16 +53,19 @@
             "path": "adapters/",
             "kind": "directory",
             "role": "adapter",
-            "lifecycle": "managed-snapshot",
+            "lifecycle": "source",
             "authority": "non-authority",
             "generated": false,
             "owner": "contracts/adapters",
-            "description": "Managed backend source snapshots.",
+            "description": "Declarative references to external adapter sources.",
             "allowedFileKinds": [
                 "file",
                 "directory"
             ],
             "allowedImports": [],
+            "allowedExtensions": [
+                ".cue"
+            ],
             "forbiddenChildren": [
                 ".git"
             ],
@@ -162,27 +165,6 @@
             ]
         },
         {
-            "path": "migration/",
-            "kind": "directory",
-            "role": "migration",
-            "lifecycle": "quarantine",
-            "authority": "quarantined",
-            "generated": false,
-            "owner": "contracts/repo",
-            "description": "Quarantined observations awaiting classification.",
-            "allowedFileKinds": [
-                "file",
-                "directory"
-            ],
-            "allowedImports": [],
-            "validatesWith": [
-                "cue vet ./migration"
-            ],
-            "prunesWith": [
-                "reject undeclared children"
-            ]
-        },
-        {
             "path": "test/",
             "kind": "directory",
             "role": "validation",
@@ -222,6 +204,32 @@
             ],
             "validatesWith": [
                 "./test/check.sh"
+            ],
+            "prunesWith": [
+                "reject undeclared children"
+            ]
+        },
+        {
+            "path": ".github/",
+            "kind": "directory",
+            "role": "documentation",
+            "lifecycle": "source",
+            "authority": "non-authority",
+            "generated": false,
+            "owner": "contracts/repo",
+            "description": "GitHub repository metadata and contribution templates.",
+            "allowedFileKinds": [
+                "file",
+                "directory"
+            ],
+            "allowedImports": [],
+            "allowedExtensions": [
+                ".yml",
+                ".yaml",
+                ".md"
+            ],
+            "validatesWith": [
+                "./test/repo-layout.sh"
             ],
             "prunesWith": [
                 "reject undeclared children"
@@ -270,69 +278,6 @@
             ]
         },
         {
-            "path": "cmd/",
-            "kind": "directory",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "non-authority",
-            "generated": false,
-            "owner": "contracts/mcp",
-            "description": "Go command adapters.",
-            "allowedFileKinds": [
-                "file",
-                "directory"
-            ],
-            "allowedImports": [],
-            "validatesWith": [
-                "go test ./..."
-            ],
-            "prunesWith": [
-                "reject undeclared children"
-            ]
-        },
-        {
-            "path": "internal/",
-            "kind": "directory",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "non-authority",
-            "generated": false,
-            "owner": "contracts/mcp",
-            "description": "Internal Go implementation packages.",
-            "allowedFileKinds": [
-                "file",
-                "directory"
-            ],
-            "allowedImports": [],
-            "validatesWith": [
-                "go test ./..."
-            ],
-            "prunesWith": [
-                "reject undeclared children"
-            ]
-        },
-        {
-            "path": "bin/",
-            "kind": "directory",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "non-authority",
-            "generated": false,
-            "owner": "contracts/repo",
-            "description": "Developer-only tooling; never agent-visible.",
-            "allowedFileKinds": [
-                "file",
-                "directory"
-            ],
-            "allowedImports": [],
-            "validatesWith": [
-                "./test/repo-layout.sh"
-            ],
-            "prunesWith": [
-                "reject generated references to bin/"
-            ]
-        },
-        {
             "path": "cue.mod/",
             "kind": "directory",
             "role": "tooling",
@@ -371,259 +316,7 @@
             ]
         },
         {
-            "path": "agent.search.schema.cue",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "dotfiles.agent-context.cue",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "dotfiles.jsonld.cue",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "dotfiles.schema-map.cue",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "dotfiles.schema-map.json",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "go.mod",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "go.sum",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
             "path": "justfile",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "mcp.runtime.cue",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "workspace.contract.json",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "workspace.cue",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "workspace.domains.cue",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "workspace.domains.json",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "workspace.hosts.cue",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "workspace.hosts.json",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "workspace.projections.cue",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "workspace.projects.cue",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "workspace.projects.json",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "workspace.schema.cue",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "workspace.workflow.cue",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "workspace.workflow.json",
-            "kind": "file",
-            "role": "tooling",
-            "lifecycle": "source",
-            "authority": "authoritative",
-            "generated": false,
-            "owner": "github.com/fatb4f/contract.cuemod",
-            "validatesWith": [
-                "./test/check.sh"
-            ]
-        },
-        {
-            "path": "workspace_tool.cue",
             "kind": "file",
             "role": "tooling",
             "lifecycle": "source",

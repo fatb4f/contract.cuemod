@@ -1,7 +1,0 @@
-{
-  "schema": "agent.search-implementation.error.v1",
-  "code": "unknown_rejection",
-  "message": "Unknown rejection.",
-  "projection_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "details": {}
-}
