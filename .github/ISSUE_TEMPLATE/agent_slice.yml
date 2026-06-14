@@ -1,30 +1,40 @@
 
-````yaml
 name: Contract slice
-description: Plan a bounded contract.cuemod implementation slice with explicit mode, scope, sub-issues, and quota controls.
-title: "[slice]: "
+description: >-
+  Plan a bounded contract.cuemod implementation slice with explicit mode, scope,
+  sub-issues, and quota controls.
+title: '[slice]: '
 labels:
   - slice
   - contract.cuemod
 body:
   - type: markdown
     attributes:
-      value: |
+      value: >
         ## Slice contract
+
 
         This parent issue defines the slice envelope only.
 
-        Major sections should be created as sub-issues when they require separate implementation, validation, or review.
+
+        Major sections should be created as sub-issues when they require
+        separate implementation, validation, or review.
+
 
         Slice modes:
 
-        - `contract-only`
-        - `fixture-only`
-        - `projection-refresh`
-        - `hook-runtime`
-        - `repo/vcs-only`
-        - `issue-admin`
 
+        - `contract-only`
+
+        - `fixture-only`
+
+        - `projection-refresh`
+
+        - `hook-runtime`
+
+        - `repo/vcs-only`
+
+        - `issue-admin`
   - type: dropdown
     id: primary_mode
     attributes:
@@ -39,23 +49,26 @@ body:
         - issue-admin
     validations:
       required: true
-
   - type: textarea
     id: objective
     attributes:
       label: Objective
       description: State the invariant or outcome this slice must produce.
-      placeholder: |
+      placeholder: >
         Example:
-        Add concrete agent-runtime fixture scaffolding so future invalid fixtures avoid repeated boilerplate and do not rely on open imported fixture values.
+
+        Add concrete agent-runtime fixture scaffolding so future invalid
+        fixtures avoid repeated boilerplate and do not rely on open imported
+        fixture values.
     validations:
       required: true
-
   - type: textarea
     id: authority
     attributes:
       label: Authority / source of truth
-      description: List the contract files, issue numbers, commits, or upstream constraints that define the slice.
+      description: >-
+        List the contract files, issue numbers, commits, or upstream constraints
+        that define the slice.
       placeholder: |
         - Parent issue:
         - Previous commit:
@@ -63,7 +76,6 @@ body:
         - Runtime invariant:
     validations:
       required: true
-
   - type: dropdown
     id: quota_mode
     attributes:
@@ -75,7 +87,6 @@ body:
         - critical
     validations:
       required: true
-
   - type: textarea
     id: allowed_paths
     attributes:
@@ -86,12 +97,13 @@ body:
         - fixtures/agent-runtime/README.md
     validations:
       required: true
-
   - type: textarea
     id: denied_paths
     attributes:
       label: Denied paths
-      description: Files/directories that must not be inspected or patched unless the parent issue is revised.
+      description: >-
+        Files/directories that must not be inspected or patched unless the
+        parent issue is revised.
       value: |
         - generated/*
         - projections/*
@@ -102,7 +114,6 @@ body:
         - unrelated fixtures/*
     validations:
       required: true
-
   - type: textarea
     id: hard_caps
     attributes:
@@ -119,28 +130,38 @@ body:
         - final response max 15-20 lines
     validations:
       required: true
-
   - type: textarea
     id: subissues
     attributes:
       label: Sub-issues to create
-      description: Create these as native GitHub sub-issues when the section is non-trivial.
-      value: |
+      description: >-
+        Create these as native GitHub sub-issues when the section is
+        non-trivial.
+      value: >
         ## Required sub-issues
 
-        - [ ] contract-only: define or update the authoritative contract invariant
+
+        - [ ] contract-only: define or update the authoritative contract
+        invariant
+
         - [ ] fixture-only: add concrete positive/negative fixture coverage
+
         - [ ] validation: add or update narrow validation entrypoints
-        - [ ] issue-admin: summarize, comment, and close after implementation is accepted
+
+        - [ ] issue-admin: summarize, comment, and close after implementation is
+        accepted
+
 
         ## Optional sub-issues
 
+
         - [ ] projection-refresh: regenerate generated/projection outputs
+
         - [ ] hook-runtime: update .codex hook/runtime adapter surfaces
+
         - [ ] repo/vcs-only: update repo/VCS workflow contracts
     validations:
       required: true
-
   - type: textarea
     id: acceptance
     attributes:
@@ -156,7 +177,6 @@ body:
         - [ ] Final commit is clean and scoped.
     validations:
       required: true
-
   - type: textarea
     id: validation_plan
     attributes:
@@ -179,21 +199,25 @@ body:
         ```
     validations:
       required: true
-
   - type: textarea
     id: non_goals
     attributes:
       label: Non-goals
       description: Explicitly exclude work that would widen the slice.
-      value: |
+      value: >
         - No broad repo inspection.
+
         - No unrelated refactor.
-        - No generated/projection refresh unless this is a projection-refresh slice.
+
+        - No generated/projection refresh unless this is a projection-refresh
+        slice.
+
         - No GitHub issue update/close inside implementation run.
-        - No MCP/Codex SDK live execution unless this is the declared slice target.
+
+        - No MCP/Codex SDK live execution unless this is the declared slice
+        target.
     validations:
       required: true
-
   - type: textarea
     id: closeout
     attributes:
@@ -209,4 +233,3 @@ body:
         - Blockers / follow-up
     validations:
       required: true
-````
