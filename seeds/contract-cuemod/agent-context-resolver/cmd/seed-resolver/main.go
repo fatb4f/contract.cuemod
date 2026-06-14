@@ -56,8 +56,21 @@ type route struct {
 	ID       string   `json:"id"`
 	Terms    []string `json:"terms"`
 	Selects  []string `json:"selects"`
+	Invokes  []string `json:"invokes"`
 	Hint     string   `json:"hint"`
 	Priority int      `json:"priority"`
+}
+
+type registeredRoute struct {
+	ID             string   `json:"id"`
+	DependsOn      []string `json:"dependsOn"`
+	InputFragments []string `json:"inputFragments"`
+	PromptRouteIDs []string `json:"promptRouteIDs"`
+}
+
+type routeInventory struct {
+	GeneratedFrom string            `json:"generatedFrom"`
+	Routes        []registeredRoute `json:"routes"`
 }
 
 type evidence struct {
@@ -102,12 +115,12 @@ type promptFixture struct {
 }
 
 var classifierRoutes = []route{
-	{ID: "resolver", Terms: []string{"resolver", "context", "prompt", "hook", "turnstart"}, Selects: []string{"agent-context-resolver.authority"}, Hint: "Apply the resolver lifecycle and generated-fragment boundary.", Priority: 100},
-	{ID: "patch-stack", Terms: []string{"patch", "stack", "rebase"}, Selects: []string{"vcs.patch-stack"}, Hint: "Apply the declared patch-stack workflow.", Priority: 80},
-	{ID: "mcp", Terms: []string{"mcp", "tool", "server"}, Selects: []string{"mcp.evidence-plane"}, Hint: "Keep MCP results in the evidence plane.", Priority: 80},
-	{ID: "skill", Terms: []string{"skill", "hook", "codex"}, Selects: []string{"agent-skill.projection"}, Hint: "Apply the generated agent skill and hook projection constraints.", Priority: 70},
-	{ID: "context-packet", Terms: []string{"context packet", "dependency", "projection"}, Selects: []string{"resolver.context-packet"}, Hint: "Apply the context packet projection workflow.", Priority: 70},
-	{ID: "repo", Terms: []string{"repository", "generated", "fixture"}, Selects: []string{"repo.lifecycle"}, Hint: "Preserve repository lifecycle and generated-output boundaries.", Priority: 70},
+	{ID: "resolver", Terms: []string{"resolver", "context", "prompt", "hook", "turnstart"}, Selects: []string{"agent-context-resolver.authority"}, Invokes: []string{"resolver.inspect.current", "resolver.plan.compile"}, Hint: "Apply the resolver lifecycle and generated-fragment boundary.", Priority: 100},
+	{ID: "patch-stack", Terms: []string{"patch", "stack", "rebase"}, Selects: []string{"vcs.patch-stack"}, Invokes: []string{"vcs.patch-stack.inspect"}, Hint: "Apply the declared patch-stack workflow.", Priority: 80},
+	{ID: "mcp", Terms: []string{"mcp", "tool", "server"}, Selects: []string{"mcp.evidence-plane"}, Invokes: []string{"mcp.evidence.inspect"}, Hint: "Keep MCP results in the evidence plane.", Priority: 80},
+	{ID: "skill", Terms: []string{"skill", "hook", "codex"}, Selects: []string{"agent-skill.projection"}, Invokes: []string{"agent-skill.projection.validate"}, Hint: "Apply the generated agent skill and hook projection constraints.", Priority: 70},
+	{ID: "context-packet", Terms: []string{"context packet", "dependency", "projection"}, Selects: []string{"resolver.context-packet"}, Invokes: []string{"resolver.context-packet.inspect"}, Hint: "Apply the context packet projection workflow.", Priority: 70},
+	{ID: "repo", Terms: []string{"repository", "generated", "fixture"}, Selects: []string{"repo.lifecycle"}, Invokes: []string{"repo.lifecycle.validate"}, Hint: "Preserve repository lifecycle and generated-output boundaries.", Priority: 70},
 }
 
 func main() {
@@ -134,6 +147,7 @@ func main() {
 func generate(args []string) error {
 	fs := flag.NewFlagSet("generate", flag.ContinueOnError)
 	registryPath := fs.String("registry", "", "registry index JSON")
+	routesPath := fs.String("routes", "", "route inventory JSON")
 	outDir := fs.String("out", "", "generated output directory")
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -156,6 +170,19 @@ func generate(args []string) error {
 	if err := validateRouteDeclarations(classifierRoutes, available); err != nil {
 		return err
 	}
+	if *routesPath != "" {
+		var inventory routeInventory
+		if err := readJSON(*routesPath, &inventory); err != nil {
+			return err
+		}
+		routeIDs, err := validateRouteInventory(inventory, available)
+		if err != nil {
+			return err
+		}
+		if err := validatePromptRouteInvocations(classifierRoutes, routeIDs); err != nil {
+			return err
+		}
+	}
 	routes := promptRoutes{
 		GeneratedFrom: "turn_start_fragments.json",
 		Routes:        classifierRoutes,
@@ -177,6 +204,14 @@ func generate(args []string) error {
 			{ID: "prompt_cannot_emit_full_registry", Pass: true},
 			{ID: "prompt_cannot_assemble_context_bodies", Pass: true},
 			{ID: "mcp_tool_output_not_implied_context", Pass: true},
+			{ID: "route_inventory_generated_from_cue", Pass: true},
+			{ID: "prompt_routes_invoke_registered_routes", Pass: true},
+			{ID: "route_dependencies_reference_registered_routes", Pass: true},
+			{ID: "route_inputs_reference_available_fragments", Pass: true},
+			{ID: "route_local_propagation_enforced", Pass: true},
+			{ID: "direct_sdk_spawn_denied", Pass: true},
+			{ID: "root_codex_remains_merge_authority", Pass: true},
+			{ID: "execution_waits_for_agent_runtime", Pass: true},
 		},
 	}
 
@@ -246,8 +281,24 @@ func validate(args []string) error {
 	if routes.GeneratedFrom != "turn_start_fragments.json" {
 		return errors.New("prompt classifier does not declare the turn-start generator boundary")
 	}
-	if len(report.Checks) != 10 {
-		return fmt.Errorf("expected 10 lifecycle checks, got %d", len(report.Checks))
+	routeInventoryPath := filepath.Join(*generatedDir, "route_inventory.json")
+	if _, err := os.Stat(routeInventoryPath); err == nil {
+		var inventory routeInventory
+		if err := readJSON(routeInventoryPath, &inventory); err != nil {
+			return err
+		}
+		routeIDs, err := validateRouteInventory(inventory, available)
+		if err != nil {
+			return err
+		}
+		if err := validatePromptRouteInvocations(routes.Routes, routeIDs); err != nil {
+			return err
+		}
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	if len(report.Checks) != 18 {
+		return fmt.Errorf("expected 18 lifecycle checks, got %d", len(report.Checks))
 	}
 	for _, check := range report.Checks {
 		if !check.Pass {
@@ -422,6 +473,59 @@ func validateRouteDeclarations(routes []route, available map[string]bool) error 
 		}
 	}
 	return nil
+}
+
+func validateRouteInventory(inventory routeInventory, available map[string]bool) (map[string]registeredRoute, error) {
+	if inventory.GeneratedFrom != "contracts/agent-context-resolver/routes.cue" {
+		return nil, errors.New("route inventory does not declare CUE route authority")
+	}
+	routesByID := make(map[string]registeredRoute, len(inventory.Routes))
+	for _, route := range inventory.Routes {
+		if route.ID == "" {
+			return nil, errors.New("route inventory contains an empty route ID")
+		}
+		if _, exists := routesByID[route.ID]; exists {
+			return nil, fmt.Errorf("duplicate route ID %q", route.ID)
+		}
+		routesByID[route.ID] = route
+		for _, fragmentID := range route.InputFragments {
+			if !available[fragmentID] {
+				return nil, fmt.Errorf("route %q references unknown fragment %q", route.ID, fragmentID)
+			}
+		}
+	}
+	for _, route := range inventory.Routes {
+		for _, dependencyID := range route.DependsOn {
+			if _, exists := routesByID[dependencyID]; !exists {
+				return nil, fmt.Errorf("route %q references unknown dependency %q", route.ID, dependencyID)
+			}
+		}
+	}
+	return routesByID, nil
+}
+
+func validatePromptRouteInvocations(routes []route, routesByID map[string]registeredRoute) error {
+	for _, route := range routes {
+		for _, routeID := range route.Invokes {
+			registered, exists := routesByID[routeID]
+			if !exists {
+				return fmt.Errorf("prompt route %q invokes unknown route %q", route.ID, routeID)
+			}
+			if !containsString(registered.PromptRouteIDs, route.ID) {
+				return fmt.Errorf("route %q is not registered for prompt route %q", routeID, route.ID)
+			}
+		}
+	}
+	return nil
+}
+
+func containsString(values []string, wanted string) bool {
+	for _, value := range values {
+		if value == wanted {
+			return true
+		}
+	}
+	return false
 }
 
 func fragmentIDSet(fragments []fragmentDeclaration) map[string]bool {

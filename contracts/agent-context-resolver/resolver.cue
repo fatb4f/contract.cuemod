@@ -86,6 +86,7 @@ import "list"
 		hints: #PromptHint
 		evidence: #PromptEvidence
 		additionalContext: string & !=""
+		controller?: #ResolvedRoutePlan
 	})
 })
 

@@ -32,7 +32,11 @@ output=$(
 		"$script_dir/agent-context-resolver-hook"
 )
 printf '%s\n' "$output" | jq -er '
-	.hookSpecificOutput.additionalContext
-	| sub("^Agent context routing hint:\n"; "")
-	| fromjson
+	if . == {} then
+		{}
+	else
+		.hookSpecificOutput.additionalContext
+		| sub("^Agent route controller packet:\n"; "")
+		| fromjson
+	end
 '

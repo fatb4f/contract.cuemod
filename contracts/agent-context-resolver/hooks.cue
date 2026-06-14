@@ -20,12 +20,15 @@ import "list"
 }
 
 #UserPromptSubmitOutput: {
+	schema: "agent.route-controller-packet.v1"
 	selectedFragments: [...string]
 	compactHints: [...string]
 	evidence: [...#Evidence]
+	controller: #ResolvedRoutePlan
 
-	fullRegistry?:  _|_
-	contextBodies?: _|_
+	fullRegistry?:   _|_
+	contextBodies?:  _|_
+	fullTranscript?: _|_
 }
 
 #UserPromptSubmitContract: {

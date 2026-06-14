@@ -1,0 +1,271 @@
+{
+    "generatedFrom": "contracts/agent-context-resolver/routes.cue",
+    "gates": [
+        {
+            "id": "registry-authority",
+            "class": "registry_authority",
+            "stage": "selection",
+            "appliesToKinds": [
+                "inspect",
+                "validate",
+                "generate",
+                "diff",
+                "test",
+                "summarize",
+                "risk_scan"
+            ],
+            "required": true
+        },
+        {
+            "id": "route-local-propagation",
+            "class": "propagation_boundary",
+            "stage": "projection",
+            "appliesToKinds": [
+                "inspect",
+                "validate",
+                "generate",
+                "diff",
+                "test",
+                "summarize",
+                "risk_scan"
+            ],
+            "required": true
+        },
+        {
+            "id": "runtime-deny",
+            "class": "runtime_denial",
+            "stage": "execution",
+            "appliesToKinds": [
+                "validate",
+                "generate",
+                "diff",
+                "test",
+                "risk_scan"
+            ],
+            "required": true
+        },
+        {
+            "id": "structured-result",
+            "class": "structured_result",
+            "stage": "merge",
+            "appliesToKinds": [
+                "inspect",
+                "validate",
+                "generate",
+                "diff",
+                "test",
+                "summarize",
+                "risk_scan"
+            ],
+            "required": true
+        }
+    ],
+    "routes": [
+        {
+            "id": "resolver.inspect.current",
+            "kind": "inspect",
+            "priority": 100,
+            "promptRouteIDs": [
+                "resolver"
+            ],
+            "sequence": 10,
+            "parallelGroup": "inspect",
+            "dependsOn": [],
+            "inputFragments": [
+                "agent-context-resolver.authority"
+            ],
+            "task": {
+                "objective": "Inspect the current resolver authority and generated boundary.",
+                "constraints": [
+                    "Treat CUE and repository state as durable authority."
+                ],
+                "files": [
+                    "contracts/agent-context-resolver"
+                ]
+            },
+            "outputSchema": {
+                "schema": "agent.route-result.inspect.v1"
+            },
+            "gates": [
+                "registry-authority",
+                "route-local-propagation",
+                "structured-result"
+            ]
+        },
+        {
+            "id": "resolver.plan.compile",
+            "kind": "validate",
+            "priority": 95,
+            "promptRouteIDs": [
+                "resolver"
+            ],
+            "sequence": 20,
+            "dependsOn": [
+                "resolver.inspect.current"
+            ],
+            "inputFragments": [
+                "agent-context-resolver.authority"
+            ],
+            "task": {
+                "objective": "Compile and validate a bounded route plan.",
+                "constraints": [
+                    "Reference registered routes and selected fragments only.",
+                    "Keep root Codex as merge and synthesis authority."
+                ]
+            },
+            "outputSchema": {
+                "schema": "agent.route-result.validation.v1"
+            },
+            "gates": [
+                "registry-authority",
+                "route-local-propagation",
+                "runtime-deny",
+                "structured-result"
+            ]
+        },
+        {
+            "id": "vcs.patch-stack.inspect",
+            "kind": "inspect",
+            "priority": 80,
+            "promptRouteIDs": [
+                "patch-stack"
+            ],
+            "sequence": 10,
+            "parallelGroup": "inspect",
+            "dependsOn": [],
+            "inputFragments": [
+                "vcs.patch-stack"
+            ],
+            "task": {
+                "objective": "Inspect the declared patch-stack workflow.",
+                "constraints": [
+                    "Do not mutate repository state during route inspection."
+                ]
+            },
+            "outputSchema": {
+                "schema": "agent.route-result.inspect.v1"
+            },
+            "gates": [
+                "registry-authority",
+                "route-local-propagation",
+                "structured-result"
+            ]
+        },
+        {
+            "id": "mcp.evidence.inspect",
+            "kind": "inspect",
+            "priority": 80,
+            "promptRouteIDs": [
+                "mcp"
+            ],
+            "sequence": 10,
+            "parallelGroup": "inspect",
+            "dependsOn": [],
+            "inputFragments": [
+                "mcp.evidence-plane"
+            ],
+            "task": {
+                "objective": "Inspect MCP evidence-plane constraints.",
+                "constraints": [
+                    "Do not promote tool output into implied context."
+                ]
+            },
+            "outputSchema": {
+                "schema": "agent.route-result.inspect.v1"
+            },
+            "gates": [
+                "registry-authority",
+                "route-local-propagation",
+                "structured-result"
+            ]
+        },
+        {
+            "id": "agent-skill.projection.validate",
+            "kind": "validate",
+            "priority": 70,
+            "promptRouteIDs": [
+                "skill"
+            ],
+            "sequence": 20,
+            "dependsOn": [],
+            "inputFragments": [
+                "agent-skill.projection"
+            ],
+            "task": {
+                "objective": "Validate generated agent skill and hook projections.",
+                "constraints": [
+                    "Regenerate derived assets from CUE authority."
+                ],
+                "commands": [
+                    "./test/agent-context-hook.sh"
+                ]
+            },
+            "outputSchema": {
+                "schema": "agent.route-result.validation.v1"
+            },
+            "gates": [
+                "registry-authority",
+                "route-local-propagation",
+                "structured-result"
+            ]
+        },
+        {
+            "id": "resolver.context-packet.inspect",
+            "kind": "inspect",
+            "priority": 70,
+            "promptRouteIDs": [
+                "context-packet"
+            ],
+            "sequence": 10,
+            "parallelGroup": "inspect",
+            "dependsOn": [],
+            "inputFragments": [
+                "resolver.context-packet"
+            ],
+            "task": {
+                "objective": "Inspect context packet projection constraints.",
+                "constraints": [
+                    "Return structured evidence without forwarding parent context."
+                ]
+            },
+            "outputSchema": {
+                "schema": "agent.route-result.inspect.v1"
+            },
+            "gates": [
+                "registry-authority",
+                "route-local-propagation",
+                "structured-result"
+            ]
+        },
+        {
+            "id": "repo.lifecycle.validate",
+            "kind": "validate",
+            "priority": 70,
+            "promptRouteIDs": [
+                "repo"
+            ],
+            "sequence": 20,
+            "dependsOn": [],
+            "inputFragments": [
+                "repo.lifecycle"
+            ],
+            "task": {
+                "objective": "Validate repository lifecycle and generated-output boundaries.",
+                "constraints": [
+                    "Do not treat generated artifacts as source authority."
+                ],
+                "commands": [
+                    "./test/check.sh"
+                ]
+            },
+            "outputSchema": {
+                "schema": "agent.route-result.validation.v1"
+            },
+            "gates": [
+                "registry-authority",
+                "route-local-propagation",
+                "structured-result"
+            ]
+        }
+    ]
+}

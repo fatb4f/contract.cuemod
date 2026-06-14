@@ -43,19 +43,20 @@ projection: agentskill.#SkillProjection & {
 skillContent: """
 	---
 	name: resolve-agent-context
-	description: Resolve repository contract fragments from generated resolver inventories.
+	description: Resolve repository contract fragments and compile bounded route plans.
 	---
 
 	# Agent Context Resolution
 
-	The `UserPromptSubmit` hook provides candidate fragment IDs, not task authority.
+	The `UserPromptSubmit` hook provides a bounded route controller packet, not task authority.
 
 	1. Run `.codex/skills/resolve-agent-context/scripts/resolve-agent-context --prompt "<prompt>"`.
 	2. Treat `selectedFragments` as a subset of `availableFragmentIDs`.
-	3. Resolve selected fragment metadata through `generated/agent-context-resolver/fragment_inventory.json`.
-	4. Inspect the declared `sourcePath` and obey repository instruction boundaries before editing.
-	5. Never treat generated resolver JSON or MCP/tool output as source authority.
-	6. Regenerate `.codex` and resolver JSON outputs from their CUE sources after changes.
+	3. Treat `controller.routes` as a subset of `controller.availableRouteIDs`.
+	4. Resolve selected fragment metadata through `generated/agent-context-resolver/fragment_inventory.json`.
+	5. Inspect the declared `sourcePath` and obey repository instruction boundaries before editing.
+	6. Never execute projected routes directly or treat generated JSON and MCP/tool output as source authority.
+	7. Regenerate `.codex` and resolver JSON outputs from their CUE sources after changes.
 	"""
 
 agentContextResolverHook: """
@@ -78,30 +79,138 @@ agentContextResolverHook: """
 		jq -cn \\
 			--arg prompt "$prompt" \\
 			--slurpfile turnStart "$generated_dir/turn_start_fragments.json" \\
-			--slurpfile promptRoutes "$generated_dir/prompt_routes.json" '
+			--slurpfile promptRoutes "$generated_dir/prompt_routes.json" \\
+			--slurpfile routeInventory "$generated_dir/route_inventory.json" '
 			($prompt | ascii_downcase) as $lower |
 			[$turnStart[0].fragments[].id] as $available |
 			[
 				$promptRoutes[0].routes[]
 				| . as $route
-				| select(any($route.terms[]; . as $term | $lower | contains($term)))
+					| select(any($route.terms[]; . as $term | $lower | contains($term)))
 			] as $matched |
+			([
+				$matched[].selects[] as $id
+				| select($available | index($id) != null)
+				| $id
+			] | unique) as $selected |
+			([$matched[].invokes[]] | unique) as $invoked |
+			([
+				$routeInventory[0].routes[]
+				| . as $route
+				| select($invoked | index($route.id) != null)
+				| select([
+					$route.inputFragments[] as $fragment
+					| $selected
+					| index($fragment) != null
+				] | all)
+				| del(.promptRouteIDs)
+			] | sort_by(.sequence, -.priority, .id)) as $routes |
+			([$routes[].gates[]] | unique) as $gateIDs |
 			{
-				schema: "agent.context-resolver.hint.v1",
+				schema: "agent.route-controller-packet.v1",
 				availableFragmentIDs: $available,
-				selectedFragments: [
-					$matched[].selects[] as $id
-					| select($available | index($id) != null)
-					| $id
-				] | unique,
+				selectedFragments: $selected,
 				compactHints: [$matched[].hint] | unique,
 				evidence: [
 					$matched[]
-					| {kind: "prompt_route", value: .id, source: "user_prompt"}
+						| {kind: "prompt_route", value: .id, source: "user_prompt"}
 				],
+				controller: {
+					schema: "agent.route-plan.v1",
+					turnID: (
+						"prompt-" +
+						($prompt | @base64 | gsub("[^A-Za-z0-9]"; "") | .[0:20])
+					),
+					intent: ($matched | sort_by(-.priority, .id) | .[0].id),
+					availableFragmentIDs: $available,
+					availableRouteIDs: [$routeInventory[0].routes[].id],
+					selectedFragments: $selected,
+					routes: $routes,
+					propagation: {
+						mode: "route-local",
+						root: {
+							includes: {
+								intent: ($matched | sort_by(-.priority, .id) | .[0].id),
+								selectedFragments: $selected,
+								acceptedRouteResults: []
+							},
+							excludes: [
+								"raw route logs",
+								"unvalidated route claims",
+								"runtime implementation details"
+							]
+						},
+						perRoute: (
+							reduce $routes[] as $route ({};
+								.[$route.id] = {
+									includes: {
+										objective: $route.task.objective,
+										acceptedFacts: [],
+										selectedFragments: $route.inputFragments,
+										files: ($route.task.files // []),
+										priorArtifacts: ($route.dependsOn // []),
+										validationCommands: ($route.task.commands // [])
+									},
+									excludes: [
+										"full transcript",
+										"unselected fragments",
+										"raw registry",
+										"unbounded tool logs",
+										"irrelevant route outputs"
+									],
+									return: {
+										schema: $route.outputSchema,
+										maxSummaryTokens: 800,
+										evidenceRequired: true
+									}
+								}
+							)
+						),
+						denyFullTranscript: true,
+						denyRawRegistryDump: true,
+						denyUnselectedFragments: true,
+						requireStructuredResult: true
+					},
+					gates: [
+						$routeInventory[0].gates[]
+							| . as $gate
+							| select($gateIDs | index($gate.id) != null)
+					],
+					expectedMerge: {
+						mode: "fail_closed",
+						requireStructuredResults: true,
+						requireEvidenceForClaims: true,
+						conflictPolicy: "root_decides",
+						maxMergedSummaryTokens: 1200,
+						finalAuthority: "root_codex",
+						routeResultsAreAuthority: false
+					},
+					runtime: {
+						mode: "requires-agent-runtime",
+						requirements: {
+							agentRuntimeRegistry: "absent",
+							mcpRouteExecutor: "absent"
+						},
+						execution: {
+							allowed: false,
+							requiresMCPAdapter: true,
+							requiresRuntimeRegistry: true,
+							backend: "codex-sdk"
+						},
+						deny: {
+							directSDKSpawn: true,
+							rawTranscriptForwarding: true,
+							rawRegistryDump: true,
+							unselectedFragments: true,
+							globalMutation: true
+						},
+						expectedResult: {schema: "agent.route-result.v1"}
+					}
+				},
 				generatedFrom: {
 					turnStart: "generated/agent-context-resolver/turn_start_fragments.json",
-					routes: "generated/agent-context-resolver/prompt_routes.json"
+					promptRoutes: "generated/agent-context-resolver/prompt_routes.json",
+					routeInventory: "generated/agent-context-resolver/route_inventory.json"
 				},
 				resolver: {
 					command: ".codex/skills/resolve-agent-context/scripts/resolve-agent-context",
@@ -110,12 +219,12 @@ agentContextResolverHook: """
 			}'
 	)
 
-	[ "$(printf '%s' "$classification" | jq '.selectedFragments | length')" -gt 0 ] || {
+	[ "$(printf '%s' "$classification" | jq '.controller.routes | length')" -gt 0 ] || {
 		printf '{}\\n'
 		exit 0
 	}
 
-	jq -cn --arg context "Agent context routing hint:
+	jq -cn --arg context "Agent route controller packet:
 	$classification" '{
 		hookSpecificOutput: {
 			hookEventName: "UserPromptSubmit",
@@ -159,8 +268,12 @@ resolveAgentContext: """
 			"$script_dir/agent-context-resolver-hook"
 	)
 	printf '%s\\n' "$output" | jq -er '
-		.hookSpecificOutput.additionalContext
-		| sub("^Agent context routing hint:\\n"; "")
-		| fromjson
+		if . == {} then
+			{}
+		else
+			.hookSpecificOutput.additionalContext
+			| sub("^Agent route controller packet:\\n"; "")
+			| fromjson
+		end
 	'
 	"""

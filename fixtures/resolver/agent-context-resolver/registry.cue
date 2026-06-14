@@ -47,3 +47,102 @@ output: agentcontextresolver.#ResolverOutput & {
 		additionalContext: "Agent context lifecycle report: selected fragment IDs only"
 	}
 }
+
+#FixtureRoute: agentcontextresolver.#RouteInvocation & {
+	id:            string | *"resolver.inspect.current"
+	kind:          "inspect"
+	priority:      100
+	sequence:      10
+	parallelGroup: "inspect"
+	dependsOn: [...string] | *[]
+	inputFragments: [...string] | *["agent-context-resolver.authority"]
+	task: {
+		objective: "Inspect resolver authority."
+		constraints: ["Use selected fragments only."]
+		files: ["contracts/agent-context-resolver"]
+	}
+	outputSchema: {schema: "agent.route-result.inspect.v1"}
+	gates: ["registry-authority", "route-local-propagation", "structured-result"]
+}
+
+#FixturePlan: agentcontextresolver.#ResolvedRoutePlan & {
+	schema: "agent.route-plan.v1"
+	turnID: "fixture-turn"
+	intent: "resolver"
+	availableFragmentIDs: [...string] | *["agent-context-resolver.authority"]
+	availableRouteIDs: [...string] | *["resolver.inspect.current"]
+	selectedFragments: [...string] | *["agent-context-resolver.authority"]
+	routes: [...agentcontextresolver.#RouteInvocation] | *[#FixtureRoute]
+	propagation: {
+		mode: "route-local"
+		root: {
+			includes: {
+				intent: "resolver"
+				selectedFragments: ["agent-context-resolver.authority"]
+				acceptedRouteResults: []
+			}
+			excludes: ["raw route logs", "unvalidated route claims", "runtime implementation details"]
+		}
+		perRoute: {
+			"resolver.inspect.current": {
+				includes: {
+					objective: "Inspect resolver authority."
+					acceptedFacts: []
+					selectedFragments: ["agent-context-resolver.authority"]
+					files: ["contracts/agent-context-resolver"]
+				}
+				excludes: ["full transcript", "unselected fragments", "raw registry", "unbounded tool logs", "irrelevant route outputs"]
+				return: {
+					schema: {schema: "agent.route-result.inspect.v1"}
+					maxSummaryTokens: 800
+					evidenceRequired: true
+				}
+			}
+		}
+		denyFullTranscript:      true
+		denyRawRegistryDump:     true
+		denyUnselectedFragments: true
+		requireStructuredResult: true
+	}
+	gates: [
+		{
+			id:    "registry-authority"
+			class: "registry_authority"
+			stage: "selection"
+			appliesToKinds: ["inspect"]
+			required: true
+		},
+	]
+	expectedMerge: {
+		mode:                     "fail_closed"
+		requireStructuredResults: true
+		requireEvidenceForClaims: true
+		conflictPolicy:           "root_decides"
+		maxMergedSummaryTokens:   1200
+		finalAuthority:           "root_codex"
+		routeResultsAreAuthority: false
+	}
+	runtime: {
+		mode: "requires-agent-runtime"
+		requirements: {
+			agentRuntimeRegistry: "absent"
+			mcpRouteExecutor:     "absent"
+		}
+		execution: {
+			allowed:                 false
+			requiresMCPAdapter:      true
+			requiresRuntimeRegistry: true
+			backend:                 "codex-sdk"
+		}
+		deny: {
+			directSDKSpawn:          true
+			rawTranscriptForwarding: true
+			rawRegistryDump:         true
+			unselectedFragments:     true
+			globalMutation:          true
+		}
+		expectedResult: {schema: "agent.route-result.v1"}
+	}
+}
+
+validRoutePlan: #FixturePlan

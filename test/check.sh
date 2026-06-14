@@ -77,7 +77,14 @@ for invalid_fixture in \
 	./fixtures/resolver/agent-context-resolver/invalid-hook-context-body \
 	./fixtures/resolver/agent-context-resolver/invalid-full-registry \
 	./fixtures/resolver/agent-context-resolver/invalid-assertion-false \
-	./fixtures/resolver/agent-context-resolver/invalid-unavailable-selection
+	./fixtures/resolver/agent-context-resolver/invalid-unavailable-selection \
+	./fixtures/resolver/agent-context-resolver/invalid-unknown-route \
+	./fixtures/resolver/agent-context-resolver/invalid-route-fragment \
+	./fixtures/resolver/agent-context-resolver/invalid-route-dependency \
+	./fixtures/resolver/agent-context-resolver/invalid-route-propagation \
+	./fixtures/resolver/agent-context-resolver/invalid-direct-sdk-spawn \
+	./fixtures/resolver/agent-context-resolver/invalid-runtime-execution \
+	./fixtures/resolver/agent-context-resolver/invalid-route-authority
 do
 	if cue vet "$invalid_fixture" >/dev/null 2>&1; then
 		printf '%s\n' "$invalid_fixture unexpectedly passed" >&2

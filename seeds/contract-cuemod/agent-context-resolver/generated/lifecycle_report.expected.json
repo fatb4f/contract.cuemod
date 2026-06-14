@@ -40,6 +40,38 @@
     {
       "id": "mcp_tool_output_not_implied_context",
       "pass": true
+    },
+    {
+      "id": "route_inventory_generated_from_cue",
+      "pass": true
+    },
+    {
+      "id": "prompt_routes_invoke_registered_routes",
+      "pass": true
+    },
+    {
+      "id": "route_dependencies_reference_registered_routes",
+      "pass": true
+    },
+    {
+      "id": "route_inputs_reference_available_fragments",
+      "pass": true
+    },
+    {
+      "id": "route_local_propagation_enforced",
+      "pass": true
+    },
+    {
+      "id": "direct_sdk_spawn_denied",
+      "pass": true
+    },
+    {
+      "id": "root_codex_remains_merge_authority",
+      "pass": true
+    },
+    {
+      "id": "execution_waits_for_agent_runtime",
+      "pass": true
     }
   ]
 }

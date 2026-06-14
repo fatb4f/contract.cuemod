@@ -16,9 +16,9 @@ run_hook() {
 }
 
 hint=$(run_hook "Update the resolver hook without allowing MCP tool output to become context.")
-hint_context=$(printf '%s\n' "$hint" | jq -r '.hookSpecificOutput.additionalContext | sub("^Agent context routing hint:\\n"; "") | fromjson')
+hint_context=$(printf '%s\n' "$hint" | jq -r '.hookSpecificOutput.additionalContext | sub("^Agent route controller packet:\\n"; "") | fromjson')
 printf '%s\n' "$hint_context" | jq -e '
-	.schema == "agent.context-resolver.hint.v1" and
+	.schema == "agent.route-controller-packet.v1" and
 	(.availableFragmentIDs | index("agent-context-resolver.authority") != null) and
 	(.availableFragmentIDs | index("agent-skill.projection") != null) and
 	(.availableFragmentIDs | index("mcp.evidence-plane") != null) and
@@ -27,14 +27,30 @@ printf '%s\n' "$hint_context" | jq -e '
 	(.selectedFragments | index("agent-skill.projection") != null) and
 	(.selectedFragments | index("mcp.evidence-plane") != null) and
 	([.selectedFragments[] as $id | .availableFragmentIDs | index($id) != null] | all) and
+	.controller.schema == "agent.route-plan.v1" and
+	(.controller.availableRouteIDs | index("resolver.inspect.current") != null) and
+	(.controller.routes | map(.id) | index("resolver.inspect.current") != null) and
+	(.controller.routes | map(.id) | index("resolver.plan.compile") != null) and
+	([.controller.routes[].id as $id | .controller.availableRouteIDs | index($id) != null] | all) and
+	.controller.propagation.mode == "route-local" and
+	.controller.propagation.denyFullTranscript == true and
+	.controller.propagation.denyRawRegistryDump == true and
+	.controller.propagation.denyUnselectedFragments == true and
+	.controller.runtime.mode == "requires-agent-runtime" and
+	.controller.runtime.execution.allowed == false and
+	.controller.runtime.deny.directSDKSpawn == true and
+	.controller.expectedMerge.finalAuthority == "root_codex" and
+	.controller.expectedMerge.routeResultsAreAuthority == false and
 	.generatedFrom.turnStart == "generated/agent-context-resolver/turn_start_fragments.json" and
-	.generatedFrom.routes == "generated/agent-context-resolver/prompt_routes.json"
+	.generatedFrom.promptRoutes == "generated/agent-context-resolver/prompt_routes.json" and
+	.generatedFrom.routeInventory == "generated/agent-context-resolver/route_inventory.json"
 ' >/dev/null
 
 resolved=$("$resolver" --prompt "Update the resolver hook without allowing MCP tool output to become context.")
 printf '%s\n' "$resolved" | jq -e '
-	.schema == "agent.context-resolver.hint.v1" and
-	([.selectedFragments[] as $id | .availableFragmentIDs | index($id) != null] | all)
+	.schema == "agent.route-controller-packet.v1" and
+	([.selectedFragments[] as $id | .availableFragmentIDs | index($id) != null] | all) and
+	([.controller.routes[].id as $id | .controller.availableRouteIDs | index($id) != null] | all)
 ' >/dev/null
 
 run_hook "Update README wording" | jq -e '. == {}' >/dev/null
@@ -45,8 +61,10 @@ mkdir -p "$tmp_root/generated"
 (
 	cd "$repo_root"
 	cue export ./contracts/registry.cue -e repoRegistry --force --out json --outfile "$tmp_root/generated/registry.index.json"
+	cue export ./contracts/agent-context-resolver -e routeInventory --force --out json --outfile "$tmp_root/generated/route_inventory.json"
 	go run ./seeds/contract-cuemod/agent-context-resolver/cmd/seed-resolver/main.go generate \
 		--registry "$tmp_root/generated/registry.index.json" \
+		--routes "$tmp_root/generated/route_inventory.json" \
 		--out "$tmp_root/generated"
 	cue export ./projections/agent-skill -e projection.hooks --out json >"$tmp_root/hooks.json"
 	cue export ./projections/agent-skill -e skillContent --out text >"$tmp_root/SKILL.md"

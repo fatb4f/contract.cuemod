@@ -80,8 +80,14 @@ validate_reference_glue "$component_path"
 regenerated_dir="$tmp_root/regenerated"
 mkdir -p "$regenerated_dir"
 cp "$registry_path" "$regenerated_dir/registry.index.json"
+cue export ./contracts/agent-context-resolver \
+	-e routeInventory \
+	--force \
+	--out json \
+	--outfile "$regenerated_dir/route_inventory.json"
 go run "$resolver_main" generate \
 	--registry "$regenerated_dir/registry.index.json" \
+	--routes "$regenerated_dir/route_inventory.json" \
 	--out "$regenerated_dir"
 diff -ru "$generated_dir" "$regenerated_dir"
 
