@@ -1,0 +1,212 @@
+
+````yaml
+name: Contract slice
+description: Plan a bounded contract.cuemod implementation slice with explicit mode, scope, sub-issues, and quota controls.
+title: "[slice]: "
+labels:
+  - slice
+  - contract.cuemod
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Slice contract
+
+        This parent issue defines the slice envelope only.
+
+        Major sections should be created as sub-issues when they require separate implementation, validation, or review.
+
+        Slice modes:
+
+        - `contract-only`
+        - `fixture-only`
+        - `projection-refresh`
+        - `hook-runtime`
+        - `repo/vcs-only`
+        - `issue-admin`
+
+  - type: dropdown
+    id: primary_mode
+    attributes:
+      label: Primary slice mode
+      description: Select the dominant execution mode for this parent issue.
+      options:
+        - contract-only
+        - fixture-only
+        - projection-refresh
+        - hook-runtime
+        - repo/vcs-only
+        - issue-admin
+    validations:
+      required: true
+
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: State the invariant or outcome this slice must produce.
+      placeholder: |
+        Example:
+        Add concrete agent-runtime fixture scaffolding so future invalid fixtures avoid repeated boilerplate and do not rely on open imported fixture values.
+    validations:
+      required: true
+
+  - type: textarea
+    id: authority
+    attributes:
+      label: Authority / source of truth
+      description: List the contract files, issue numbers, commits, or upstream constraints that define the slice.
+      placeholder: |
+        - Parent issue:
+        - Previous commit:
+        - Contract authority:
+        - Runtime invariant:
+    validations:
+      required: true
+
+  - type: dropdown
+    id: quota_mode
+    attributes:
+      label: Quota mode
+      description: Select the expected execution budget.
+      options:
+        - normal
+        - constrained
+        - critical
+    validations:
+      required: true
+
+  - type: textarea
+    id: allowed_paths
+    attributes:
+      label: Allowed paths
+      description: Files/directories the implementation run may inspect or patch.
+      placeholder: |
+        - fixtures/agent-runtime/registry.cue
+        - fixtures/agent-runtime/README.md
+    validations:
+      required: true
+
+  - type: textarea
+    id: denied_paths
+    attributes:
+      label: Denied paths
+      description: Files/directories that must not be inspected or patched unless the parent issue is revised.
+      value: |
+        - generated/*
+        - projections/*
+        - .codex/*
+        - contracts/repo/*
+        - contracts/vcs/*
+        - contracts/vb-reference/*
+        - unrelated fixtures/*
+    validations:
+      required: true
+
+  - type: textarea
+    id: hard_caps
+    attributes:
+      label: Hard caps
+      description: Runtime limits for Codex / agent execution.
+      value: |
+        - max 12 exec_command calls
+        - max 3 apply_patch calls
+        - max 1 invariant
+        - max 1 positive fixture
+        - max 1 negative fixture
+        - no GitHub issue update/close during implementation
+        - no generated projection updates unless mode is projection-refresh
+        - final response max 15-20 lines
+    validations:
+      required: true
+
+  - type: textarea
+    id: subissues
+    attributes:
+      label: Sub-issues to create
+      description: Create these as native GitHub sub-issues when the section is non-trivial.
+      value: |
+        ## Required sub-issues
+
+        - [ ] contract-only: define or update the authoritative contract invariant
+        - [ ] fixture-only: add concrete positive/negative fixture coverage
+        - [ ] validation: add or update narrow validation entrypoints
+        - [ ] issue-admin: summarize, comment, and close after implementation is accepted
+
+        ## Optional sub-issues
+
+        - [ ] projection-refresh: regenerate generated/projection outputs
+        - [ ] hook-runtime: update .codex hook/runtime adapter surfaces
+        - [ ] repo/vcs-only: update repo/VCS workflow contracts
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Concrete checks required before the parent issue can close.
+      placeholder: |
+        - [ ] Contract invariant is represented in CUE.
+        - [ ] Valid fixture passes.
+        - [ ] Invalid fixture fails for the intended reason.
+        - [ ] Narrow validation passes.
+        - [ ] Full validation run is performed only once, if required.
+        - [ ] No denied paths were modified.
+        - [ ] Final commit is clean and scoped.
+    validations:
+      required: true
+
+  - type: textarea
+    id: validation_plan
+    attributes:
+      label: Validation plan
+      description: List narrow validation first; full repo validation should be final-only.
+      value: |
+        ## Narrow validation
+
+        ```sh
+        cue fmt <target-files>
+        cue vet ./contracts/<target>
+        cue vet ./fixtures/<target>
+        cue eval ./fixtures/<target> -e <validCase> -c
+        ```
+
+        ## Final validation, if required
+
+        ```sh
+        ./test/check.sh
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Non-goals
+      description: Explicitly exclude work that would widen the slice.
+      value: |
+        - No broad repo inspection.
+        - No unrelated refactor.
+        - No generated/projection refresh unless this is a projection-refresh slice.
+        - No GitHub issue update/close inside implementation run.
+        - No MCP/Codex SDK live execution unless this is the declared slice target.
+    validations:
+      required: true
+
+  - type: textarea
+    id: closeout
+    attributes:
+      label: Closeout report format
+      description: Required final report shape.
+      value: |
+        Final response must contain only:
+
+        - Summary
+        - Files changed
+        - Validation
+        - Commit SHA
+        - Blockers / follow-up
+    validations:
+      required: true
+````

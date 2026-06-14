@@ -1,0 +1,106 @@
+
+````yaml
+name: Slice sub-issue
+description: Execute one bounded section of a parent contract slice.
+title: "[sub-slice]: "
+labels:
+  - sub-slice
+  - contract.cuemod
+body:
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Sub-slice mode
+      options:
+        - contract-only
+        - fixture-only
+        - projection-refresh
+        - hook-runtime
+        - repo/vcs-only
+        - issue-admin
+    validations:
+      required: true
+
+  - type: input
+    id: parent_issue
+    attributes:
+      label: Parent issue
+      placeholder: "#123"
+    validations:
+      required: true
+
+  - type: textarea
+    id: invariant
+    attributes:
+      label: Single invariant
+      description: This sub-issue must implement or validate exactly one invariant.
+      placeholder: |
+        Example:
+        Closed external CUE shape must be separated from derived validation conjunct.
+    validations:
+      required: true
+
+  - type: textarea
+    id: allowed_paths
+    attributes:
+      label: Allowed paths
+      placeholder: |
+        - contracts/agent-runtime/invocation.cue
+    validations:
+      required: true
+
+  - type: textarea
+    id: denied_paths
+    attributes:
+      label: Denied paths
+      value: |
+        - generated/*
+        - projections/*
+        - .codex/*
+        - contracts/repo/*
+        - unrelated fixtures/*
+    validations:
+      required: true
+
+  - type: textarea
+    id: patch_budget
+    attributes:
+      label: Patch budget
+      value: |
+        - max 3 apply_patch calls
+        - max 12 exec_command calls
+        - max 1 contract file
+        - max 1 positive fixture
+        - max 1 negative fixture
+        - stop on first unexpected validation class
+    validations:
+      required: true
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation
+      value: |
+        ```sh
+        cue fmt <target-files>
+        cue vet <target-package>
+        cue eval <target-package> -e <case> -c
+        ```
+
+        Do not run full `./test/check.sh` unless this sub-slice explicitly requires it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      value: |
+        - [ ] One invariant changed.
+        - [ ] Narrow validation passes.
+        - [ ] No denied paths changed.
+        - [ ] Commit is scoped.
+        - [ ] Parent issue can consume the result.
+    validations:
+      required: true
+````
