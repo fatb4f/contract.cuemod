@@ -14,7 +14,7 @@ import (
 	unboundedToolLogs:       false
 })
 
-#RuntimeInvocation: {
+#RuntimeInvocation: close({
 	schema:       "agent.runtime-invocation.v1"
 	invocationID: #RuntimeID
 	workerID:     #RuntimeID
@@ -30,6 +30,12 @@ import (
 	arbitraryPrompt?: _|_
 	rawTranscript?:   _|_
 	rawRegistry?:     _|_
+}) & {
+	invocationID:      #RuntimeID
+	workerID:          #RuntimeID
+	budgetID:          #RuntimeID
+	routeRef:          resolver.#RuntimeRouteReference
+	runtimeProjection: resolver.#RuntimeProjection
 
 	_projectionRouteIDs: [for ref in runtimeProjection.routeRefs {ref.routeID}]
 	_projectedRouteRefs: [

@@ -89,11 +89,22 @@ for invalid_fixture in \
 	./fixtures/resolver/agent-context-resolver/invalid-runtime-execution \
 	./fixtures/resolver/agent-context-resolver/invalid-route-authority \
 	./fixtures/agent-runtime/invalid-arbitrary-prompt \
+	./fixtures/agent-runtime/invalid-extra-prompt-field \
+	./fixtures/agent-runtime/invalid-parent-context-window \
+	./fixtures/agent-runtime/invalid-developer-messages \
+	./fixtures/agent-runtime/invalid-raw-tool-logs \
+	./fixtures/agent-runtime/invalid-global-context \
 	./fixtures/agent-runtime/invalid-raw-transcript \
 	./fixtures/agent-runtime/invalid-raw-registry \
 	./fixtures/agent-runtime/invalid-unregistered-route \
 	./fixtures/agent-runtime/invalid-unregistered-worker \
-	./fixtures/agent-runtime/invalid-missing-budget
+	./fixtures/agent-runtime/invalid-missing-budget \
+	./fixtures/agent-runtime/invalid-result-unbound-invocation \
+	./fixtures/agent-runtime/invalid-result-invocation-id-mismatch \
+	./fixtures/agent-runtime/invalid-result-worker-id-mismatch \
+	./fixtures/agent-runtime/invalid-result-route-ref-mismatch \
+	./fixtures/agent-runtime/invalid-result-budget-mismatch \
+	./fixtures/agent-runtime/invalid-runtime-route-drift
 do
 	if cue vet "$invalid_fixture" >/dev/null 2>&1; then
 		printf '%s\n' "$invalid_fixture unexpectedly passed" >&2

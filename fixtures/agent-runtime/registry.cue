@@ -26,15 +26,15 @@ registry: runtime.#AgentRuntimeRegistry & runtime.runtimeRegistry
 
 #FixtureRouteRef: resolver.#RuntimeRouteReference & {
 	schema:    "agent.runtime-route-reference.v1"
-	routeID:   string | *"resolver.inspect.current"
-	routeKind: resolver.#RouteKind | *"inspect"
+	routeID:   "resolver.inspect.current"
+	routeKind: "inspect"
 	context:   #FixtureContext
 	outputSchema: {schema: "agent.route-result.inspect.v1"}
 }
 
 #FixtureRuntimeProjection: resolver.#RuntimeProjection & {
 	mode: "eligible"
-	routeRefs: [...resolver.#RuntimeRouteReference] | *[#FixtureRouteRef]
+	routeRefs: [#FixtureRouteRef]
 	requirements: {
 		agentRuntimeRegistry: "present"
 		mcpRouteExecutor:     "present"
@@ -55,10 +55,11 @@ registry: runtime.#AgentRuntimeRegistry & runtime.runtimeRegistry
 	expectedResult: {schema: "agent.route-result.v1"}
 }
 
-fixtureInvocationInput: {
+#FixtureInvocation: runtime.#RuntimeInvocation & {
 	schema:            "agent.runtime-invocation.v1"
 	invocationID:      "fixture-runtime-invocation"
-	workerID:          string | *"codex-route-inspector"
+	workerID:          "codex-route-inspector"
+	budgetID:          "inspect-standard"
 	routeRef:          #FixtureRouteRef
 	runtimeProjection: #FixtureRuntimeProjection
 	inputPolicy: {
@@ -74,11 +75,26 @@ fixtureInvocationInput: {
 	}
 }
 
-validInvocation: runtime.#RuntimeInvocation & fixtureInvocationInput & {
-	budgetID: "inspect-standard"
-}
-
 validResult: runtime.#RuntimeResult & {
+	invocation: {
+		schema:            "agent.runtime-invocation.v1"
+		invocationID:      "fixture-runtime-invocation"
+		workerID:          "codex-route-inspector"
+		budgetID:          "inspect-standard"
+		routeRef:          #FixtureRouteRef
+		runtimeProjection: #FixtureRuntimeProjection
+		inputPolicy: {
+			arbitraryPrompt:         false
+			rawTranscriptForwarding: false
+			rawRegistryDump:         false
+			unselectedFragments:     false
+			unboundedToolLogs:       false
+		}
+		lifecycle: {
+			state: "pending"
+			history: [{state: "pending", at: "2026-06-13T20:00:00Z"}]
+		}
+	}
 	schema:       "agent.runtime-result.v1"
 	invocationID: "fixture-runtime-invocation"
 	workerID:     "codex-route-inspector"
@@ -120,4 +136,12 @@ validResult: runtime.#RuntimeResult & {
 		mergePolicyRequired:      true
 		finalSynthesisAuthority:  "root_codex"
 	}
+}
+
+validInvocation: validResult.invocation
+
+validResolverRuntimeHandoff: runtime.#ResolverRuntimeHandoff & {
+	runtimeProjection: #FixtureRuntimeProjection
+	invocation:        validInvocation
+	result:            validResult
 }

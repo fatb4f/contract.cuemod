@@ -70,3 +70,34 @@ runtimeRegistryValidation: {
 		}
 	}
 }
+
+#ResolverRuntimeHandoff: close({
+	runtimeProjection: {
+		routeRefs: [...resolver.#RuntimeRouteReference]
+		...
+	}
+	invocation: {...}
+	result: {...}
+
+	_validatedProjection: resolver.#RuntimeProjection & runtimeProjection & {
+		mode: "eligible"
+		execution: allowed: true
+	}
+	_validatedInvocation: #RuntimeInvocation & invocation & {
+		runtimeProjection: runtimeProjection
+	}
+	_validatedResult: #RuntimeResult & result & {
+		invocation: invocation
+	}
+
+	_registeredRouteKinds: [
+		for route in runtimeRegistry.routes {
+			"\(route.routeID)|\(route.routeKind)"
+		},
+	]
+	for ref in runtimeProjection.routeRefs {
+		if !list.Contains(_registeredRouteKinds, "\(ref.routeID)|\(ref.routeKind)") {
+			_runtimeRouteDrift: _|_
+		}
+	}
+})
