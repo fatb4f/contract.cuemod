@@ -347,6 +347,191 @@ agentContextResolver: graph.#ContractDomain & {
 			polarity: "invariant"
 			strength: "required"
 		}
+		"agent-context-resolver.fixture-obligations-owned": {
+			subject: "agent-context-resolver.root"
+			fact:    "Every resolver fixture obligation references an existing assertion and targets a declared leaf or an explicitly planned target."
+			appliesTo: [
+				"agent-context-resolver.assertions",
+				"agent-context-resolver.fixtures",
+				"agent-context-resolver.checks",
+			]
+			evidence: ["agent-context-resolver.check.fixture-obligations-owned"]
+			polarity: "invariant"
+			strength: "required"
+		}
+		"agent-context-resolver.test-obligations-owned": {
+			subject: "agent-context-resolver.root"
+			fact:    "Every resolver test obligation references an existing assertion, existing fixture obligations, and an existing check."
+			appliesTo: [
+				"agent-context-resolver.assertions",
+				"agent-context-resolver.fixtures",
+				"agent-context-resolver.checks",
+			]
+			evidence: ["agent-context-resolver.check.test-obligations-owned"]
+			polarity: "invariant"
+			strength: "required"
+		}
+		"agent-context-resolver.assertion-coverage-complete": {
+			subject: "agent-context-resolver.root"
+			fact:    "Every active resolver assertion has declared fixture and test coverage or is explicitly coverage-exempt."
+			appliesTo: [
+				"agent-context-resolver.assertions",
+				"agent-context-resolver.fixtures",
+				"agent-context-resolver.checks",
+			]
+			evidence: ["agent-context-resolver.check.assertion-coverage-complete"]
+			polarity: "invariant"
+			strength: "required"
+		}
+	}
+
+	fixtureObligations: {
+		"agent-context-resolver.fixture.leaves-owned.positive.workspace-lifecycle-graph": {
+			assertion:   "agent-context-resolver.leaves-owned"
+			polarity:    "positive"
+			target:      "agent-context-resolver.leaf.workspace-lifecycle-fixtures"
+			path:        "fixtures/resolver/workspace-lifecycle/graph.cue"
+			expected:    "pass"
+			generation:  "manual"
+			description: "Positive workspace lifecycle fixture proving owned leaf IDs resolve through declared section ownership."
+		}
+		"agent-context-resolver.fixture.leaves-owned.negative.invalid-route-authority": {
+			assertion:   "agent-context-resolver.leaves-owned"
+			polarity:    "negative"
+			target:      "agent-context-resolver.leaf.resolver-fixtures"
+			path:        "fixtures/resolver/agent-context-resolver/invalid-route-authority/result.cue"
+			expected:    "fail"
+			generation:  "manual"
+			description: "Negative resolver fixture proving invalid authority ownership is rejected."
+		}
+		"agent-context-resolver.fixture.leaves-rooted.positive.workspace-lifecycle-packets": {
+			assertion:   "agent-context-resolver.leaves-rooted"
+			polarity:    "positive"
+			target:      "agent-context-resolver.leaf.workspace-lifecycle-fixtures"
+			path:        "fixtures/resolver/workspace-lifecycle/packets.cue"
+			expected:    "pass"
+			generation:  "manual"
+			description: "Positive workspace lifecycle fixture proving resolver packets remain rooted in declared leaves."
+		}
+		"agent-context-resolver.fixture.leaves-rooted.negative.invalid-route-fragment": {
+			assertion:   "agent-context-resolver.leaves-rooted"
+			polarity:    "negative"
+			target:      "agent-context-resolver.leaf.resolver-fixtures"
+			path:        "fixtures/resolver/agent-context-resolver/invalid-route-fragment/result.cue"
+			expected:    "fail"
+			generation:  "manual"
+			description: "Negative resolver fixture proving invalid route fragment ownership fails rooted-leaf validation."
+		}
+	}
+
+	testObligations: {
+		"agent-context-resolver.test.sections-contained.cue-vet": {
+			assertion: "agent-context-resolver.sections-contained"
+			fixtures: []
+			check: "agent-context-resolver.check.sections-contained"
+			command: ["cue vet ./contracts/agent-context-resolver"]
+			description: "Validate section containment through the resolver domain CUE package."
+		}
+		"agent-context-resolver.test.leaves-owned.cue-vet": {
+			assertion: "agent-context-resolver.leaves-owned"
+			fixtures: [
+				"agent-context-resolver.fixture.leaves-owned.positive.workspace-lifecycle-graph",
+				"agent-context-resolver.fixture.leaves-owned.negative.invalid-route-authority",
+			]
+			check: "agent-context-resolver.check.leaves-owned"
+			command: ["cue vet ./contracts/agent-context-resolver"]
+			description: "Validate leaf ownership with positive and negative resolver fixture obligations declared as evidence inputs."
+		}
+		"agent-context-resolver.test.leaves-rooted.cue-eval": {
+			assertion: "agent-context-resolver.leaves-rooted"
+			fixtures: [
+				"agent-context-resolver.fixture.leaves-rooted.positive.workspace-lifecycle-packets",
+				"agent-context-resolver.fixture.leaves-rooted.negative.invalid-route-fragment",
+			]
+			check: "agent-context-resolver.check.leaves-rooted"
+			command: ["cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"]
+			description: "Validate leaf root paths with positive and negative resolver fixture obligations declared as evidence inputs."
+		}
+		"agent-context-resolver.test.fixture-obligations-owned.cue-eval": {
+			assertion: "agent-context-resolver.fixture-obligations-owned"
+			fixtures: []
+			check: "agent-context-resolver.check.fixture-obligations-owned"
+			command: ["cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"]
+			description: "Validate fixture obligation assertion and target references through graph constraints."
+		}
+		"agent-context-resolver.test.test-obligations-owned.cue-eval": {
+			assertion: "agent-context-resolver.test-obligations-owned"
+			fixtures: [
+				"agent-context-resolver.fixture.leaves-owned.positive.workspace-lifecycle-graph",
+				"agent-context-resolver.fixture.leaves-owned.negative.invalid-route-authority",
+				"agent-context-resolver.fixture.leaves-rooted.positive.workspace-lifecycle-packets",
+				"agent-context-resolver.fixture.leaves-rooted.negative.invalid-route-fragment",
+			]
+			check: "agent-context-resolver.check.test-obligations-owned"
+			command: ["cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"]
+			description: "Validate test obligation assertion, fixture, and check references through graph constraints."
+		}
+		"agent-context-resolver.test.assertion-coverage-complete.cue-eval": {
+			assertion: "agent-context-resolver.assertion-coverage-complete"
+			fixtures: [
+				"agent-context-resolver.fixture.leaves-owned.positive.workspace-lifecycle-graph",
+				"agent-context-resolver.fixture.leaves-owned.negative.invalid-route-authority",
+				"agent-context-resolver.fixture.leaves-rooted.positive.workspace-lifecycle-packets",
+				"agent-context-resolver.fixture.leaves-rooted.negative.invalid-route-fragment",
+			]
+			check: "agent-context-resolver.check.assertion-coverage-complete"
+			command: ["cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"]
+			description: "Validate active assertion coverage through graph constraints."
+		}
+	}
+
+	coverage: {
+		"agent-context-resolver.coverage.sections-contained": {
+			assertion: "agent-context-resolver.sections-contained"
+			requiredFixtures: []
+			requiredTests: ["agent-context-resolver.test.sections-contained.cue-vet"]
+		}
+		"agent-context-resolver.coverage.leaves-owned": {
+			assertion: "agent-context-resolver.leaves-owned"
+			requiredFixtures: [
+				"agent-context-resolver.fixture.leaves-owned.positive.workspace-lifecycle-graph",
+				"agent-context-resolver.fixture.leaves-owned.negative.invalid-route-authority",
+			]
+			requiredTests: ["agent-context-resolver.test.leaves-owned.cue-vet"]
+		}
+		"agent-context-resolver.coverage.leaves-rooted": {
+			assertion: "agent-context-resolver.leaves-rooted"
+			requiredFixtures: [
+				"agent-context-resolver.fixture.leaves-rooted.positive.workspace-lifecycle-packets",
+				"agent-context-resolver.fixture.leaves-rooted.negative.invalid-route-fragment",
+			]
+			requiredTests: ["agent-context-resolver.test.leaves-rooted.cue-eval"]
+		}
+		"agent-context-resolver.coverage.fixture-obligations-owned": {
+			assertion: "agent-context-resolver.fixture-obligations-owned"
+			requiredFixtures: []
+			requiredTests: ["agent-context-resolver.test.fixture-obligations-owned.cue-eval"]
+		}
+		"agent-context-resolver.coverage.test-obligations-owned": {
+			assertion: "agent-context-resolver.test-obligations-owned"
+			requiredFixtures: [
+				"agent-context-resolver.fixture.leaves-owned.positive.workspace-lifecycle-graph",
+				"agent-context-resolver.fixture.leaves-owned.negative.invalid-route-authority",
+				"agent-context-resolver.fixture.leaves-rooted.positive.workspace-lifecycle-packets",
+				"agent-context-resolver.fixture.leaves-rooted.negative.invalid-route-fragment",
+			]
+			requiredTests: ["agent-context-resolver.test.test-obligations-owned.cue-eval"]
+		}
+		"agent-context-resolver.coverage.assertion-coverage-complete": {
+			assertion: "agent-context-resolver.assertion-coverage-complete"
+			requiredFixtures: [
+				"agent-context-resolver.fixture.leaves-owned.positive.workspace-lifecycle-graph",
+				"agent-context-resolver.fixture.leaves-owned.negative.invalid-route-authority",
+				"agent-context-resolver.fixture.leaves-rooted.positive.workspace-lifecycle-packets",
+				"agent-context-resolver.fixture.leaves-rooted.negative.invalid-route-fragment",
+			]
+			requiredTests: ["agent-context-resolver.test.assertion-coverage-complete.cue-eval"]
+		}
 	}
 
 	checks: {
@@ -372,6 +557,30 @@ agentContextResolver: graph.#ContractDomain & {
 			expr:    "agentContextResolver"
 			failure: "agent-context-resolver contains a declared leaf without a root path beginning at agent-context-resolver.root."
 		}
+		"agent-context-resolver.check.fixture-obligations-owned": {
+			kind: "cue-def"
+			assertions: ["agent-context-resolver.fixture-obligations-owned"]
+			target: "agent-context-resolver.root"
+			command: ["cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"]
+			expr:    "agentContextResolver"
+			failure: "agent-context-resolver contains a fixture obligation with an orphaned assertion or target."
+		}
+		"agent-context-resolver.check.test-obligations-owned": {
+			kind: "cue-def"
+			assertions: ["agent-context-resolver.test-obligations-owned"]
+			target: "agent-context-resolver.root"
+			command: ["cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"]
+			expr:    "agentContextResolver"
+			failure: "agent-context-resolver contains a test obligation with an orphaned assertion, fixture obligation, or check."
+		}
+		"agent-context-resolver.check.assertion-coverage-complete": {
+			kind: "cue-def"
+			assertions: ["agent-context-resolver.assertion-coverage-complete"]
+			target: "agent-context-resolver.root"
+			command: ["cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"]
+			expr:    "agentContextResolver"
+			failure: "agent-context-resolver contains an active assertion without declared coverage."
+		}
 	}
 
 	workers: {
@@ -395,6 +604,9 @@ agentContextResolver: graph.#ContractDomain & {
 				"agent-context-resolver.sections-contained",
 				"agent-context-resolver.leaves-owned",
 				"agent-context-resolver.leaves-rooted",
+				"agent-context-resolver.fixture-obligations-owned",
+				"agent-context-resolver.test-obligations-owned",
+				"agent-context-resolver.assertion-coverage-complete",
 			]
 			pathScope: {
 				allowedPaths: [

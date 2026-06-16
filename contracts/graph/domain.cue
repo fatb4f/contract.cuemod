@@ -61,6 +61,20 @@ package graph
 	"temporary" |
 	"migration"
 
+#FixtureCaseKind:
+	"positive" |
+	"negative" |
+	"invariant"
+
+#ExpectedFixtureResult:
+	"pass" |
+	"fail"
+
+#FixtureGenerationMode:
+	"manual" |
+	"generated" |
+	"worker"
+
 #CheckKind:
 	"cue-vet" |
 	"cue-export" |
@@ -159,7 +173,49 @@ package graph
 	strength: #AssertionStrength | *"required"
 	status:   "active" | "deprecated" | "planned" | *"active"
 
+	coverageExempt: bool | *false
+
 	description?: string & !=""
+})
+
+#FixtureObligation: close({
+	id: #ID
+
+	assertion: #ID
+	polarity:  #FixtureCaseKind
+
+	target: #ID
+	path:   #RelPath
+
+	expected: #ExpectedFixtureResult
+
+	generation:    #FixtureGenerationMode | *"manual"
+	worker?:       #ID
+	targetPlanned: bool | *false
+
+	description?: string & !=""
+})
+
+#TestObligation: close({
+	id: #ID
+
+	assertion: #ID
+	fixtures: [...#ID]
+	check: #ID
+
+	command: [...string & !=""]
+
+	description?: string & !=""
+})
+
+#AssertionCoverage: close({
+	id:        #ID
+	assertion: #ID
+
+	requiredFixtures: [...#ID]
+	requiredTests: [...#ID]
+
+	status: "planned" | "active" | "deprecated" | *"active"
 })
 
 #Check: close({
@@ -249,6 +305,15 @@ package graph
 	relations: [...#RelationEdge]
 
 	assertions: [ID=string]: #Assertion & {id: ID}
+	fixtureObligations: [ID=string]: #FixtureObligation & {
+		id: ID
+	}
+	testObligations: [ID=string]: #TestObligation & {
+		id: ID
+	}
+	coverage: [ID=string]: #AssertionCoverage & {
+		id: ID
+	}
 	checks: [ID=string]: #Check & {id: ID}
 	workers: [ID=string]: #WorkerBinding & {id: ID}
 	hooks: [ID=string]: #HookBoundary & {id: ID}
@@ -258,6 +323,84 @@ package graph
 	for _, worker in workers {
 		if worker.kind == "validation-worker" && worker.mayMutate {
 			_validationWorkerMutationDenied: _|_
+		}
+	}
+
+	_fixtureObligationAssertionRefs: {
+		for _, obligation in fixtureObligations {
+			"\(obligation.id)": assertions[obligation.assertion]
+		}
+	}
+
+	_fixtureObligationTargetRefs: {
+		for _, obligation in fixtureObligations {
+			if obligation.targetPlanned == false {
+				"\(obligation.id)": leaves[obligation.target]
+			}
+		}
+	}
+
+	_fixtureObligationWorkerRefs: {
+		for _, obligation in fixtureObligations {
+			if obligation.generation == "worker" {
+				"\(obligation.id)": workers[obligation.worker]
+			}
+		}
+	}
+
+	_testObligationAssertionRefs: {
+		for _, obligation in testObligations {
+			"\(obligation.id)": assertions[obligation.assertion]
+		}
+	}
+
+	_testObligationCheckRefs: {
+		for _, obligation in testObligations {
+			"\(obligation.id)": checks[obligation.check]
+		}
+	}
+
+	_testObligationFixtureRefs: {
+		for _, obligation in testObligations {
+			for _, fixtureID in obligation.fixtures {
+				"\(obligation.id).\(fixtureID)": fixtureObligations[fixtureID]
+			}
+		}
+	}
+
+	_coveredAssertions: {
+		for _, item in coverage {
+			if item.status != "deprecated" {
+				"\(item.assertion)": true
+			}
+		}
+	}
+
+	for assertionID, assertion in assertions {
+		if assertion.status == "active" && assertion.coverageExempt == false {
+			_coveredAssertions: "\(assertionID)": true
+		}
+	}
+
+	_coverageAssertionRefs: {
+		for _, item in coverage {
+			"\(item.id)": assertions[item.assertion]
+		}
+	}
+
+	_coverageFixtureRefs: {
+		for _, item in coverage {
+			for _, fixtureID in item.requiredFixtures {
+				"\(item.id).\(fixtureID)": fixtureObligations[fixtureID]
+			}
+		}
+	}
+
+	_coverageTestRefs: {
+		for _, item in coverage {
+			for _, testID in item.requiredTests {
+				"\(item.id).\(testID)": testObligations[testID]
+			}
 		}
 	}
 })
