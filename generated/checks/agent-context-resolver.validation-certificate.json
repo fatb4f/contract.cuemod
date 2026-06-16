@@ -1,0 +1,125 @@
+{
+    "id": "agent-context-resolver.validation-certificate",
+    "domain": "agent-context-resolver",
+    "manifest": "agent-context-resolver.check-manifest",
+    "entries": {
+        "agent-context-resolver.test.sections-contained.cue-vet": {
+            "id": "agent-context-resolver.test.sections-contained.cue-vet",
+            "manifestEntry": "agent-context-resolver.test.sections-contained.cue-vet",
+            "testObligation": "agent-context-resolver.test.sections-contained.cue-vet",
+            "check": "agent-context-resolver.check.sections-contained",
+            "assertion": "agent-context-resolver.sections-contained",
+            "requiredEvidence": {
+                "assertions": [
+                    "agent-context-resolver.sections-contained"
+                ],
+                "fixtures": [],
+                "check": "agent-context-resolver.check.sections-contained",
+                "command": [
+                    "cue vet ./contracts/agent-context-resolver"
+                ]
+            }
+        },
+        "agent-context-resolver.test.leaves-owned.cue-vet": {
+            "id": "agent-context-resolver.test.leaves-owned.cue-vet",
+            "manifestEntry": "agent-context-resolver.test.leaves-owned.cue-vet",
+            "testObligation": "agent-context-resolver.test.leaves-owned.cue-vet",
+            "check": "agent-context-resolver.check.leaves-owned",
+            "assertion": "agent-context-resolver.leaves-owned",
+            "requiredEvidence": {
+                "assertions": [
+                    "agent-context-resolver.leaves-owned"
+                ],
+                "fixtures": [
+                    "agent-context-resolver.fixture.leaves-owned.positive.workspace-lifecycle-graph",
+                    "agent-context-resolver.fixture.leaves-owned.negative.invalid-route-authority"
+                ],
+                "check": "agent-context-resolver.check.leaves-owned",
+                "command": [
+                    "cue vet ./contracts/agent-context-resolver"
+                ]
+            }
+        },
+        "agent-context-resolver.test.leaves-rooted.cue-eval": {
+            "id": "agent-context-resolver.test.leaves-rooted.cue-eval",
+            "manifestEntry": "agent-context-resolver.test.leaves-rooted.cue-eval",
+            "testObligation": "agent-context-resolver.test.leaves-rooted.cue-eval",
+            "check": "agent-context-resolver.check.leaves-rooted",
+            "assertion": "agent-context-resolver.leaves-rooted",
+            "requiredEvidence": {
+                "assertions": [
+                    "agent-context-resolver.leaves-rooted"
+                ],
+                "fixtures": [
+                    "agent-context-resolver.fixture.leaves-rooted.positive.workspace-lifecycle-packets",
+                    "agent-context-resolver.fixture.leaves-rooted.negative.invalid-route-fragment"
+                ],
+                "check": "agent-context-resolver.check.leaves-rooted",
+                "command": [
+                    "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                ]
+            }
+        },
+        "agent-context-resolver.test.fixture-obligations-owned.cue-eval": {
+            "id": "agent-context-resolver.test.fixture-obligations-owned.cue-eval",
+            "manifestEntry": "agent-context-resolver.test.fixture-obligations-owned.cue-eval",
+            "testObligation": "agent-context-resolver.test.fixture-obligations-owned.cue-eval",
+            "check": "agent-context-resolver.check.fixture-obligations-owned",
+            "assertion": "agent-context-resolver.fixture-obligations-owned",
+            "requiredEvidence": {
+                "assertions": [
+                    "agent-context-resolver.fixture-obligations-owned"
+                ],
+                "fixtures": [],
+                "check": "agent-context-resolver.check.fixture-obligations-owned",
+                "command": [
+                    "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                ]
+            }
+        },
+        "agent-context-resolver.test.test-obligations-owned.cue-eval": {
+            "id": "agent-context-resolver.test.test-obligations-owned.cue-eval",
+            "manifestEntry": "agent-context-resolver.test.test-obligations-owned.cue-eval",
+            "testObligation": "agent-context-resolver.test.test-obligations-owned.cue-eval",
+            "check": "agent-context-resolver.check.test-obligations-owned",
+            "assertion": "agent-context-resolver.test-obligations-owned",
+            "requiredEvidence": {
+                "assertions": [
+                    "agent-context-resolver.test-obligations-owned"
+                ],
+                "fixtures": [
+                    "agent-context-resolver.fixture.leaves-owned.positive.workspace-lifecycle-graph",
+                    "agent-context-resolver.fixture.leaves-owned.negative.invalid-route-authority",
+                    "agent-context-resolver.fixture.leaves-rooted.positive.workspace-lifecycle-packets",
+                    "agent-context-resolver.fixture.leaves-rooted.negative.invalid-route-fragment"
+                ],
+                "check": "agent-context-resolver.check.test-obligations-owned",
+                "command": [
+                    "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                ]
+            }
+        },
+        "agent-context-resolver.test.assertion-coverage-complete.cue-eval": {
+            "id": "agent-context-resolver.test.assertion-coverage-complete.cue-eval",
+            "manifestEntry": "agent-context-resolver.test.assertion-coverage-complete.cue-eval",
+            "testObligation": "agent-context-resolver.test.assertion-coverage-complete.cue-eval",
+            "check": "agent-context-resolver.check.assertion-coverage-complete",
+            "assertion": "agent-context-resolver.assertion-coverage-complete",
+            "requiredEvidence": {
+                "assertions": [
+                    "agent-context-resolver.assertion-coverage-complete"
+                ],
+                "fixtures": [
+                    "agent-context-resolver.fixture.leaves-owned.positive.workspace-lifecycle-graph",
+                    "agent-context-resolver.fixture.leaves-owned.negative.invalid-route-authority",
+                    "agent-context-resolver.fixture.leaves-rooted.positive.workspace-lifecycle-packets",
+                    "agent-context-resolver.fixture.leaves-rooted.negative.invalid-route-fragment"
+                ],
+                "check": "agent-context-resolver.check.assertion-coverage-complete",
+                "command": [
+                    "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                ]
+            }
+        }
+    }
+}

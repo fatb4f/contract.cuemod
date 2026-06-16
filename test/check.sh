@@ -4,6 +4,9 @@ set -eu
 repo_root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd -P)
 cd "$repo_root"
 
+tmp_dir=$(mktemp -d)
+trap 'rm -rf "$tmp_dir"' EXIT INT HUP TERM
+
 cue vet ./contracts/graph
 cue vet ./contracts
 cue vet ./contracts/adapters
@@ -13,6 +16,14 @@ cue vet ./contracts/resolver
 cue vet ./contracts/validation
 cue vet ./contracts/agent-skill
 cue vet ./contracts/agent-context-resolver
+cue export ./contracts/agent-context-resolver -e agentContextResolver.checkManifest \
+	--force --out json --outfile "$tmp_dir/agent-context-resolver.check-manifest.json"
+cmp "$tmp_dir/agent-context-resolver.check-manifest.json" \
+	generated/checks/agent-context-resolver.check-manifest.json
+cue export ./contracts/agent-context-resolver -e agentContextResolver.validationCertificate \
+	--force --out json --outfile "$tmp_dir/agent-context-resolver.validation-certificate.json"
+cmp "$tmp_dir/agent-context-resolver.validation-certificate.json" \
+	generated/checks/agent-context-resolver.validation-certificate.json
 cue vet ./contracts/agent-runtime
 cue vet ./contracts/agent-runtime/adapters
 cue vet ./contracts/repo

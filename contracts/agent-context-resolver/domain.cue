@@ -583,6 +583,67 @@ agentContextResolver: graph.#ContractDomain & {
 		}
 	}
 
+	checkManifest: graph.#CheckManifest & {
+		id:     "agent-context-resolver.check-manifest"
+		domain: "agent-context-resolver"
+		entries: {
+			for obligationID, obligation in testObligations {
+				"\(obligationID)": {
+					testObligation: obligationID
+					check:          obligation.check
+					assertion:      obligation.assertion
+					fixtures:       obligation.fixtures
+					command:        obligation.command
+					evidenceRequired: {
+						assertions: [obligation.assertion]
+						fixtures: obligation.fixtures
+						check:    obligation.check
+					}
+				}
+			}
+		}
+	}
+
+	validationCertificate: graph.#ValidationCertificate & {
+		id:       "agent-context-resolver.validation-certificate"
+		domain:   "agent-context-resolver"
+		manifest: checkManifest.id
+		entries: {
+			for entryID, entry in checkManifest.entries {
+				"\(entryID)": {
+					manifestEntry:  entry.id
+					testObligation: entry.testObligation
+					check:          entry.check
+					assertion:      entry.assertion
+					requiredEvidence: {
+						assertions: entry.evidenceRequired.assertions
+						fixtures:   entry.evidenceRequired.fixtures
+						check:      entry.evidenceRequired.check
+						command:    entry.command
+					}
+				}
+			}
+		}
+	}
+
+	_checkManifestTestObligationRefs: {
+		for _, entry in checkManifest.entries {
+			"\(entry.id)": testObligations[entry.testObligation]
+		}
+	}
+
+	_checkManifestCheckRefs: {
+		for _, entry in checkManifest.entries {
+			"\(entry.id)": checks[entry.check]
+		}
+	}
+
+	_validationCertificateManifestRefs: {
+		for _, entry in validationCertificate.entries {
+			"\(entry.id)": checkManifest.entries[entry.manifestEntry]
+		}
+	}
+
 	workers: {
 		"agent-context-resolver.validation-worker": {
 			kind:      "validation-worker"

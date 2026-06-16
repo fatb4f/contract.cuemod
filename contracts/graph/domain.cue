@@ -232,6 +232,66 @@ package graph
 	failure: string & !=""
 })
 
+#CheckManifestEntry: close({
+	id: #ID
+
+	testObligation: #ID
+	check:          #ID
+	assertion:      #ID
+	fixtures: [...#ID]
+
+	command: [...string & !=""]
+
+	evidenceRequired: {
+		assertions: [#ID, ...#ID]
+		fixtures: [...#ID]
+		check: #ID
+	}
+
+	description?: string & !=""
+})
+
+#CheckManifest: close({
+	id:     #ID
+	domain: #ID
+
+	entries: [ID=string]: #CheckManifestEntry & {
+		id: ID
+	}
+})
+
+#ValidationCertificateEntry: close({
+	id: #ID
+
+	manifestEntry:  #ID
+	testObligation: #ID
+	check:          #ID
+	assertion:      #ID
+
+	requiredEvidence: {
+		assertions: [#ID, ...#ID]
+		fixtures: [...#ID]
+		check: #ID
+		command: [...string & !=""]
+	}
+
+	runtimeEvidence?: {
+		worker: #ID
+		status: "pending" | "pass" | "fail" | "blocked"
+		artifacts: [...#RelPath]
+	}
+})
+
+#ValidationCertificate: close({
+	id:     #ID
+	domain: #ID
+
+	manifest: #ID
+	entries: [ID=string]: #ValidationCertificateEntry & {
+		id: ID
+	}
+})
+
 #WorkerPathScope: close({
 	allowedPaths: [#RelPath, ...#RelPath]
 	deniedPaths: [...#RelPath]
@@ -315,6 +375,8 @@ package graph
 		id: ID
 	}
 	checks: [ID=string]: #Check & {id: ID}
+	checkManifest?:         #CheckManifest
+	validationCertificate?: #ValidationCertificate
 	workers: [ID=string]: #WorkerBinding & {id: ID}
 	hooks: [ID=string]: #HookBoundary & {id: ID}
 
