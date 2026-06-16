@@ -24,7 +24,7 @@ That model is wrong for the intended architecture. The real unit of work is not
 the top-level folder. The real unit is the `ContractDomain`: an independent
 rooted arborescent authority graph owned by one contract package.
 
-Example:
+Current migration example:
 
 ```text
 agent-context-resolver
@@ -40,7 +40,9 @@ agent-context-resolver
 
 The refactor is needed because the current layout spreads one functional domain
 across many artifact-kind folders, while the contract does not yet declare that
-spread as a single rooted graph.
+spread as a single rooted graph. The desired end state is a contained contract:
+fixtures, checks, hooks, workers, and generated outputs are contract-local
+branches instead of repo-wide artifact folders.
 
 ## Core problem
 
@@ -109,6 +111,26 @@ workers
 hooks / just / shell
   = adapters that enforce or expose contract authority
 ```
+
+Desired containment shape:
+
+```text
+.
+root
+└── contract
+    ├── assertions
+    ├── fixtures
+    ├── adapters
+    ├── projections
+    ├── generated
+    ├── seeds
+    ├── workers
+    ├── checks
+    └── hooks
+```
+
+For a specific domain, `contract` is the contract package root. For
+`agent-context-resolver`, that root is `contracts/agent-context-resolver`.
 
 The ownership graph is arborescent. The relation graph can be richer.
 
@@ -234,6 +256,26 @@ contracts/agent-context-resolver
   -> agentContextResolver: graph.#ContractDomain
 ```
 
+During the migration, existing external leaves can be declared with explicit
+authority paths. The target shape should then move or project those leaves into
+contract-local branches:
+
+```text
+contracts/agent-context-resolver
+  assertions/
+  fixtures/
+  adapters/
+  projections/
+  generated/
+  seeds/
+  workers/
+  checks/
+  hooks/
+```
+
+Use `docs/refactor/contract-domain-template.md` as the reusable starting point
+for each contract migration.
+
 Each `contracts/*` package should define an independent contract domain entity:
 
 ```text
@@ -295,9 +337,10 @@ Use this wording for the issue and child implementation slices:
 
 Each contract in `contract.cuemod` is an independent arborescent graph entity.
 
-The contract package is the root. Every adapter, fixture, generated artifact,
-projection, seed, hook, test, and worker binding owned by that contract must
-have a declared authority path back to that root.
+The contract package is the root. Every assertion, adapter, fixture, generated
+artifact, projection, seed, hook, check, and worker binding owned by that
+contract must be contained under that contract root or explicitly marked as
+migration glue with a declared authority path back to the root.
 
 Ownership is arborescent: each owned node has one authority parent, except the
 root.
@@ -340,12 +383,9 @@ When this moves into `contracts/graph`, preserve the existing exported `df:*`
 ID surface or provide compatibility aliases. Current packages already import
 that surface.
 
-The target generic layer should use `#ContractDomain` as the primary primitive,
-with an owned `#AuthorityGraph` for arborescent authority and typed relation
-edges over that authority tree. The lower CUE sketch is a starting point, not
-the final naming contract: rename `#DomainContract` to `#ContractDomain`,
-`#RootedGraph` to `#AuthorityGraph`, graph nodes to authority nodes, and worker
-definitions to `#WorkerBinding` before implementation.
+The target generic layer uses `#ContractDomain` as the primary primitive, with
+an owned `#AuthorityGraph` for arborescent authority and typed relation edges
+over that authority tree.
 
 The root-path invariant must be enforced as reachability from `graph.root`, not
 only as local parent-reference validity. A disconnected subtree with valid local
@@ -369,11 +409,11 @@ worker request/result/action/budget semantics.
 ```cue
 package graph
 
-import "list"
+import (
+	"list"
 
-// -----------------------------------------------------------------------------
-// Scalar interfaces
-// -----------------------------------------------------------------------------
+	agentruntime "github.com/fatb4f/contract.cuemod/contracts/agent-runtime"
+)
 
 #ID: string & =~"^[a-z0-9][a-z0-9._-]*$"
 
@@ -381,9 +421,7 @@ import "list"
 
 #SchemaID: string & =~"^[a-z][a-z0-9.-]*\\.v[0-9]+$"
 
-// -----------------------------------------------------------------------------
-// Object model interface
-// -----------------------------------------------------------------------------
+#Fact: string & !=""
 
 #ObjectModelKind:
 	"contract-object-model" |
@@ -430,11 +468,7 @@ import "list"
 	concrete: bool
 })
 
-// -----------------------------------------------------------------------------
-// Rooted graph interface
-// -----------------------------------------------------------------------------
-
-#GraphNodeKind:
+#NodeKind:
 	"root" |
 	"object-model" |
 	"contract" |
@@ -452,23 +486,25 @@ import "list"
 	"hook" |
 	"external"
 
-#GraphEdgeKind:
+#AuthorityEdgeKind:
 	"owns" |
-	"contains" |
-	"derives" |
-	"projects" |
-	"validates" |
+	"contains"
+
+#RelationEdgeKind:
 	"asserts" |
 	"evidences" |
+	"validates" |
+	"derives" |
+	"projects" |
 	"executes" |
 	"guards" |
 	"depends_on" |
 	"adapts" |
 	"blocks"
 
-#GraphNode: close({
+#AuthorityNode: close({
 	id:   #ID
-	kind: #GraphNodeKind
+	kind: #NodeKind
 
 	// Path is optional because not every graph node is file-backed.
 	path?: #RelPath
@@ -476,6 +512,9 @@ import "list"
 	// Parent gives the arborescent shape.
 	// Root nodes omit parent.
 	parent?: #ID
+
+	// Explicit authority path from graph root to this node.
+	rootPath: [#ID, ...#ID]
 
 	// Logical branch this node belongs to.
 	branch?: #ID
@@ -486,10 +525,16 @@ import "list"
 	description?: string & !=""
 })
 
-#GraphEdge: close({
+#AuthorityEdge: close({
 	from: #ID
 	to:   #ID
-	kind: #GraphEdgeKind
+	kind: #AuthorityEdgeKind
+})
+
+#RelationEdge: close({
+	from: #ID
+	to:   #ID
+	kind: #RelationEdgeKind
 
 	description?: string & !=""
 })
@@ -522,16 +567,18 @@ import "list"
 	ownedNodes: [...#ID]
 })
 
-#RootedGraph: close({
+#AuthorityGraph: close({
 	id:   #ID
 	root: #ID
 
-	nodes:    [string]: #GraphNode
-	edges:    [...#GraphEdge]
-	branches: [string]: #DomainBranch
+	nodes:          [string]: #AuthorityNode
+	authorityEdges: [...#AuthorityEdge]
+	relationEdges:  [...#RelationEdge]
+	branches:       [string]: #DomainBranch
 
 	_nodeIDs:   [for id, _ in nodes {id}]
 	_branchIDs: [for id, _ in branches {id}]
+	_authorityPairs: [for edge in authorityEdges {"\(edge.from)|\(edge.to)"}]
 
 	if !list.Contains(_nodeIDs, root) {
 		_missingRootNode: _|_
@@ -540,17 +587,35 @@ import "list"
 	for id, node in nodes {
 		node.id: id
 
-		if node.kind != "root" {
-			parent: _
+		if id == root {
+			node.kind: "root"
+			node.parent?: _|_
+			node.rootPath: [root]
 		}
 
-		if node.kind == "root" {
-			parent?: _|_
+		if id != root {
+			node.parent: _
+			node.rootPath[0]: root
+			node.rootPath[len(node.rootPath)-1]: id
 		}
 
-		if node.parent != _|_ {
+		if id != root {
 			if !list.Contains(_nodeIDs, node.parent) {
 				_unknownParentNode: _|_
+			}
+			if !list.Contains(_authorityPairs, "\(node.parent)|\(id)") {
+				_missingAuthorityEdge: _|_
+			}
+		}
+
+		for i, nodeID in node.rootPath {
+			if !list.Contains(_nodeIDs, nodeID) {
+				_unknownRootPathNode: _|_
+			}
+			if i > 0 {
+				if !list.Contains(_authorityPairs, "\(node.rootPath[i-1])|\(nodeID)") {
+					_missingRootPathAuthorityEdge: _|_
+				}
 			}
 		}
 
@@ -581,20 +646,26 @@ import "list"
 		}
 	}
 
-	for edge in edges {
+	for edge in authorityEdges {
 		if !list.Contains(_nodeIDs, edge.from) {
-			_unknownEdgeFromNode: _|_
+			_unknownAuthorityEdgeFromNode: _|_
 		}
 
 		if !list.Contains(_nodeIDs, edge.to) {
-			_unknownEdgeToNode: _|_
+			_unknownAuthorityEdgeToNode: _|_
+		}
+	}
+
+	for edge in relationEdges {
+		if !list.Contains(_nodeIDs, edge.from) {
+			_unknownRelationEdgeFromNode: _|_
+		}
+
+		if !list.Contains(_nodeIDs, edge.to) {
+			_unknownRelationEdgeToNode: _|_
 		}
 	}
 })
-
-// -----------------------------------------------------------------------------
-// Assertion interface
-// -----------------------------------------------------------------------------
 
 #AssertionPolarity:
 	"positive" |
@@ -608,29 +679,21 @@ import "list"
 	"migration"
 
 #Assertion: close({
-	id: #ID
-
-	// Fact asserted by the contract.
-	fact: string & !=""
-
-	// Primary graph node the fact is about.
+	id:      #ID
 	subject: #ID
+	fact:    #Fact
 
-	// Nodes the assertion constrains.
 	appliesTo: [...#ID]
 
-	// Check, fixture, proof, or generated-evidence node IDs.
+	// Check IDs that provide executable evidence for this fact.
 	evidence: [...#ID]
 
 	polarity: #AssertionPolarity
 	strength: #AssertionStrength | *"required"
+	status:   "active" | "deprecated" | "planned" | *"active"
 
 	description?: string & !=""
 })
-
-// -----------------------------------------------------------------------------
-// Check interface
-// -----------------------------------------------------------------------------
 
 #CheckKind:
 	"cue-vet" |
@@ -666,86 +729,9 @@ import "list"
 	failure: string & !=""
 })
 
-// -----------------------------------------------------------------------------
-// Worker interface
-// -----------------------------------------------------------------------------
-
-#WorkerKind:
-	"projection-worker" |
-	"fixture-worker" |
-	"validation-worker" |
-	"git-worker"
-
-#WorkerAction:
-	"inspect" |
-	"write_projection" |
-	"write_fixture" |
-	"mutate_source" |
-	"run_validation" |
-	"collect_evidence" |
-	"inspect_git" |
-	"stage" |
-	"commit"
-
-#WorkerStopCondition:
-	"objective_complete" |
-	"command_budget_exhausted" |
-	"scope_violation" |
-	"validation_failed" |
-	"permission_required" |
-	"blocked"
-
-#WorkerResultStatus:
-	"pass" |
-	"fail" |
-	"blocked" |
-	"stopped"
-
-#WorkerResultAuthority:
-	"evidence_only"
-
-#WorkerInputArtifact: close({
+#WorkerBinding: close({
 	id:   #ID
-	kind:
-		"contract" |
-		"fixture" |
-		"projection" |
-		"generated" |
-		"patch" |
-		"route-result" |
-		"command-output"
-
-	node?: #ID
-	path?: #RelPath
-	ref?:  string & !=""
-})
-
-#WorkerCommandBudget: close({
-	maxCommands: int & >0
-
-	allowedCommands: [string & !="", ...string & !=""]
-})
-
-#WorkerExpectedResult: close({
-	schema: #SchemaID | "agent.worker-result.v1"
-
-	allowedStatuses: [#WorkerResultStatus, ...#WorkerResultStatus]
-
-	requireValidationEvidence: bool
-
-	maxChangedNodes: int & >=0
-	maxChangedPaths: int & >=0
-})
-
-#WorkerPermissions: close({
-	commit: bool | *false
-	stage:  bool | *false
-	write:  bool | *false
-})
-
-#Worker: close({
-	id:   #ID
-	kind: #WorkerKind
+	kind: agentruntime.#SDKWorkerKind
 
 	objective: string & !=""
 
@@ -757,44 +743,16 @@ import "list"
 
 	requiredAssertions: [...#ID]
 
-	inputArtifacts: [...#WorkerInputArtifact]
+	pathScope?: agentruntime.#WorkerPathScope
+	actions:    [agentruntime.#WorkerAction, ...agentruntime.#WorkerAction]
 
-	actions: [#WorkerAction, ...#WorkerAction]
+	mayMutate:   bool | *false
+	mayGenerate: bool | *false
+	mayStage:    bool | *false
+	mayCommit:   bool | *false
 
-	commandBudget: #WorkerCommandBudget
-
-	stopConditions: [#WorkerStopCondition, ...#WorkerStopCondition]
-
-	expectedResult: #WorkerExpectedResult
-
-	permissions: #WorkerPermissions
-
-	resultAuthority: #WorkerResultAuthority | *"evidence_only"
-
-	rootAuthority: close({
-		planning:    "root_agent"
-		merge:       "root_agent"
-		retry:       "root_agent"
-		scopeChange: "root_agent"
-		finalCommit: "root_agent"
-	})
-
-	for action in actions {
-		if action == "commit" {
-			permissions: commit: true
-		}
-		if action == "stage" {
-			permissions: stage: true
-		}
-		if action == "write_projection" || action == "write_fixture" || action == "mutate_source" {
-			permissions: write: true
-		}
-	}
+	resultAuthority: "evidence_only" | *"evidence_only"
 })
-
-// -----------------------------------------------------------------------------
-// Hook boundary interface
-// -----------------------------------------------------------------------------
 
 #HookKind:
 	"pre-commit" |
@@ -821,20 +779,42 @@ import "list"
 	description?: string & !=""
 })
 
-// -----------------------------------------------------------------------------
-// Domain contract interface
-// -----------------------------------------------------------------------------
+#OwnedAdapter: close({
+	node: #ID
+})
 
-#DomainContract: close({
+#OwnedFixture: close({
+	node: #ID
+})
+
+#OwnedProjection: close({
+	node: #ID
+})
+
+#OwnedGenerated: close({
+	node: #ID
+})
+
+#OwnedSeed: close({
+	node: #ID
+})
+
+#ContractDomain: close({
 	id: #ID
 
 	model: #ObjectModel
-	graph: #RootedGraph
+	graph: #AuthorityGraph
 
 	assertions: [string]: #Assertion
 	checks:     [string]: #Check
-	workers:   [string]: #Worker
+	workers:   [string]: #WorkerBinding
 	hooks?:     [string]: #HookBoundary
+
+	adapters:    [string]: #OwnedAdapter
+	fixtures:    [string]: #OwnedFixture
+	projections: [string]: #OwnedProjection
+	generated:   [string]: #OwnedGenerated
+	seeds:       [string]: #OwnedSeed
 
 	_nodeIDs:      [for id, _ in graph.nodes {id}]
 	_assertionIDs: [for id, _ in assertions {id}]
@@ -900,16 +880,8 @@ import "list"
 			}
 		}
 
-		if worker.kind == "validation-worker" {
-			for action in worker.actions {
-				if action == "write_projection" ||
-					action == "write_fixture" ||
-					action == "mutate_source" ||
-					action == "stage" ||
-					action == "commit" {
-					_validationWorkerMutationDenied: _|_
-				}
-			}
+		if worker.kind == "validation-worker" && worker.mayMutate {
+			_validationWorkerMutationDenied: _|_
 		}
 	}
 
@@ -930,6 +902,32 @@ import "list"
 			if !list.Contains(_assertionIDs, assertionID) {
 				_unknownHookAssertion: _|_
 			}
+		}
+	}
+
+	for _, owned in adapters {
+		if !list.Contains(_nodeIDs, owned.node) {
+			_unknownOwnedAdapterNode: _|_
+		}
+	}
+	for _, owned in fixtures {
+		if !list.Contains(_nodeIDs, owned.node) {
+			_unknownOwnedFixtureNode: _|_
+		}
+	}
+	for _, owned in projections {
+		if !list.Contains(_nodeIDs, owned.node) {
+			_unknownOwnedProjectionNode: _|_
+		}
+	}
+	for _, owned in generated {
+		if !list.Contains(_nodeIDs, owned.node) {
+			_unknownOwnedGeneratedNode: _|_
+		}
+	}
+	for _, owned in seeds {
+		if !list.Contains(_nodeIDs, owned.node) {
+			_unknownOwnedSeedNode: _|_
 		}
 	}
 })
@@ -967,20 +965,32 @@ agentContextResolver: graph.#ContractDomain & {
 			"agent-context-resolver.root": {
 				kind: "root"
 				path: "contracts/agent-context-resolver"
+				rootPath: ["agent-context-resolver.root"]
 			}
 			"agent-context-resolver.fixtures": {
 				kind: "fixture"
 				path: "fixtures/resolver/agent-context-resolver"
 				parent: "agent-context-resolver.root"
+				rootPath: [
+					"agent-context-resolver.root",
+					"agent-context-resolver.fixtures",
+				]
 			}
 			"agent-context-resolver.generated": {
 				kind: "generated"
 				path: "generated/agent-context-resolver"
 				parent: "agent-context-resolver.root"
+				rootPath: [
+					"agent-context-resolver.root",
+					"agent-context-resolver.generated",
+				]
 			}
 		}
-		edges: [
+		authorityEdges: [
 			{from: "agent-context-resolver.root", to: "agent-context-resolver.fixtures", kind: "owns"},
+			{from: "agent-context-resolver.root", to: "agent-context-resolver.generated", kind: "owns"},
+		]
+		relationEdges: [
 			{from: "agent-context-resolver.root", to: "agent-context-resolver.generated", kind: "derives"},
 		]
 		branches: {}
