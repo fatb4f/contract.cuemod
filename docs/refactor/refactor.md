@@ -42,7 +42,7 @@ The refactor is needed because the current layout spreads one functional domain
 across many artifact-kind folders, while the contract does not yet declare that
 spread as a single rooted graph. The desired end state is a contained contract:
 fixtures, checks, hooks, workers, and generated outputs are contract-local
-branches instead of repo-wide artifact folders.
+sections instead of repo-wide artifact folders.
 
 ## Core problem
 
@@ -80,7 +80,7 @@ To:
 ```text
 contract-rooted object model
   -> rooted graph
-  -> declared branches/leaves
+  -> declared sections/leaves
   -> assertions as facts
   -> checks as evidence
   -> workers as bounded mutators
@@ -191,7 +191,8 @@ If a path cannot trace back to its contract root, then it is one of:
 #AuthorityNode
 #AuthorityEdge
 #RelationEdge
-#DomainBranch
+#ContractSection
+#ContractLeaf
 #Assertion
 #Check
 #WorkerBinding
@@ -258,7 +259,7 @@ contracts/agent-context-resolver
 
 During the migration, existing external leaves can be declared with explicit
 authority paths. The target shape should then move or project those leaves into
-contract-local branches:
+contract-local sections:
 
 ```text
 contracts/agent-context-resolver
@@ -275,6 +276,11 @@ contracts/agent-context-resolver
 
 Use `docs/refactor/contract-domain-template.md` as the reusable starting point
 for each contract migration.
+
+The template uses contract sections plus concrete leaves. Do not carry the
+older `#DomainBranch` terminology into the executable schema; implementation
+should introduce `#ContractSectionKind`, `#ContractLeafKind`,
+`#ContractSection`, and `#ContractLeaf`.
 
 Each `contracts/*` package should define an independent contract domain entity:
 
