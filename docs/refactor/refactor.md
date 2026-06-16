@@ -21,7 +21,8 @@ top-level source domain such as `adapters`, `contracts`, `fixtures`,
 `generated`, `projections`, `providers`, and `seeds`.
 
 That model is wrong for the intended architecture. The real unit of work is not
-the top-level folder. The real unit is the contract object model.
+the top-level folder. The real unit is the `ContractDomain`: an independent
+rooted arborescent authority graph owned by one contract package.
 
 Example:
 
@@ -84,29 +85,55 @@ contract-rooted object model
   -> just/hooks/shell as adapters
 ```
 
-## Intended model
+## Primary contract ontology
 
 ```text
-contract object model
-  owns rooted graph
+ContractDomain
+  = independent rooted arborescent authority graph
 
-rooted graph
-  owns branches and leaves
+root
+  = contract package root
+
+owned leaves
+  = adapters / fixtures / generated / projections / seeds / hooks / tests
 
 assertions
-  declare facts about the graph
+  = facts declared by the contract
 
 checks
-  provide executable evidence for assertions
+  = executable evidence for assertions
 
 workers
-  mutate only within graph/assertion bounds
+  = bounded mutators over graph nodes, constrained by assertions
 
-hooks
-  guard mutation boundaries
+hooks / just / shell
+  = adapters that enforce or expose contract authority
+```
 
-just/shell
-  expose commands, but do not own authority
+The ownership graph is arborescent. The relation graph can be richer.
+
+```text
+ownership edges
+  root -> branch -> leaf
+  single authority parent
+  no orphan leaves
+
+relation edges
+  asserts
+  evidences
+  validates
+  derives
+  projects
+  guards
+  depends_on
+  adapts
+```
+
+So:
+
+```text
+contract authority = tree / arborescence
+contract semantics = typed graph over that tree
 ```
 
 ## Main invariant
@@ -137,15 +164,16 @@ If a path cannot trace back to its contract root, then it is one of:
 
 ```text
 #ObjectModel
-#RootedGraph
-#GraphNode
-#GraphEdge
+#ContractDomain
+#AuthorityGraph
+#AuthorityNode
+#AuthorityEdge
+#RelationEdge
 #DomainBranch
 #Assertion
 #Check
-#GraphWorker
+#WorkerBinding
 #HookBoundary
-#DomainContract
 ```
 
 2. Preserve existing `contracts/graph` compatibility.
@@ -183,7 +211,9 @@ contracts/graph defines graph-local worker bindings
 contracts/agent-runtime owns executable SDK worker semantics
 ```
 
-Graph workers should bind to the existing bounded SDK worker contract in
+`ContractDomain.workers` should declare graph-local worker bindings. Executable
+worker mechanics remain owned by `agent-runtime`. Graph workers should bind to
+the existing bounded SDK worker contract in
 `contracts/agent-runtime/sdk_workers.cue`.
 
 5. Fold in `agent-context-resolver` as the first object model.
@@ -201,7 +231,33 @@ contracts/agent-context-resolver
   proof.cue
   registry.cue
 
-  -> agentContextResolver: graph.#DomainContract
+  -> agentContextResolver: graph.#ContractDomain
+```
+
+Each `contracts/*` package should define an independent contract domain entity:
+
+```text
+contracts/agent-context-resolver
+  -> agentContextResolver: graph.#ContractDomain
+
+contracts/agent-runtime
+  -> agentRuntime: graph.#ContractDomain
+
+contracts/repo
+  -> repo: graph.#ContractDomain
+
+contracts/vcs
+  -> vcs: graph.#ContractDomain
+```
+
+The repo-wide registry indexes these domains. It must not collapse them into one
+mega-tree:
+
+```text
+contracts/registry.cue
+  = catalogue of contract roots
+  = cross-contract reference table
+  != owner of every leaf
 ```
 
 ## What this is not
@@ -237,31 +293,41 @@ Use this wording for the issue and child implementation slices:
 ```md
 ## Model
 
-`agent-context-resolver` is a rooted arborescent domain graph.
+Each contract in `contract.cuemod` is an independent arborescent graph entity.
 
-The root is `contracts/agent-context-resolver`.
+The contract package is the root. Every adapter, fixture, generated artifact,
+projection, seed, hook, test, and worker binding owned by that contract must
+have a declared authority path back to that root.
 
-Every owned leaf must have a declared path back to the root through ownership,
-derivation, validation, or assertion edges.
+Ownership is arborescent: each owned node has one authority parent, except the
+root.
+
+Typed relation edges may form a richer graph over the owned tree:
+
+- asserts
+- evidences
+- validates
+- derives
+- projects
+- guards
+- depends_on
+- adapts
 
 Assertions are contract-owned facts about the graph.
 
-Workers are bounded mutators. A worker may inspect or mutate only the graph
-nodes allowed by its declared worker contract, and only while preserving the
-required assertions.
+Checks are executable evidence for assertions.
+
+Workers are bounded mutators. A worker may inspect or mutate only the nodes
+allowed by its declared worker binding, and only while preserving the required
+assertions.
+
+The repo registry indexes independent contract domains. It does not become a
+mega-owner of every leaf.
 
 ## Required invariant
 
-No owned leaf may exist without a declared path back to the contract root.
-
-## Required contract additions
-
-- domain graph nodes
-- domain graph edges
-- assertions as facts
-- checks as evidence for facts
-- workers as bounded graph mutators
-- hook routes as mutation-boundary guards
+No owned leaf may exist without a declared authority path back to the contract
+root.
 ```
 
 ## Generic base layer
@@ -274,10 +340,31 @@ When this moves into `contracts/graph`, preserve the existing exported `df:*`
 ID surface or provide compatibility aliases. Current packages already import
 that surface.
 
+The target generic layer should use `#ContractDomain` as the primary primitive,
+with an owned `#AuthorityGraph` for arborescent authority and typed relation
+edges over that authority tree. The lower CUE sketch is a starting point, not
+the final naming contract: rename `#DomainContract` to `#ContractDomain`,
+`#RootedGraph` to `#AuthorityGraph`, graph nodes to authority nodes, and worker
+definitions to `#WorkerBinding` before implementation.
+
 The root-path invariant must be enforced as reachability from `graph.root`, not
 only as local parent-reference validity. A disconnected subtree with valid local
 parents is still invalid unless it is explicitly marked as cross-domain or
-migration glue.
+migration glue. The intended hard invariant is:
+
+```text
+For every owned node N:
+
+1. N.rootPath[0] == graph.root
+2. N.rootPath[-1] == N.id
+3. every adjacent pair in rootPath is connected by an ownership edge
+4. N has exactly one authority parent, except root
+5. no file-backed owned leaf exists outside this tree
+```
+
+Worker semantics should not be duplicated here. `contracts/graph` defines
+graph-local worker bindings; `contracts/agent-runtime/sdk_workers.cue` owns
+worker request/result/action/budget semantics.
 
 ```cue
 package graph
@@ -853,7 +940,7 @@ import "list"
 Use this sequence to bind the dirty layout safely:
 
 1. Add the generic model.
-2. Make `contracts/agent-context-resolver` expose one `agentContextResolver: graph.#DomainContract`.
+2. Make `contracts/agent-context-resolver` expose one `agentContextResolver: graph.#ContractDomain`.
 3. Add only graph nodes/edges first.
 4. Add assertion facts.
 5. Add checks as evidence.
@@ -864,7 +951,7 @@ Use this sequence to bind the dirty layout safely:
 First resolver instance target:
 
 ```cue
-agentContextResolver: graph.#DomainContract & {
+agentContextResolver: graph.#ContractDomain & {
 	id: "agent-context-resolver"
 
 	model: {
