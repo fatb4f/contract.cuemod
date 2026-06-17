@@ -383,6 +383,22 @@ agentContextResolver: graph.#ContractDomain & {
 			polarity: "invariant"
 			strength: "required"
 		}
+		"agent-context-resolver.migration-acceptance-closed": {
+			subject: "agent-context-resolver.root"
+			fact:    "The resolver closeout can export a bounded controller packet, predefined A2A route-worker invocation schema, deterministic merge reducer, bounded merge packet, adapter bindings, and route-worker evidence without SDK subagents, MCP execution, GitButler, or git-meta."
+			appliesTo: [
+				"agent-context-resolver.leaf.proof-contract",
+				"agent-context-resolver.leaf.merge-contract",
+				"agent-context-resolver.leaf.runtime-projection-contract",
+				"agent-context-resolver.leaf.route-plan-contract",
+				"agent-context-resolver.leaf.routes-contract",
+				"agent-context-resolver.leaf.resolver-worker-binding",
+				"agent-context-resolver.leaf.generated-fragments",
+			]
+			evidence: ["agent-context-resolver.check.migration-acceptance-closed"]
+			polarity: "invariant"
+			strength: "required"
+		}
 	}
 
 	fixtureObligations: {
@@ -421,6 +437,15 @@ agentContextResolver: graph.#ContractDomain & {
 			expected:    "fail"
 			generation:  "manual"
 			description: "Negative resolver fixture proving invalid route fragment ownership fails rooted-leaf validation."
+		}
+		"agent-context-resolver.fixture.migration-acceptance.positive.route-compiler-proof": {
+			assertion:   "agent-context-resolver.migration-acceptance-closed"
+			polarity:    "positive"
+			target:      "agent-context-resolver.leaf.proof-contract"
+			path:        "contracts/agent-context-resolver/proof.cue"
+			expected:    "pass"
+			generation:  "manual"
+			description: "Positive proof fixture for the generated controller packet, runtime-denied route-worker invocation model, deterministic reducer, bounded merge packet, and evidence-only closeout."
 		}
 	}
 
@@ -483,6 +508,20 @@ agentContextResolver: graph.#ContractDomain & {
 			command: ["cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"]
 			description: "Validate active assertion coverage through graph constraints."
 		}
+		"agent-context-resolver.test.migration-acceptance-closed.cue-export": {
+			assertion: "agent-context-resolver.migration-acceptance-closed"
+			fixtures: ["agent-context-resolver.fixture.migration-acceptance.positive.route-compiler-proof"]
+			check: "agent-context-resolver.check.migration-acceptance-closed"
+			command: [
+				"cue export ./contracts/agent-context-resolver -e agentContextResolver",
+				"cue export ./contracts/agent-context-resolver -e routeInventory",
+				"cue export ./contracts/agent-context-resolver -e routeInventoryValidation",
+				"cue export ./contracts/agent-context-resolver -e routeCompilerProof",
+				"cue export ./contracts/agent-context-resolver -e agentContextResolver.checkManifest",
+				"cue export ./contracts/agent-context-resolver -e agentContextResolver.validationCertificate",
+			]
+			description: "Validate the final resolver migration acceptance exports, including route compiler proof closeout state."
+		}
 	}
 
 	coverage: {
@@ -532,6 +571,11 @@ agentContextResolver: graph.#ContractDomain & {
 			]
 			requiredTests: ["agent-context-resolver.test.assertion-coverage-complete.cue-eval"]
 		}
+		"agent-context-resolver.coverage.migration-acceptance-closed": {
+			assertion: "agent-context-resolver.migration-acceptance-closed"
+			requiredFixtures: ["agent-context-resolver.fixture.migration-acceptance.positive.route-compiler-proof"]
+			requiredTests: ["agent-context-resolver.test.migration-acceptance-closed.cue-export"]
+		}
 	}
 
 	checks: {
@@ -580,6 +624,21 @@ agentContextResolver: graph.#ContractDomain & {
 			command: ["cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"]
 			expr:    "agentContextResolver"
 			failure: "agent-context-resolver contains an active assertion without declared coverage."
+		}
+		"agent-context-resolver.check.migration-acceptance-closed": {
+			kind: "cue-export"
+			assertions: ["agent-context-resolver.migration-acceptance-closed"]
+			target: "agent-context-resolver.root"
+			command: [
+				"cue export ./contracts/agent-context-resolver -e agentContextResolver",
+				"cue export ./contracts/agent-context-resolver -e routeInventory",
+				"cue export ./contracts/agent-context-resolver -e routeInventoryValidation",
+				"cue export ./contracts/agent-context-resolver -e routeCompilerProof",
+				"cue export ./contracts/agent-context-resolver -e agentContextResolver.checkManifest",
+				"cue export ./contracts/agent-context-resolver -e agentContextResolver.validationCertificate",
+			]
+			expr:    "routeCompilerProof"
+			failure: "agent-context-resolver migration acceptance is not closed by exported controller packet, route-worker invocation, deterministic reducer, bounded merge packet, adapter binding, and evidence records."
 		}
 	}
 
@@ -692,6 +751,7 @@ agentContextResolver: graph.#ContractDomain & {
 				"agent-context-resolver.fixture-obligations-owned",
 				"agent-context-resolver.test-obligations-owned",
 				"agent-context-resolver.assertion-coverage-complete",
+				"agent-context-resolver.migration-acceptance-closed",
 			]
 			pathScope: {
 				allowedPaths: [

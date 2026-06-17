@@ -135,6 +135,32 @@
                 ],
                 "check": "agent-context-resolver.check.assertion-coverage-complete"
             }
+        },
+        "agent-context-resolver.test.migration-acceptance-closed.cue-export": {
+            "id": "agent-context-resolver.test.migration-acceptance-closed.cue-export",
+            "testObligation": "agent-context-resolver.test.migration-acceptance-closed.cue-export",
+            "check": "agent-context-resolver.check.migration-acceptance-closed",
+            "assertion": "agent-context-resolver.migration-acceptance-closed",
+            "fixtures": [
+                "agent-context-resolver.fixture.migration-acceptance.positive.route-compiler-proof"
+            ],
+            "command": [
+                "cue export ./contracts/agent-context-resolver -e agentContextResolver",
+                "cue export ./contracts/agent-context-resolver -e routeInventory",
+                "cue export ./contracts/agent-context-resolver -e routeInventoryValidation",
+                "cue export ./contracts/agent-context-resolver -e routeCompilerProof",
+                "cue export ./contracts/agent-context-resolver -e agentContextResolver.checkManifest",
+                "cue export ./contracts/agent-context-resolver -e agentContextResolver.validationCertificate"
+            ],
+            "evidenceRequired": {
+                "assertions": [
+                    "agent-context-resolver.migration-acceptance-closed"
+                ],
+                "fixtures": [
+                    "agent-context-resolver.fixture.migration-acceptance.positive.route-compiler-proof"
+                ],
+                "check": "agent-context-resolver.check.migration-acceptance-closed"
+            }
         }
     }
 }

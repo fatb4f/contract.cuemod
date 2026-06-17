@@ -98,6 +98,82 @@ routeCompilerProof: #ResolvedRoutePlan & {
 		finalAuthority:           "root_codex"
 		routeResultsAreAuthority: false
 	}
+	mergeReducer: {
+		schema:        "agent.merge-reducer.v1"
+		stage:         "merge_reduction"
+		input:         "route_results"
+		output:        "bounded_merge_packet"
+		deterministic: true
+		steps: [
+			"schema_validation",
+			"evidence_compression",
+			"merge_policy",
+			"bounded_merge_packet",
+		]
+		order: {
+			primary:    "route.sequence"
+			tieBreaker: "route.id"
+			direction:  "ascending"
+		}
+		compression: {
+			schema:                  "agent.evidence-compression.v1"
+			stage:                   "evidence_compression"
+			mode:                    "bounded"
+			input:                   "validated_route_results"
+			output:                  "compressed_evidence"
+			mayReduceEvidenceVolume: true
+			mustPreserveProvenance:  true
+			provenanceFields: ["routeID", "evidence"]
+			deny: {
+				eraseProvenance:    true
+				rawTranscriptInput: true
+			}
+		}
+		policy: expectedMerge
+		packet: {
+			schema:                   "agent.bounded-merge-packet.v1"
+			producer:                 "merge_reducer"
+			stage:                    "bounded_merge_packet"
+			deterministic:            true
+			finalAuthority:           "root_codex"
+			routeResultsAuthority:    "evidence_only"
+			routeResultsAreAuthority: false
+			maxSummaryTokens:         1200
+			sourceRouteIDs: [
+				routeInventory.routes[0].id,
+				routeInventory.routes[1].id,
+			]
+			facts: []
+			evidence: [
+				{kind: "contract", ref: "contracts/agent-context-resolver/proof.cue"},
+				{kind: "contract", ref: "contracts/agent-context-resolver/merge.cue"},
+			]
+			diagnostics: []
+			conflicts: []
+			deny: {
+				rawWorkerTranscripts: true
+				arbitraryTranscripts: true
+				unboundedEvidence:    true
+			}
+		}
+		deny: {
+			rawWorkerTranscripts: true
+			unstructuredResults:  true
+			routeResultsAsFinal:  true
+		}
+	}
+	modelSynthesisGate: {
+		schema:  "agent.model-synthesis-gate.v1"
+		stage:   "model_synthesis"
+		allowed: false
+		input:   routeCompilerProof.mergeReducer.packet
+		reads:   "bounded_merge_packet_only"
+		deny: {
+			rawWorkerTranscripts:       true
+			arbitraryRouteResultAccess: true
+			routeResultsAsAuthority:    true
+		}
+	}
 	runtime: {
 		mode: "requires-agent-runtime"
 		routeRefs: [
