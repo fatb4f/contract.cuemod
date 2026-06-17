@@ -1,8 +1,15 @@
 package agentruntime
 
-import resolver "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver:agentcontextresolver"
-
 #RuntimeID: string & =~"^[a-z0-9][a-z0-9._-]*$"
+
+#RouteKind:
+	"inspect" |
+	"validate" |
+	"generate" |
+	"diff" |
+	"test" |
+	"summarize" |
+	"risk_scan"
 
 #WorkerCapability:
 	"inspect" |
@@ -25,7 +32,7 @@ import resolver "github.com/fatb4f/contract.cuemod/contracts/agent-context-resol
 	id:    #RuntimeID
 	label: string & !=""
 	capabilities: [...#WorkerCapability] & [_, ...]
-	allowedRouteKinds: [...resolver.#RouteKind] & [_, ...]
+	allowedRouteKinds: [...#RouteKind] & [_, ...]
 	executorAdapterID: #RuntimeID
 	backendAdapterID:  #RuntimeID
 	budgetID:          #RuntimeID

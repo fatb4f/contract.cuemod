@@ -2,7 +2,7 @@ package validation
 
 import (
 	"github.com/fatb4f/contract.cuemod/contracts/graph"
-	"github.com/fatb4f/contract.cuemod/contracts/mcp"
+	"github.com/fatb4f/contract.cuemod/contracts/protocols/mcp"
 )
 
 #CompleteResult: mcp.#MCPResult & {

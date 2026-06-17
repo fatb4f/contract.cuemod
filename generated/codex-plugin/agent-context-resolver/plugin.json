@@ -1,0 +1,15 @@
+{
+  "schema_version": "v1",
+  "name": "agent-context-resolver",
+  "version": "0.1.0",
+  "description": "Codex-facing package for the portable agent context resolver contracts.",
+  "mcp": {
+    "config": ".mcp.json"
+  },
+  "skills": [
+    {
+      "name": "agent-context-resolver",
+      "path": "skills/agent-context-resolver/SKILL.md"
+    }
+  ]
+}

@@ -34,12 +34,12 @@
     {
       "id": "mcp.evidence-plane",
       "sourceContract": "mcp",
-      "sourcePath": "contracts/mcp/mcp.cue",
+      "sourcePath": "contracts/protocols/mcp/mcp.cue",
       "role": "constraint",
       "surface": "turn_start",
       "summary": "MCP provider, result, and evidence-plane constraints.",
-      "authorityRoot": "contracts/mcp",
-      "contractPath": "contracts/mcp/mcp.cue"
+      "authorityRoot": "contracts/protocols/mcp",
+      "contractPath": "contracts/protocols/mcp/mcp.cue"
     },
     {
       "id": "repo.contract-seed",
@@ -64,12 +64,12 @@
     {
       "id": "resolver.context-packet",
       "sourceContract": "resolver",
-      "sourcePath": "contracts/resolver/resolver.cue",
+      "sourcePath": "contracts/context/packet/resolver.cue",
       "role": "workflow",
       "surface": "turn_start",
       "summary": "Context packet selection and dependency projection workflow.",
-      "authorityRoot": "contracts/resolver",
-      "contractPath": "contracts/resolver/resolver.cue"
+      "authorityRoot": "contracts/context/packet",
+      "contractPath": "contracts/context/packet/resolver.cue"
     },
     {
       "id": "vb-contract.authority",

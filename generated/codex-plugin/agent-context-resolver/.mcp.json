@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "agent-context-resolver": {
+      "command": "./bin/contract-mcp",
+      "args": []
+    }
+  }
+}

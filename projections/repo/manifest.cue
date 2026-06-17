@@ -35,22 +35,22 @@ manifest: repocontract.#RepoLayout & {
 	]
 
 	fixtures: [
-		{path: "fixtures/mcp/valid", targetContract: "contracts/mcp", polarity: "valid", expected: "pass", validatesWith: "cue vet ./fixtures/mcp/valid"},
-		{path: "fixtures/mcp/adapter-output", targetContract: "contracts/mcp", polarity: "valid", expected: "pass", validatesWith: "cue vet ./fixtures/mcp/adapter-output"},
-		{path: "fixtures/mcp/invalid-negative", targetContract: "contracts/mcp", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/mcp/invalid-negative"},
-		{path: "fixtures/mcp/invalid-direct", targetContract: "contracts/mcp", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/mcp/invalid-direct"},
-		{path: "fixtures/mcp/invalid-adapter-output", targetContract: "contracts/mcp", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/mcp/invalid-adapter-output"},
-		{path: "fixtures/mcp/invalid-authority", targetContract: "contracts/mcp", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/mcp/invalid-authority"},
-		{path: "fixtures/mcp/invalid-capability", targetContract: "contracts/mcp", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/mcp/invalid-capability"},
-		{path: "fixtures/mcp/invalid-complete", targetContract: "contracts/mcp", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/mcp/invalid-complete"},
-		{path: "fixtures/mcp/invalid-provider-id", targetContract: "contracts/mcp", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/mcp/invalid-provider-id"},
+		{path: "fixtures/mcp/valid", targetContract: "contracts/protocols/mcp", polarity: "valid", expected: "pass", validatesWith: "cue vet ./fixtures/mcp/valid"},
+		{path: "fixtures/mcp/adapter-output", targetContract: "contracts/protocols/mcp", polarity: "valid", expected: "pass", validatesWith: "cue vet ./fixtures/mcp/adapter-output"},
+		{path: "fixtures/mcp/invalid-negative", targetContract: "contracts/protocols/mcp", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/mcp/invalid-negative"},
+		{path: "fixtures/mcp/invalid-direct", targetContract: "contracts/protocols/mcp", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/mcp/invalid-direct"},
+		{path: "fixtures/mcp/invalid-adapter-output", targetContract: "contracts/protocols/mcp", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/mcp/invalid-adapter-output"},
+		{path: "fixtures/mcp/invalid-authority", targetContract: "contracts/protocols/mcp", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/mcp/invalid-authority"},
+		{path: "fixtures/mcp/invalid-capability", targetContract: "contracts/protocols/mcp", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/mcp/invalid-capability"},
+		{path: "fixtures/mcp/invalid-complete", targetContract: "contracts/protocols/mcp", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/mcp/invalid-complete"},
+		{path: "fixtures/mcp/invalid-provider-id", targetContract: "contracts/protocols/mcp", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/mcp/invalid-provider-id"},
 		{path: "fixtures/vcs/valid", targetContract: "contracts/vcs", polarity: "valid", expected: "pass", validatesWith: "cue vet ./fixtures/vcs/valid"},
 		{path: "fixtures/vcs/invalid-unpushed", targetContract: "contracts/vcs", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/vcs/invalid-unpushed"},
 		{path: "fixtures/vcs/invalid-reflog-only", targetContract: "contracts/vcs", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/vcs/invalid-reflog-only"},
 		{path: "fixtures/vcs/invalid-missing-transaction-policy", targetContract: "contracts/vcs", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/vcs/invalid-missing-transaction-policy"},
 		{path: "fixtures/agent-skill/valid", targetContract: "contracts/agent-skill", polarity: "valid", expected: "pass", validatesWith: "cue vet ./fixtures/agent-skill/valid"},
 		{path: "fixtures/agent-skill/invalid", targetContract: "contracts/agent-skill", polarity: "invalid", expected: "fail", validatesWith: "cue vet ./fixtures/agent-skill/invalid"},
-		{path: "fixtures/resolver/workspace-lifecycle", targetContract: "contracts/resolver", polarity: "valid", expected: "pass", validatesWith: "cue vet ./fixtures/resolver/workspace-lifecycle"},
+		{path: "fixtures/resolver/workspace-lifecycle", targetContract: "contracts/context/packet", polarity: "valid", expected: "pass", validatesWith: "cue vet ./fixtures/resolver/workspace-lifecycle"},
 	]
 
 	generatedAssets: [

@@ -1,5 +1,23 @@
 package adapters
 
+#AdapterKind: "go-wrapper" | "cli" | "mcp-server" | "codex-hook"
+
+#AdapterBoundary: close({
+	id:   string
+	kind: #AdapterKind
+
+	authority: close({
+		contract:  "agent-context-resolver"
+		ownsLogic: false
+	})
+
+	invariants: close({
+		cueOwnsValidation: true
+		adapterOwnsIO:     true
+		duplicateLogic:    false
+	})
+})
+
 #ManagedAdapter: close({
 	id: string & =~"^df:adapter/[a-z0-9._-]+$"
 

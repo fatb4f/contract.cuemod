@@ -1,10 +1,6 @@
 package agentruntime
 
-import (
-	"list"
-
-	resolver "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver:agentcontextresolver"
-)
+import "list"
 
 #InvocationInputPolicy: close({
 	arbitraryPrompt:         false
@@ -19,8 +15,8 @@ import (
 	invocationID: #RuntimeID
 	workerID:     #RuntimeID
 	budgetID:     #RuntimeID
-	routeRef:     resolver.#RuntimeRouteReference
-	runtimeProjection: resolver.#RuntimeProjection & {
+	routeRef:     #RuntimeRouteReference
+	runtimeProjection: #RuntimeProjection & {
 		mode: "eligible"
 		execution: allowed: true
 	}
@@ -34,8 +30,8 @@ import (
 	invocationID:      #RuntimeID
 	workerID:          #RuntimeID
 	budgetID:          #RuntimeID
-	routeRef:          resolver.#RuntimeRouteReference
-	runtimeProjection: resolver.#RuntimeProjection
+	routeRef:          #RuntimeRouteReference
+	runtimeProjection: #RuntimeProjection
 
 	_projectionRouteIDs: [for ref in runtimeProjection.routeRefs {ref.routeID}]
 	_projectedRouteRefs: [
@@ -44,7 +40,6 @@ import (
 			ref
 		},
 	]
-	_projectedRouteRefs: [routeRef]
 	_registeredRouteIDs: [for route in runtimeRegistry.routes {route.routeID}]
 	_registeredRouteKinds: [
 		for route in runtimeRegistry.routes {

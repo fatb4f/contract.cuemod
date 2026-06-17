@@ -11,25 +11,43 @@ resolver_contract_dir="$repo_root/contracts/agent-context-resolver"
 cue vet ./contracts/graph
 cue vet ./contracts
 cue vet ./contracts/adapters
-cue vet ./contracts/mcp
+cue vet ./contracts/protocols/mcp
+cue vet ./contracts/protocols/a2a
 cue vet ./contracts/providers
-cue vet ./contracts/resolver
+cue vet ./contracts/context/packet
 cue vet ./contracts/validation
 cue vet ./contracts/agent-skill
-(
-	cd "$resolver_contract_dir"
-	cue vet ./...
-	cue export . >/dev/null
-	cue export . -e agentContextResolver.checkManifest \
-		--force --out json --outfile "$tmp_dir/agent-context-resolver.check-manifest.json"
-)
+cue vet ./contracts/agent-runtime
+cue eval ./contracts/... >/dev/null
+for root_domain in \
+	./contracts/protocols/mcp \
+	./contracts/protocols/a2a \
+	./contracts/context/packet \
+	./contracts/adapters \
+	./contracts/agent-runtime \
+	./contracts/agent-context-resolver
+do
+	cue export "$root_domain" >/dev/null
+done
+if cue export ./contracts/registry.cue -e repoRegistry | rg 'agent-context-resolver/(projections|adapters)/' >/dev/null; then
+	printf '%s\n' "component-local resolver bindings registered as root authorities" >&2
+	exit 1
+fi
+go test ./...
+go run ./cmd/contractctl acr validate >/dev/null
+go run ./cmd/contractctl acr inventory >/dev/null
+go run ./cmd/contractctl acr export --target runtime-projection >/dev/null
+printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' |
+	go run ./cmd/contract-mcp |
+	rg 'acr\.(inventory|resolve_prompt|plan_route|validate|export_runtime_projection)' >/dev/null
+cue vet ./contracts/agent-context-resolver/...
+cue export ./contracts/agent-context-resolver >/dev/null
+cue export ./contracts/agent-context-resolver -e agentContextResolver.checkManifest \
+	--force --out json --outfile "$tmp_dir/agent-context-resolver.check-manifest.json"
 cmp "$tmp_dir/agent-context-resolver.check-manifest.json" \
 	contracts/agent-context-resolver/generated/checks/check_manifest.json
-(
-	cd "$resolver_contract_dir"
-	cue export . -e agentContextResolver.validationCertificate \
-		--force --out json --outfile "$tmp_dir/agent-context-resolver.validation-certificate.json"
-)
+cue export ./contracts/agent-context-resolver -e agentContextResolver.validationCertificate \
+	--force --out json --outfile "$tmp_dir/agent-context-resolver.validation-certificate.json"
 cmp "$tmp_dir/agent-context-resolver.validation-certificate.json" \
 	contracts/agent-context-resolver/generated/checks/validation_certificate.json
 cue vet ./contracts/repo
@@ -47,10 +65,7 @@ cue vet ./providers/cue-rg
 cue vet ./providers/lua-lsp
 cue vet ./providers/chezmoi
 cue vet ./adapters/git-mcp-go
-(
-	cd "$resolver_contract_dir"
-	cue vet ./projections/agent-skill
-)
+cue vet ./contracts/agent-context-resolver/projections/agent-skill
 cue vet ./projections/repo
 cue export ./projections/repo -e manifest >/dev/null
 cue export ./projections/repo -e inventory >/dev/null

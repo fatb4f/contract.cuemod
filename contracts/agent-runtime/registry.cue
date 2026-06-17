@@ -4,12 +4,11 @@ import (
 	"list"
 
 	adaptercontracts "github.com/fatb4f/contract.cuemod/contracts/agent-runtime/adapters:agentruntimeadapters"
-	resolver "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver:agentcontextresolver"
 )
 
 #RuntimeRouteRegistration: close({
 	routeID:   #RuntimeID
-	routeKind: resolver.#RouteKind
+	routeKind: #RouteKind
 	allowedWorkers: [...#RuntimeID] & [_, ...]
 })
 
@@ -73,13 +72,13 @@ runtimeRegistryValidation: {
 
 #ResolverRuntimeHandoff: close({
 	runtimeProjection: {
-		routeRefs: [...resolver.#RuntimeRouteReference]
+		routeRefs: [...#RuntimeRouteReference]
 		...
 	}
 	invocation: {...}
 	result: {...}
 
-	_validatedProjection: resolver.#RuntimeProjection & runtimeProjection & {
+	_validatedProjection: #RuntimeProjection & runtimeProjection & {
 		mode: "eligible"
 		execution: allowed: true
 	}

@@ -1,7 +1,5 @@
 package agentruntime
 
-import resolver "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver:agentcontextresolver"
-
 #RuntimeResult: close({
 	invocation: {...}
 	_validatedInvocation: #RuntimeInvocation & invocation
@@ -17,7 +15,7 @@ import resolver "github.com/fatb4f/contract.cuemod/contracts/agent-context-resol
 		id: invocation.budgetID
 	}
 	usage: #RuntimeUsage
-	result: resolver.#RouteResult & {
+	result: #RuntimeRouteResult & {
 		routeID: routeRef.routeID
 	}
 	returnToRoot: close({

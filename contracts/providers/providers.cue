@@ -1,6 +1,6 @@
 package providers
 
-import "github.com/fatb4f/contract.cuemod/contracts/mcp"
+import "github.com/fatb4f/contract.cuemod/contracts/protocols/mcp"
 
 #TypedProvider: mcp.#MCPProvider & {
 	kind: mcp.#ProviderKind
