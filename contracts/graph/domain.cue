@@ -458,7 +458,19 @@ package graph
 		metadata?: {
 			turn_id?: string & !=""
 		}
-		sourceIdentity:    _
+		sourceIdentity: _
+		taskName:       string & =~"^/[A-Za-z0-9._/-]+$"
+		recipient:      string & =~"^/[A-Za-z0-9._/-]+$"
+		sender:         string & =~"^/[A-Za-z0-9._/-]+$"
+		payload: close({
+			id: #ID
+			kind:
+				"task" |
+				"message" |
+				"final_answer" |
+				"route_result" |
+				"evidence"
+		})
 		payloadBoundary:   _
 		authority:         "correlation_only"
 		definesGraphTruth: false

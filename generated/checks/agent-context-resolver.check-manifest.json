@@ -149,6 +149,7 @@
                 "cue export ./contracts/agent-context-resolver -e routeInventory",
                 "cue export ./contracts/agent-context-resolver -e routeInventoryValidation",
                 "cue export ./contracts/agent-context-resolver -e routeCompilerProof",
+                "cue export ./contracts/agent-context-resolver -e routeEnvelopeProtocolProof",
                 "cue export ./contracts/agent-context-resolver -e agentContextResolver.checkManifest",
                 "cue export ./contracts/agent-context-resolver -e agentContextResolver.validationCertificate"
             ],

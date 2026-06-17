@@ -22,6 +22,20 @@ package agentcontextresolver
 	"MESSAGE" |
 	"FINAL_ANSWER"
 
+#AgentPath: string & =~"^/[A-Za-z0-9._/-]+$"
+
+#A2APayloadKind:
+	"task" |
+	"message" |
+	"final_answer" |
+	"route_result" |
+	"evidence"
+
+#A2APayloadRef: close({
+	id:   #DeclaredID
+	kind: #A2APayloadKind
+})
+
 #PayloadBoundary: close({
 	plaintextEnvelope: true
 	encryptedContent:  bool
@@ -41,11 +55,33 @@ package agentcontextresolver
 	adapterID?:      #DeclaredID
 	metadata?:       #ResponseItemMetadata
 	sourceIdentity:  #ResponseItemSourceIdentity
+	taskName:        #AgentPath
+	recipient:       #AgentPath
+	sender:          #AgentPath
+	payload:         #A2APayloadRef
 	payloadBoundary: #PayloadBoundary
 
 	authority:         "correlation_only"
 	definesGraphTruth: false
 	mutationAuthority: false
+
+	if kind == "NEW_TASK" {
+		payload: {
+			kind: "task"
+		}
+	}
+
+	if kind == "MESSAGE" {
+		payload: {
+			kind: "message"
+		}
+	}
+
+	if kind == "FINAL_ANSWER" {
+		payload: {
+			kind: "final_answer"
+		}
+	}
 })
 
 #A2AWorkerAdapter: close({

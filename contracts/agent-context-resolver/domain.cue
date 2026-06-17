@@ -517,6 +517,7 @@ agentContextResolver: graph.#ContractDomain & {
 				"cue export ./contracts/agent-context-resolver -e routeInventory",
 				"cue export ./contracts/agent-context-resolver -e routeInventoryValidation",
 				"cue export ./contracts/agent-context-resolver -e routeCompilerProof",
+				"cue export ./contracts/agent-context-resolver -e routeEnvelopeProtocolProof",
 				"cue export ./contracts/agent-context-resolver -e agentContextResolver.checkManifest",
 				"cue export ./contracts/agent-context-resolver -e agentContextResolver.validationCertificate",
 			]
@@ -634,6 +635,7 @@ agentContextResolver: graph.#ContractDomain & {
 				"cue export ./contracts/agent-context-resolver -e routeInventory",
 				"cue export ./contracts/agent-context-resolver -e routeInventoryValidation",
 				"cue export ./contracts/agent-context-resolver -e routeCompilerProof",
+				"cue export ./contracts/agent-context-resolver -e routeEnvelopeProtocolProof",
 				"cue export ./contracts/agent-context-resolver -e agentContextResolver.checkManifest",
 				"cue export ./contracts/agent-context-resolver -e agentContextResolver.validationCertificate",
 			]
@@ -871,6 +873,13 @@ agentContextResolver: graph.#ContractDomain & {
 					sourceID:       "agent-context-resolver.response-item.resolver-inspect-current"
 					producerID:     "agent-context-resolver.validation-worker"
 					responseItemID: "resp-item-resolver-inspect-current"
+				}
+				taskName:  "/agent-context-resolver/validation"
+				recipient: "/root-codex"
+				sender:    "/agent-context-resolver/validation-worker"
+				payload: {
+					id:   routeResultID
+					kind: "final_answer"
 				}
 				payloadBoundary: {
 					plaintextEnvelope:               true

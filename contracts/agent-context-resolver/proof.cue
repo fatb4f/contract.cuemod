@@ -286,3 +286,39 @@ routeCompilerProof: #ResolvedRoutePlan & {
 		expectedResult: {schema: "agent.route-result.v1"}
 	}
 }
+
+routeEnvelopeProtocolProof: {
+	schema: "agent.route-envelope-protocol-proof.v1"
+
+	evidenceRecords: agentContextResolver.evidenceRecords
+	checks: [
+		for recordID, record in evidenceRecords {
+			id:          recordID
+			taskName:    record.routeEnvelope.taskName
+			recipient:   record.routeEnvelope.recipient
+			sender:      record.routeEnvelope.sender
+			payloadID:   record.routeEnvelope.payload.id
+			payloadKind: record.routeEnvelope.payload.kind
+
+			metadata:       record.routeEnvelope.metadata
+			sourceIdentity: record.routeEnvelope.sourceIdentity
+			payloadBoundary: record.routeEnvelope.payloadBoundary & {
+				encryptedContent: bool
+			}
+
+			authority:         record.routeEnvelope.authority & "correlation_only"
+			definesGraphTruth: record.routeEnvelope.definesGraphTruth & false
+			mutationAuthority: record.routeEnvelope.mutationAuthority & false
+
+			if record.routeEnvelope.kind == "NEW_TASK" {
+				payloadKind: "task"
+			}
+			if record.routeEnvelope.kind == "MESSAGE" {
+				payloadKind: "message"
+			}
+			if record.routeEnvelope.kind == "FINAL_ANSWER" {
+				payloadKind: "final_answer"
+			}
+		},
+	]
+}
