@@ -64,8 +64,11 @@ cue vet ./fixtures/vcs/valid
 	./seed/scripts/validate.sh
 )
 
-./test/agent-context-hook.sh
-./test/repo-layout.sh
+(
+	cd "$resolver_contract_dir"
+	cue export ./assertions -e agentContextResolverAssertions.agentContextHook >/dev/null
+)
+cue export ./contracts/repo/assertions -e repoLayoutAssertions >/dev/null
 
 if cue vet ./fixtures/mcp/invalid-negative >/dev/null 2>&1; then
 	printf '%s\n' "invalid negative claim unexpectedly passed" >&2
