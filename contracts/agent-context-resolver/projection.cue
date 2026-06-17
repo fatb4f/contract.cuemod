@@ -1,7 +1,5 @@
 package agentcontextresolver
 
-import registryseed "github.com/fatb4f/contract.cuemod/contracts:registry"
-
 #ProjectedFragment: {
 	id:             string
 	sourceContract: string
@@ -14,7 +12,7 @@ import registryseed "github.com/fatb4f/contract.cuemod/contracts:registry"
 }
 
 #FragmentInventory: {
-	repo: registryseed.#RepoContractRegistry.repo
+	repo: #RepoContractRegistry.repo
 	fragments: [...#ProjectedFragment]
 }
 

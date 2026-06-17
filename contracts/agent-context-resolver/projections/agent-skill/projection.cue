@@ -1,6 +1,6 @@
 package agentskillprojection
 
-import "github.com/fatb4f/contract.cuemod/contracts/agent-skill:agentskill"
+import "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/internal/agent-skill:agentskill"
 
 projection: agentskill.#SkillProjection & {
 	metadata: {

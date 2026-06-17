@@ -1,6 +1,36 @@
 package agentcontextresolver
 
-import graph "github.com/fatb4f/contract.cuemod/contracts/graph"
+import (
+	sectionadapters "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/adapters"
+	sectionassertions "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/assertions"
+	sectionchecks "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/checks"
+	sectionfixtures "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/fixtures"
+	sectiongenerated "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/generated"
+	graph "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/internal/graph"
+	sectionhooks "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/hooks"
+	sectionprojections "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/projections"
+	sectionseed "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/seed"
+	sectionworkers "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/workers"
+)
+
+resolverModuleBoundary: {
+	modulePath:    "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver"
+	moduleRoot:    "."
+	publicSurface: "domain.cue"
+	deferred: ["contracts/agent-runtime"]
+}
+
+resolverSectionPackages: {
+	assertions:  sectionassertions.section
+	checks:      sectionchecks.section
+	adapters:    sectionadapters.section
+	workers:     sectionworkers.section
+	hooks:       sectionhooks.section
+	fixtures:    sectionfixtures.section
+	projections: sectionprojections.section
+	generated:   sectiongenerated.section
+	seed:        sectionseed.section
+}
 
 agentContextResolver: graph.#ContractDomain & {
 	id: "agent-context-resolver"
@@ -69,7 +99,7 @@ agentContextResolver: graph.#ContractDomain & {
 		}
 		"agent-context-resolver.seeds": {
 			kind: "seeds"
-			path: "contracts/agent-context-resolver/seeds"
+			path: "contracts/agent-context-resolver/seed"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.seeds"]
 			ownedLeaves: [
 				"agent-context-resolver.leaf.seed-resolver",
@@ -454,7 +484,7 @@ agentContextResolver: graph.#ContractDomain & {
 			assertion: "agent-context-resolver.sections-contained"
 			fixtures: []
 			check: "agent-context-resolver.check.sections-contained"
-			command: ["cue vet ./contracts/agent-context-resolver"]
+			command: ["cue vet ."]
 			description: "Validate section containment through the resolver domain CUE package."
 		}
 		"agent-context-resolver.test.leaves-owned.cue-vet": {
@@ -464,7 +494,7 @@ agentContextResolver: graph.#ContractDomain & {
 				"agent-context-resolver.fixture.leaves-owned.negative.invalid-route-authority",
 			]
 			check: "agent-context-resolver.check.leaves-owned"
-			command: ["cue vet ./contracts/agent-context-resolver"]
+			command: ["cue vet ."]
 			description: "Validate leaf ownership with positive and negative resolver fixture obligations declared as evidence inputs."
 		}
 		"agent-context-resolver.test.leaves-rooted.cue-eval": {
@@ -474,14 +504,14 @@ agentContextResolver: graph.#ContractDomain & {
 				"agent-context-resolver.fixture.leaves-rooted.negative.invalid-route-fragment",
 			]
 			check: "agent-context-resolver.check.leaves-rooted"
-			command: ["cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"]
+			command: ["cue eval . -e agentContextResolver -c"]
 			description: "Validate leaf root paths with positive and negative resolver fixture obligations declared as evidence inputs."
 		}
 		"agent-context-resolver.test.fixture-obligations-owned.cue-eval": {
 			assertion: "agent-context-resolver.fixture-obligations-owned"
 			fixtures: []
 			check: "agent-context-resolver.check.fixture-obligations-owned"
-			command: ["cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"]
+			command: ["cue eval . -e agentContextResolver -c"]
 			description: "Validate fixture obligation assertion and target references through graph constraints."
 		}
 		"agent-context-resolver.test.test-obligations-owned.cue-eval": {
@@ -493,7 +523,7 @@ agentContextResolver: graph.#ContractDomain & {
 				"agent-context-resolver.fixture.leaves-rooted.negative.invalid-route-fragment",
 			]
 			check: "agent-context-resolver.check.test-obligations-owned"
-			command: ["cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"]
+			command: ["cue eval . -e agentContextResolver -c"]
 			description: "Validate test obligation assertion, fixture, and check references through graph constraints."
 		}
 		"agent-context-resolver.test.assertion-coverage-complete.cue-eval": {
@@ -505,7 +535,7 @@ agentContextResolver: graph.#ContractDomain & {
 				"agent-context-resolver.fixture.leaves-rooted.negative.invalid-route-fragment",
 			]
 			check: "agent-context-resolver.check.assertion-coverage-complete"
-			command: ["cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"]
+			command: ["cue eval . -e agentContextResolver -c"]
 			description: "Validate active assertion coverage through graph constraints."
 		}
 		"agent-context-resolver.test.migration-acceptance-closed.cue-export": {
@@ -513,13 +543,13 @@ agentContextResolver: graph.#ContractDomain & {
 			fixtures: ["agent-context-resolver.fixture.migration-acceptance.positive.route-compiler-proof"]
 			check: "agent-context-resolver.check.migration-acceptance-closed"
 			command: [
-				"cue export ./contracts/agent-context-resolver -e agentContextResolver",
-				"cue export ./contracts/agent-context-resolver -e routeInventory",
-				"cue export ./contracts/agent-context-resolver -e routeInventoryValidation",
-				"cue export ./contracts/agent-context-resolver -e routeCompilerProof",
-				"cue export ./contracts/agent-context-resolver -e routeEnvelopeProtocolProof",
-				"cue export ./contracts/agent-context-resolver -e agentContextResolver.checkManifest",
-				"cue export ./contracts/agent-context-resolver -e agentContextResolver.validationCertificate",
+				"cue export . -e agentContextResolver",
+				"cue export . -e routeInventory",
+				"cue export . -e routeInventoryValidation",
+				"cue export . -e routeCompilerProof",
+				"cue export . -e routeEnvelopeProtocolProof",
+				"cue export . -e agentContextResolver.checkManifest",
+				"cue export . -e agentContextResolver.validationCertificate",
 			]
 			description: "Validate the final resolver migration acceptance exports, including route compiler proof closeout state."
 		}
@@ -584,21 +614,21 @@ agentContextResolver: graph.#ContractDomain & {
 			kind: "cue-vet"
 			assertions: ["agent-context-resolver.sections-contained"]
 			target: "agent-context-resolver.root"
-			command: ["cue vet ./contracts/agent-context-resolver"]
+			command: ["cue vet ."]
 			failure: "agent-context-resolver contains an orphaned, mis-owned, or unproven contract section."
 		}
 		"agent-context-resolver.check.leaves-owned": {
 			kind: "cue-vet"
 			assertions: ["agent-context-resolver.leaves-owned"]
 			target: "agent-context-resolver.root"
-			command: ["cue vet ./contracts/agent-context-resolver"]
+			command: ["cue vet ."]
 			failure: "agent-context-resolver contains a section-owned leaf ID that does not resolve to a declared leaf with the section as parent."
 		}
 		"agent-context-resolver.check.leaves-rooted": {
 			kind: "cue-def"
 			assertions: ["agent-context-resolver.leaves-rooted"]
 			target: "agent-context-resolver.root"
-			command: ["cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"]
+			command: ["cue eval . -e agentContextResolver -c"]
 			expr:    "agentContextResolver"
 			failure: "agent-context-resolver contains a declared leaf without a root path beginning at agent-context-resolver.root."
 		}
@@ -606,7 +636,7 @@ agentContextResolver: graph.#ContractDomain & {
 			kind: "cue-def"
 			assertions: ["agent-context-resolver.fixture-obligations-owned"]
 			target: "agent-context-resolver.root"
-			command: ["cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"]
+			command: ["cue eval . -e agentContextResolver -c"]
 			expr:    "agentContextResolver"
 			failure: "agent-context-resolver contains a fixture obligation with an orphaned assertion or target."
 		}
@@ -614,7 +644,7 @@ agentContextResolver: graph.#ContractDomain & {
 			kind: "cue-def"
 			assertions: ["agent-context-resolver.test-obligations-owned"]
 			target: "agent-context-resolver.root"
-			command: ["cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"]
+			command: ["cue eval . -e agentContextResolver -c"]
 			expr:    "agentContextResolver"
 			failure: "agent-context-resolver contains a test obligation with an orphaned assertion, fixture obligation, or check."
 		}
@@ -622,7 +652,7 @@ agentContextResolver: graph.#ContractDomain & {
 			kind: "cue-def"
 			assertions: ["agent-context-resolver.assertion-coverage-complete"]
 			target: "agent-context-resolver.root"
-			command: ["cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"]
+			command: ["cue eval . -e agentContextResolver -c"]
 			expr:    "agentContextResolver"
 			failure: "agent-context-resolver contains an active assertion without declared coverage."
 		}
@@ -631,13 +661,13 @@ agentContextResolver: graph.#ContractDomain & {
 			assertions: ["agent-context-resolver.migration-acceptance-closed"]
 			target: "agent-context-resolver.root"
 			command: [
-				"cue export ./contracts/agent-context-resolver -e agentContextResolver",
-				"cue export ./contracts/agent-context-resolver -e routeInventory",
-				"cue export ./contracts/agent-context-resolver -e routeInventoryValidation",
-				"cue export ./contracts/agent-context-resolver -e routeCompilerProof",
-				"cue export ./contracts/agent-context-resolver -e routeEnvelopeProtocolProof",
-				"cue export ./contracts/agent-context-resolver -e agentContextResolver.checkManifest",
-				"cue export ./contracts/agent-context-resolver -e agentContextResolver.validationCertificate",
+				"cue export . -e agentContextResolver",
+				"cue export . -e routeInventory",
+				"cue export . -e routeInventoryValidation",
+				"cue export . -e routeCompilerProof",
+				"cue export . -e routeEnvelopeProtocolProof",
+				"cue export . -e agentContextResolver.checkManifest",
+				"cue export . -e agentContextResolver.validationCertificate",
 			]
 			expr:    "routeCompilerProof"
 			failure: "agent-context-resolver migration acceptance is not closed by exported controller packet, route-worker invocation, deterministic reducer, bounded merge packet, adapter binding, and evidence records."
