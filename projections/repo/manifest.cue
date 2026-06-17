@@ -13,8 +13,8 @@ manifest: repocontract.#RepoLayout & {
 		{path: "fixtures/", kind: "directory", role: "fixture", lifecycle: "test-fixture", authority: "non-authority", generated: false, owner: "contracts/validation", description: "Assertion-derived valid and invalid evidence.", validatesWith: ["cue vet ./contracts/assertions"]},
 		{path: "test/", kind: "directory", role: "validation", lifecycle: "source", authority: "non-authority", generated: false, owner: "contracts/validation", description: "Optional evaluator shims derived from assertions.", validatesWith: ["cue vet ./contracts/assertions"]},
 		{path: "docs/", kind: "directory", role: "documentation", lifecycle: "source", authority: "non-authority", generated: false, owner: "contracts/repo", description: "Explanatory non-authority documentation.", allowedExtensions: [".md"], validatesWith: ["cue vet ./contracts/assertions"]},
-		{path: ".github/", kind: "directory", role: "documentation", lifecycle: "source", authority: "non-authority", generated: false, owner: "contracts/repo", description: "GitHub repository metadata and contribution templates.", allowedExtensions: [".yml", ".yaml", ".md"], validatesWith: ["./test/repo-layout.sh"]},
-		{path: ".repo/", kind: "directory", role: "generated", lifecycle: "generated", authority: "derived", generated: true, owner: "projections/repo", description: "Generated repository manifest and inventory.", validatesWith: ["./test/repo-layout.sh"]},
+		{path: ".github/", kind: "directory", role: "documentation", lifecycle: "source", authority: "non-authority", generated: false, owner: "contracts/repo", description: "GitHub repository metadata and contribution templates.", allowedExtensions: [".yml", ".yaml", ".md"], validatesWith: ["cue vet ./contracts/assertions"]},
+		{path: ".repo/", kind: "directory", role: "generated", lifecycle: "generated", authority: "derived", generated: true, owner: "projections/repo", description: "Generated repository manifest and inventory.", validatesWith: ["cue vet ./contracts/assertions"]},
 		{path: "cue.mod/", kind: "directory", role: "tooling", lifecycle: "source", authority: "authoritative", generated: false, owner: "cue.mod/module.cue", description: "CUE module metadata.", allowedExtensions: [".cue"], validatesWith: ["cue vet ./..."]},
 	]
 
@@ -54,8 +54,8 @@ manifest: repocontract.#RepoLayout & {
 	]
 
 	generatedAssets: [
-		{path: ".repo/manifest.json", generated: true, source: "contracts/repo", projection: "projections/repo:manifest", command: "cue export ./projections/repo -e manifest", editable: false, validatesWith: ["./test/repo-layout.sh"]},
-		{path: ".repo/inventory.json", generated: true, source: "contracts/repo", projection: "projections/repo:inventory", command: "cue export ./projections/repo -e inventory", editable: false, validatesWith: ["./test/repo-layout.sh"]},
-		{path: ".repo/layout.md", generated: true, source: "contracts/repo", projection: "projections/repo:layoutMarkdown", command: "cue export ./projections/repo -e layoutMarkdown --out text", editable: false, validatesWith: ["./test/repo-layout.sh"]},
+		{path: ".repo/manifest.json", generated: true, source: "contracts/repo", projection: "projections/repo:manifest", command: "cue export ./projections/repo -e manifest", editable: false, validatesWith: ["cue vet ./contracts/assertions"]},
+		{path: ".repo/inventory.json", generated: true, source: "contracts/repo", projection: "projections/repo:inventory", command: "cue export ./projections/repo -e inventory", editable: false, validatesWith: ["cue vet ./contracts/assertions"]},
+		{path: ".repo/layout.md", generated: true, source: "contracts/repo", projection: "projections/repo:layoutMarkdown", command: "cue export ./projections/repo -e layoutMarkdown --out text", editable: false, validatesWith: ["cue vet ./contracts/assertions"]},
 	]
 }

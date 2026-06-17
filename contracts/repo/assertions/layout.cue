@@ -56,6 +56,31 @@ repoLayoutAssertions: {
 		noManagedAdapterGitMetadata:                    true
 		noRepoLevelBinReferencesInGeneratedAgentAssets: true
 		noSingularAuthorityRootReferences:              true
+		noShellValidatorsAsAcceptanceAuthority:         true
+	}
+
+	for surface in repoprojection.manifest.surfaces {
+		for validator in surface.validatesWith {
+			if strings.HasPrefix(validator, "./test/") {
+				_shellValidatorRegisteredAsAcceptanceAuthority: _|_
+			}
+		}
+	}
+
+	for asset in repoprojection.manifest.assets {
+		for validator in asset.validatesWith {
+			if strings.HasPrefix(validator, "./test/") {
+				_shellValidatorRegisteredAsAcceptanceAuthority: _|_
+			}
+		}
+	}
+
+	for asset in repoprojection.manifest.generatedAssets {
+		for validator in asset.validatesWith {
+			if strings.HasPrefix(validator, "./test/") {
+				_shellValidatorRegisteredAsAcceptanceAuthority: _|_
+			}
+		}
 	}
 
 	generatedAssets: [
