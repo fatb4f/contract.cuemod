@@ -181,8 +181,6 @@ agentContextResolverAssertions: {
 					"vb-contract.component-seed",
 					"vb-contract.contract-seed",
 					"vb-contract.virtual-branch",
-					"vb-reference.authority",
-					"vb-reference.virtual-branch",
 					"vcs.patch-stack",
 				]
 			}

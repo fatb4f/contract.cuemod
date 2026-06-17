@@ -16,9 +16,7 @@
         "vb-contract.authority",
         "vb-contract.contract-seed",
         "vb-contract.component-seed",
-        "vb-contract.virtual-branch",
-        "vb-reference.authority",
-        "vb-reference.virtual-branch"
+        "vb-contract.virtual-branch"
     ],
     "availableRouteIDs": [
         "resolver.inspect.current",

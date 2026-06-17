@@ -192,28 +192,5 @@ repoRegistry: #RepoContractRegistry & {
 				},
 			]
 		},
-		{
-			id:            "vb-reference"
-			authorityRoot: "contracts/vb-reference"
-			contractPath:  "contracts/vb-reference/contract.cue"
-			fragments: [
-				{
-					id:             "vb-reference.authority"
-					sourceContract: "vb-reference"
-					sourcePath:     "contracts/vb-reference/contract.cue"
-					role:           "authority"
-					surface:        "turn_start"
-					summary:        "Reference downstream component consuming stable vb-contract schemas."
-				},
-				{
-					id:             "vb-reference.virtual-branch"
-					sourceContract: "vb-reference"
-					sourcePath:     "contracts/vb-reference/reference_branch.cue"
-					role:           "evidence"
-					surface:        "turn_start"
-					summary:        "Concrete reference virtual branch with ownership, dependencies, glue, and lifecycle gates."
-				},
-			]
-		},
 	]
 }

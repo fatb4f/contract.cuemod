@@ -25,7 +25,6 @@ rootDomains: {
 		"repo",
 		"vcs",
 		"vb-contract",
-		"vb-reference",
 	]
 
 	for id in required {

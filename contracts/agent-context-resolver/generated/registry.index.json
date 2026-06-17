@@ -167,29 +167,6 @@
                 }
             ],
             "id": "vb-contract"
-        },
-        {
-            "authorityRoot": "contracts/vb-reference",
-            "contractPath": "contracts/vb-reference/contract.cue",
-            "fragments": [
-                {
-                    "id": "vb-reference.authority",
-                    "role": "authority",
-                    "sourceContract": "vb-reference",
-                    "sourcePath": "contracts/vb-reference/contract.cue",
-                    "summary": "Reference downstream component consuming stable vb-contract schemas.",
-                    "surface": "turn_start"
-                },
-                {
-                    "id": "vb-reference.virtual-branch",
-                    "role": "evidence",
-                    "sourceContract": "vb-reference",
-                    "sourcePath": "contracts/vb-reference/reference_branch.cue",
-                    "summary": "Concrete reference virtual branch with ownership, dependencies, glue, and lifecycle gates.",
-                    "surface": "turn_start"
-                }
-            ],
-            "id": "vb-reference"
         }
     ]
 }
