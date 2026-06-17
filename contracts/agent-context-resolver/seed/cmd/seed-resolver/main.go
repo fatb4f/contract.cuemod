@@ -537,7 +537,8 @@ func fragmentIDSet(fragments []fragmentDeclaration) map[string]bool {
 }
 
 func readCUEFixture(path string, target any) error {
-	command := exec.Command("cue", "export", path, "-e", "fixture", "--out", "json")
+	expr := fmt.Sprintf("fixtures[%q]", fixtureKey(path))
+	command := exec.Command("cue", "export", path, "-e", expr, "--out", "json")
 	output, err := command.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("export CUE fixture %s: %w: %s", path, err, strings.TrimSpace(string(output)))
@@ -546,6 +547,16 @@ func readCUEFixture(path string, target any) error {
 		return fmt.Errorf("decode CUE fixture %s: %w", path, err)
 	}
 	return nil
+}
+
+func fixtureKey(path string) string {
+	name := filepath.Base(path)
+	for _, suffix := range []string{".valid.cue", ".invalid.cue", ".cue"} {
+		if strings.HasSuffix(name, suffix) {
+			return strings.TrimSuffix(name, suffix)
+		}
+	}
+	return name
 }
 
 func readJSON(path string, target any) error {

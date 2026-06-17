@@ -9,7 +9,7 @@
             "assertion": "agent-context-resolver.sections-contained",
             "fixtures": [],
             "command": [
-                "cue vet ./contracts/agent-context-resolver"
+                "cue vet ."
             ],
             "evidenceRequired": {
                 "assertions": [
@@ -29,7 +29,7 @@
                 "agent-context-resolver.fixture.leaves-owned.negative.invalid-route-authority"
             ],
             "command": [
-                "cue vet ./contracts/agent-context-resolver"
+                "cue vet ."
             ],
             "evidenceRequired": {
                 "assertions": [
@@ -52,7 +52,7 @@
                 "agent-context-resolver.fixture.leaves-rooted.negative.invalid-route-fragment"
             ],
             "command": [
-                "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                "cue eval . -e agentContextResolver -c"
             ],
             "evidenceRequired": {
                 "assertions": [
@@ -72,7 +72,7 @@
             "assertion": "agent-context-resolver.fixture-obligations-owned",
             "fixtures": [],
             "command": [
-                "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                "cue eval . -e agentContextResolver -c"
             ],
             "evidenceRequired": {
                 "assertions": [
@@ -94,7 +94,7 @@
                 "agent-context-resolver.fixture.leaves-rooted.negative.invalid-route-fragment"
             ],
             "command": [
-                "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                "cue eval . -e agentContextResolver -c"
             ],
             "evidenceRequired": {
                 "assertions": [
@@ -121,7 +121,7 @@
                 "agent-context-resolver.fixture.leaves-rooted.negative.invalid-route-fragment"
             ],
             "command": [
-                "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                "cue eval . -e agentContextResolver -c"
             ],
             "evidenceRequired": {
                 "assertions": [
@@ -145,13 +145,13 @@
                 "agent-context-resolver.fixture.migration-acceptance.positive.route-compiler-proof"
             ],
             "command": [
-                "cue export ./contracts/agent-context-resolver -e agentContextResolver",
-                "cue export ./contracts/agent-context-resolver -e routeInventory",
-                "cue export ./contracts/agent-context-resolver -e routeInventoryValidation",
-                "cue export ./contracts/agent-context-resolver -e routeCompilerProof",
-                "cue export ./contracts/agent-context-resolver -e routeEnvelopeProtocolProof",
-                "cue export ./contracts/agent-context-resolver -e agentContextResolver.checkManifest",
-                "cue export ./contracts/agent-context-resolver -e agentContextResolver.validationCertificate"
+                "cue export . -e agentContextResolver",
+                "cue export . -e routeInventory",
+                "cue export . -e routeInventoryValidation",
+                "cue export . -e routeCompilerProof",
+                "cue export . -e routeEnvelopeProtocolProof",
+                "cue export . -e agentContextResolver.checkManifest",
+                "cue export . -e agentContextResolver.validationCertificate"
             ],
             "evidenceRequired": {
                 "assertions": [

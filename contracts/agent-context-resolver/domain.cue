@@ -39,21 +39,21 @@ agentContextResolver: graph.#ContractDomain & {
 		id:          "agent-context-resolver"
 		kind:        "functional-domain"
 		package:     "agentcontextresolver"
-		rootPath:    "contracts/agent-context-resolver"
+		rootPath:    "."
 		description: "Contained contract domain for resolver authority, lifecycle, generated route controller packets, projections, hooks, and validation evidence."
 	}
 
 	root: {
 		id:   "agent-context-resolver.root"
 		kind: "contract-root"
-		path: "contracts/agent-context-resolver"
+		path: "."
 		rootPath: ["agent-context-resolver.root"]
 	}
 
 	sections: {
 		"agent-context-resolver.assertions": {
 			kind: "assertions"
-			path: "contracts/agent-context-resolver/assertions"
+			path: "assertions"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.assertions"]
 			ownedLeaves: [
 				"agent-context-resolver.leaf.domain-contract",
@@ -62,7 +62,7 @@ agentContextResolver: graph.#ContractDomain & {
 		}
 		"agent-context-resolver.fixtures": {
 			kind: "fixtures"
-			path: "contracts/agent-context-resolver/fixtures"
+			path: "fixtures"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.fixtures"]
 			ownedLeaves: [
 				"agent-context-resolver.leaf.resolver-fixtures",
@@ -71,7 +71,7 @@ agentContextResolver: graph.#ContractDomain & {
 		}
 		"agent-context-resolver.adapters": {
 			kind: "adapters"
-			path: "contracts/agent-context-resolver/adapters"
+			path: "adapters"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.adapters"]
 			ownedLeaves: [
 				"agent-context-resolver.leaf.hook-contract",
@@ -80,7 +80,7 @@ agentContextResolver: graph.#ContractDomain & {
 		}
 		"agent-context-resolver.projections": {
 			kind: "projections"
-			path: "contracts/agent-context-resolver/projections"
+			path: "projections"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.projections"]
 			ownedLeaves: [
 				"agent-context-resolver.leaf.fragments-contract",
@@ -91,7 +91,7 @@ agentContextResolver: graph.#ContractDomain & {
 		}
 		"agent-context-resolver.generated": {
 			kind: "generated"
-			path: "contracts/agent-context-resolver/generated"
+			path: "generated"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.generated"]
 			ownedLeaves: [
 				"agent-context-resolver.leaf.generated-fragments",
@@ -99,7 +99,7 @@ agentContextResolver: graph.#ContractDomain & {
 		}
 		"agent-context-resolver.seeds": {
 			kind: "seeds"
-			path: "contracts/agent-context-resolver/seed"
+			path: "seed"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.seeds"]
 			ownedLeaves: [
 				"agent-context-resolver.leaf.seed-resolver",
@@ -107,7 +107,7 @@ agentContextResolver: graph.#ContractDomain & {
 		}
 		"agent-context-resolver.workers": {
 			kind: "workers"
-			path: "contracts/agent-context-resolver/workers"
+			path: "workers"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.workers"]
 			ownedLeaves: [
 				"agent-context-resolver.leaf.resolver-worker-binding",
@@ -116,7 +116,7 @@ agentContextResolver: graph.#ContractDomain & {
 		}
 		"agent-context-resolver.checks": {
 			kind: "checks"
-			path: "contracts/agent-context-resolver/checks"
+			path: "checks"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.checks"]
 			ownedLeaves: [
 				"agent-context-resolver.leaf.gates-contract",
@@ -129,7 +129,7 @@ agentContextResolver: graph.#ContractDomain & {
 		}
 		"agent-context-resolver.hooks": {
 			kind: "hooks"
-			path: "contracts/agent-context-resolver/hooks"
+			path: "hooks"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.hooks"]
 			ownedLeaves: [
 				"agent-context-resolver.leaf.agent-context-hook",
@@ -142,147 +142,147 @@ agentContextResolver: graph.#ContractDomain & {
 			kind:   "assertion"
 			parent: "agent-context-resolver.assertions"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.assertions", "agent-context-resolver.leaf.domain-contract"]
-			path:        "contracts/agent-context-resolver/domain.cue"
+			path:        "domain.cue"
 			description: "Contained domain object model and ownership assertions."
 		}
 		"agent-context-resolver.leaf.proof-contract": {
 			kind:   "assertion"
 			parent: "agent-context-resolver.assertions"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.assertions", "agent-context-resolver.leaf.proof-contract"]
-			path:        "contracts/agent-context-resolver/proof.cue"
+			path:        "proof.cue"
 			description: "Resolver proof result and check contract."
 		}
 		"agent-context-resolver.leaf.resolver-fixtures": {
 			kind:   "fixture"
 			parent: "agent-context-resolver.fixtures"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.fixtures", "agent-context-resolver.leaf.resolver-fixtures"]
-			path:        "fixtures/resolver/agent-context-resolver"
+			path:        "fixtures/agent-context-resolver"
 			description: "Resolver route, fragment, propagation, hook-context, and runtime-denial fixtures."
 		}
 		"agent-context-resolver.leaf.workspace-lifecycle-fixtures": {
 			kind:   "fixture"
 			parent: "agent-context-resolver.fixtures"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.fixtures", "agent-context-resolver.leaf.workspace-lifecycle-fixtures"]
-			path:        "fixtures/resolver/workspace-lifecycle"
+			path:        "fixtures/workspace-lifecycle"
 			description: "Resolver workspace lifecycle graph, edge, and packet fixtures."
 		}
 		"agent-context-resolver.leaf.hook-contract": {
 			kind:   "adapter"
 			parent: "agent-context-resolver.adapters"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.adapters", "agent-context-resolver.leaf.hook-contract"]
-			path:        "contracts/agent-context-resolver/hooks.cue"
+			path:        "hooks.cue"
 			description: "Hook packet boundary and adapter evidence contract."
 		}
 		"agent-context-resolver.leaf.prompt-classifier-contract": {
 			kind:   "adapter"
 			parent: "agent-context-resolver.adapters"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.adapters", "agent-context-resolver.leaf.prompt-classifier-contract"]
-			path:        "contracts/agent-context-resolver/prompt_classifier.cue"
+			path:        "prompt_classifier.cue"
 			description: "Prompt classification adapter contract for route selection evidence."
 		}
 		"agent-context-resolver.leaf.fragments-contract": {
 			kind:   "projection"
 			parent: "agent-context-resolver.projections"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.projections", "agent-context-resolver.leaf.fragments-contract"]
-			path:        "contracts/agent-context-resolver/fragments.cue"
+			path:        "fragments.cue"
 			description: "Fragment registry authority projected into resolver context packets."
 		}
 		"agent-context-resolver.leaf.projection-contract": {
 			kind:   "projection"
 			parent: "agent-context-resolver.projections"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.projections", "agent-context-resolver.leaf.projection-contract"]
-			path:        "contracts/agent-context-resolver/projection.cue"
+			path:        "projection.cue"
 			description: "Resolver generated artifact projection contract."
 		}
 		"agent-context-resolver.leaf.runtime-projection-contract": {
 			kind:   "projection"
 			parent: "agent-context-resolver.projections"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.projections", "agent-context-resolver.leaf.runtime-projection-contract"]
-			path:        "contracts/agent-context-resolver/runtime_projection.cue"
+			path:        "runtime_projection.cue"
 			description: "Route reference projection contract for runtime-bound evidence."
 		}
 		"agent-context-resolver.leaf.registry-contract": {
 			kind:   "projection"
 			parent: "agent-context-resolver.projections"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.projections", "agent-context-resolver.leaf.registry-contract"]
-			path:        "contracts/agent-context-resolver/registry.cue"
+			path:        "registry.cue"
 			description: "Resolver route registry projection source."
 		}
 		"agent-context-resolver.leaf.generated-fragments": {
 			kind:   "generated"
 			parent: "agent-context-resolver.generated"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.generated", "agent-context-resolver.leaf.generated-fragments"]
-			path:        "contracts/agent-context-resolver/generated"
+			path:        "generated"
 			description: "Generated resolver route, fragment, lifecycle, and turn-start evidence outputs."
 		}
 		"agent-context-resolver.leaf.seed-resolver": {
 			kind:   "seed"
 			parent: "agent-context-resolver.seeds"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.seeds", "agent-context-resolver.leaf.seed-resolver"]
-			path:        "contracts/agent-context-resolver/seed"
+			path:        "seed"
 			description: "Standalone seed package for the resolver contract slice."
 		}
 		"agent-context-resolver.leaf.resolver-worker-binding": {
 			kind:   "worker"
 			parent: "agent-context-resolver.workers"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.workers", "agent-context-resolver.leaf.resolver-worker-binding"]
-			path:        "contracts/agent-context-resolver/resolver.cue"
+			path:        "resolver.cue"
 			description: "Resolver output and lifecycle binding contract for generated route controller packets."
 		}
 		"agent-context-resolver.leaf.seed-worker-script": {
 			kind:   "worker"
 			parent: "agent-context-resolver.workers"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.workers", "agent-context-resolver.leaf.seed-worker-script"]
-			path:        "contracts/agent-context-resolver/seed/scripts"
+			path:        "seed/scripts"
 			description: "Seed validation and generation scripts used as worker evidence."
 		}
 		"agent-context-resolver.leaf.gates-contract": {
 			kind:   "check"
 			parent: "agent-context-resolver.checks"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.checks", "agent-context-resolver.leaf.gates-contract"]
-			path:        "contracts/agent-context-resolver/gates.cue"
+			path:        "gates.cue"
 			description: "Route gate validation contract."
 		}
 		"agent-context-resolver.leaf.merge-contract": {
 			kind:   "check"
 			parent: "agent-context-resolver.checks"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.checks", "agent-context-resolver.leaf.merge-contract"]
-			path:        "contracts/agent-context-resolver/merge.cue"
+			path:        "merge.cue"
 			description: "Route result merge validation, deterministic reducer, bounded packet, and synthesis gate contract."
 		}
 		"agent-context-resolver.leaf.propagation-contract": {
 			kind:   "check"
 			parent: "agent-context-resolver.checks"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.checks", "agent-context-resolver.leaf.propagation-contract"]
-			path:        "contracts/agent-context-resolver/propagation.cue"
+			path:        "propagation.cue"
 			description: "Route-local propagation validation contract."
 		}
 		"agent-context-resolver.leaf.route-plan-contract": {
 			kind:   "check"
 			parent: "agent-context-resolver.checks"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.checks", "agent-context-resolver.leaf.route-plan-contract"]
-			path:        "contracts/agent-context-resolver/route_plan.cue"
+			path:        "route_plan.cue"
 			description: "Route plan validation contract."
 		}
 		"agent-context-resolver.leaf.routes-contract": {
 			kind:   "check"
 			parent: "agent-context-resolver.checks"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.checks", "agent-context-resolver.leaf.routes-contract"]
-			path:        "contracts/agent-context-resolver/routes.cue"
+			path:        "routes.cue"
 			description: "Registered resolver route inventory contract."
 		}
 		"agent-context-resolver.leaf.sequencing-contract": {
 			kind:   "check"
 			parent: "agent-context-resolver.checks"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.checks", "agent-context-resolver.leaf.sequencing-contract"]
-			path:        "contracts/agent-context-resolver/sequencing.cue"
+			path:        "sequencing.cue"
 			description: "Route sequencing validation contract."
 		}
 		"agent-context-resolver.leaf.agent-context-hook": {
 			kind:   "hook"
 			parent: "agent-context-resolver.hooks"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.hooks", "agent-context-resolver.leaf.agent-context-hook"]
-			path:        "test/agent-context-hook.sh"
+			path:        "checks/agent-context-hook"
 			description: "Hook regression script that validates projected resolver packet evidence."
 		}
 	}
@@ -436,7 +436,7 @@ agentContextResolver: graph.#ContractDomain & {
 			assertion:   "agent-context-resolver.leaves-owned"
 			polarity:    "positive"
 			target:      "agent-context-resolver.leaf.workspace-lifecycle-fixtures"
-			path:        "fixtures/resolver/workspace-lifecycle/graph.cue"
+			path:        "fixtures/workspace-lifecycle/graph.cue"
 			expected:    "pass"
 			generation:  "manual"
 			description: "Positive workspace lifecycle fixture proving owned leaf IDs resolve through declared section ownership."
@@ -445,7 +445,7 @@ agentContextResolver: graph.#ContractDomain & {
 			assertion:   "agent-context-resolver.leaves-owned"
 			polarity:    "negative"
 			target:      "agent-context-resolver.leaf.resolver-fixtures"
-			path:        "fixtures/resolver/agent-context-resolver/invalid-route-authority/result.cue"
+			path:        "fixtures/agent-context-resolver/invalid-route-authority.cue"
 			expected:    "fail"
 			generation:  "manual"
 			description: "Negative resolver fixture proving invalid authority ownership is rejected."
@@ -454,7 +454,7 @@ agentContextResolver: graph.#ContractDomain & {
 			assertion:   "agent-context-resolver.leaves-rooted"
 			polarity:    "positive"
 			target:      "agent-context-resolver.leaf.workspace-lifecycle-fixtures"
-			path:        "fixtures/resolver/workspace-lifecycle/packets.cue"
+			path:        "fixtures/workspace-lifecycle/packets.cue"
 			expected:    "pass"
 			generation:  "manual"
 			description: "Positive workspace lifecycle fixture proving resolver packets remain rooted in declared leaves."
@@ -463,7 +463,7 @@ agentContextResolver: graph.#ContractDomain & {
 			assertion:   "agent-context-resolver.leaves-rooted"
 			polarity:    "negative"
 			target:      "agent-context-resolver.leaf.resolver-fixtures"
-			path:        "fixtures/resolver/agent-context-resolver/invalid-route-fragment/result.cue"
+			path:        "fixtures/agent-context-resolver/invalid-route-fragment.cue"
 			expected:    "fail"
 			generation:  "manual"
 			description: "Negative resolver fixture proving invalid route fragment ownership fails rooted-leaf validation."
@@ -472,7 +472,7 @@ agentContextResolver: graph.#ContractDomain & {
 			assertion:   "agent-context-resolver.migration-acceptance-closed"
 			polarity:    "positive"
 			target:      "agent-context-resolver.leaf.proof-contract"
-			path:        "contracts/agent-context-resolver/proof.cue"
+			path:        "proof.cue"
 			expected:    "pass"
 			generation:  "manual"
 			description: "Positive proof fixture for the generated controller packet, runtime-denied route-worker invocation model, deterministic reducer, bounded merge packet, and evidence-only closeout."
@@ -787,13 +787,13 @@ agentContextResolver: graph.#ContractDomain & {
 			]
 			pathScope: {
 				allowedPaths: [
-					"contracts/agent-context-resolver/domain.cue",
-					"contracts/agent-context-resolver",
-					"contracts/agent-context-resolver/generated",
-					"fixtures/resolver/agent-context-resolver",
-					"fixtures/resolver/workspace-lifecycle",
-					"contracts/agent-context-resolver/seed",
-					"test/agent-context-hook.sh",
+					"domain.cue",
+					".",
+					"generated",
+					"fixtures/agent-context-resolver",
+					"fixtures/workspace-lifecycle",
+					"seed",
+					"checks/agent-context-hook",
 				]
 				deniedPaths: [
 					"contracts/repo",
@@ -934,8 +934,8 @@ agentContextResolver: graph.#ContractDomain & {
 			status:  "partial"
 			summary: "Template evidence record for a bounded route-worker output observed through the declared A2A adapter."
 			observedEvidence: [
-				{kind: "contract", ref: "contracts/agent-context-resolver/routes.cue"},
-				{kind: "contract", ref: "contracts/agent-context-resolver/resolver.cue"},
+				{kind: "contract", ref: "routes.cue"},
+				{kind: "contract", ref: "resolver.cue"},
 			]
 			reportsObservedResults: true
 			checksExpectedEvidence: true

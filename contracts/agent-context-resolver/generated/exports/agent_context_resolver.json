@@ -4,13 +4,13 @@
         "id": "agent-context-resolver",
         "kind": "functional-domain",
         "package": "agentcontextresolver",
-        "rootPath": "contracts/agent-context-resolver",
+        "rootPath": ".",
         "description": "Contained contract domain for resolver authority, lifecycle, generated route controller packets, projections, hooks, and validation evidence."
     },
     "root": {
         "id": "agent-context-resolver.root",
         "kind": "contract-root",
-        "path": "contracts/agent-context-resolver",
+        "path": ".",
         "rootPath": [
             "agent-context-resolver.root"
         ]
@@ -20,7 +20,7 @@
             "id": "agent-context-resolver.assertions",
             "kind": "assertions",
             "parent": "agent-context-resolver.root",
-            "path": "contracts/agent-context-resolver/assertions",
+            "path": "assertions",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.assertions"
@@ -34,7 +34,7 @@
             "id": "agent-context-resolver.fixtures",
             "kind": "fixtures",
             "parent": "agent-context-resolver.root",
-            "path": "contracts/agent-context-resolver/fixtures",
+            "path": "fixtures",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.fixtures"
@@ -48,7 +48,7 @@
             "id": "agent-context-resolver.adapters",
             "kind": "adapters",
             "parent": "agent-context-resolver.root",
-            "path": "contracts/agent-context-resolver/adapters",
+            "path": "adapters",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.adapters"
@@ -62,7 +62,7 @@
             "id": "agent-context-resolver.projections",
             "kind": "projections",
             "parent": "agent-context-resolver.root",
-            "path": "contracts/agent-context-resolver/projections",
+            "path": "projections",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.projections"
@@ -78,7 +78,7 @@
             "id": "agent-context-resolver.generated",
             "kind": "generated",
             "parent": "agent-context-resolver.root",
-            "path": "contracts/agent-context-resolver/generated",
+            "path": "generated",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.generated"
@@ -91,7 +91,7 @@
             "id": "agent-context-resolver.seeds",
             "kind": "seeds",
             "parent": "agent-context-resolver.root",
-            "path": "contracts/agent-context-resolver/seeds",
+            "path": "seed",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.seeds"
@@ -104,7 +104,7 @@
             "id": "agent-context-resolver.workers",
             "kind": "workers",
             "parent": "agent-context-resolver.root",
-            "path": "contracts/agent-context-resolver/workers",
+            "path": "workers",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.workers"
@@ -118,7 +118,7 @@
             "id": "agent-context-resolver.checks",
             "kind": "checks",
             "parent": "agent-context-resolver.root",
-            "path": "contracts/agent-context-resolver/checks",
+            "path": "checks",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.checks"
@@ -136,7 +136,7 @@
             "id": "agent-context-resolver.hooks",
             "kind": "hooks",
             "parent": "agent-context-resolver.root",
-            "path": "contracts/agent-context-resolver/hooks",
+            "path": "hooks",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.hooks"
@@ -151,7 +151,7 @@
             "id": "agent-context-resolver.leaf.domain-contract",
             "kind": "assertion",
             "parent": "agent-context-resolver.assertions",
-            "path": "contracts/agent-context-resolver/domain.cue",
+            "path": "domain.cue",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.assertions",
@@ -163,7 +163,7 @@
             "id": "agent-context-resolver.leaf.proof-contract",
             "kind": "assertion",
             "parent": "agent-context-resolver.assertions",
-            "path": "contracts/agent-context-resolver/proof.cue",
+            "path": "proof.cue",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.assertions",
@@ -175,7 +175,7 @@
             "id": "agent-context-resolver.leaf.resolver-fixtures",
             "kind": "fixture",
             "parent": "agent-context-resolver.fixtures",
-            "path": "fixtures/resolver/agent-context-resolver",
+            "path": "fixtures/agent-context-resolver",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.fixtures",
@@ -187,7 +187,7 @@
             "id": "agent-context-resolver.leaf.workspace-lifecycle-fixtures",
             "kind": "fixture",
             "parent": "agent-context-resolver.fixtures",
-            "path": "fixtures/resolver/workspace-lifecycle",
+            "path": "fixtures/workspace-lifecycle",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.fixtures",
@@ -199,7 +199,7 @@
             "id": "agent-context-resolver.leaf.hook-contract",
             "kind": "adapter",
             "parent": "agent-context-resolver.adapters",
-            "path": "contracts/agent-context-resolver/hooks.cue",
+            "path": "hooks.cue",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.adapters",
@@ -211,7 +211,7 @@
             "id": "agent-context-resolver.leaf.prompt-classifier-contract",
             "kind": "adapter",
             "parent": "agent-context-resolver.adapters",
-            "path": "contracts/agent-context-resolver/prompt_classifier.cue",
+            "path": "prompt_classifier.cue",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.adapters",
@@ -223,7 +223,7 @@
             "id": "agent-context-resolver.leaf.fragments-contract",
             "kind": "projection",
             "parent": "agent-context-resolver.projections",
-            "path": "contracts/agent-context-resolver/fragments.cue",
+            "path": "fragments.cue",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.projections",
@@ -235,7 +235,7 @@
             "id": "agent-context-resolver.leaf.projection-contract",
             "kind": "projection",
             "parent": "agent-context-resolver.projections",
-            "path": "contracts/agent-context-resolver/projection.cue",
+            "path": "projection.cue",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.projections",
@@ -247,7 +247,7 @@
             "id": "agent-context-resolver.leaf.runtime-projection-contract",
             "kind": "projection",
             "parent": "agent-context-resolver.projections",
-            "path": "contracts/agent-context-resolver/runtime_projection.cue",
+            "path": "runtime_projection.cue",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.projections",
@@ -259,7 +259,7 @@
             "id": "agent-context-resolver.leaf.registry-contract",
             "kind": "projection",
             "parent": "agent-context-resolver.projections",
-            "path": "contracts/agent-context-resolver/registry.cue",
+            "path": "registry.cue",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.projections",
@@ -271,7 +271,7 @@
             "id": "agent-context-resolver.leaf.generated-fragments",
             "kind": "generated",
             "parent": "agent-context-resolver.generated",
-            "path": "contracts/agent-context-resolver/generated",
+            "path": "generated",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.generated",
@@ -283,7 +283,7 @@
             "id": "agent-context-resolver.leaf.seed-resolver",
             "kind": "seed",
             "parent": "agent-context-resolver.seeds",
-            "path": "contracts/agent-context-resolver/seed",
+            "path": "seed",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.seeds",
@@ -295,7 +295,7 @@
             "id": "agent-context-resolver.leaf.resolver-worker-binding",
             "kind": "worker",
             "parent": "agent-context-resolver.workers",
-            "path": "contracts/agent-context-resolver/resolver.cue",
+            "path": "resolver.cue",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.workers",
@@ -307,7 +307,7 @@
             "id": "agent-context-resolver.leaf.seed-worker-script",
             "kind": "worker",
             "parent": "agent-context-resolver.workers",
-            "path": "contracts/agent-context-resolver/seed/scripts",
+            "path": "seed/scripts",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.workers",
@@ -319,7 +319,7 @@
             "id": "agent-context-resolver.leaf.gates-contract",
             "kind": "check",
             "parent": "agent-context-resolver.checks",
-            "path": "contracts/agent-context-resolver/gates.cue",
+            "path": "gates.cue",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.checks",
@@ -331,7 +331,7 @@
             "id": "agent-context-resolver.leaf.merge-contract",
             "kind": "check",
             "parent": "agent-context-resolver.checks",
-            "path": "contracts/agent-context-resolver/merge.cue",
+            "path": "merge.cue",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.checks",
@@ -343,7 +343,7 @@
             "id": "agent-context-resolver.leaf.propagation-contract",
             "kind": "check",
             "parent": "agent-context-resolver.checks",
-            "path": "contracts/agent-context-resolver/propagation.cue",
+            "path": "propagation.cue",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.checks",
@@ -355,7 +355,7 @@
             "id": "agent-context-resolver.leaf.route-plan-contract",
             "kind": "check",
             "parent": "agent-context-resolver.checks",
-            "path": "contracts/agent-context-resolver/route_plan.cue",
+            "path": "route_plan.cue",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.checks",
@@ -367,7 +367,7 @@
             "id": "agent-context-resolver.leaf.routes-contract",
             "kind": "check",
             "parent": "agent-context-resolver.checks",
-            "path": "contracts/agent-context-resolver/routes.cue",
+            "path": "routes.cue",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.checks",
@@ -379,7 +379,7 @@
             "id": "agent-context-resolver.leaf.sequencing-contract",
             "kind": "check",
             "parent": "agent-context-resolver.checks",
-            "path": "contracts/agent-context-resolver/sequencing.cue",
+            "path": "sequencing.cue",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.checks",
@@ -391,7 +391,7 @@
             "id": "agent-context-resolver.leaf.agent-context-hook",
             "kind": "hook",
             "parent": "agent-context-resolver.hooks",
-            "path": "test/agent-context-hook.sh",
+            "path": "checks/agent-context-hook",
             "rootPath": [
                 "agent-context-resolver.root",
                 "agent-context-resolver.hooks",
@@ -609,7 +609,7 @@
             "assertion": "agent-context-resolver.leaves-owned",
             "polarity": "positive",
             "target": "agent-context-resolver.leaf.workspace-lifecycle-fixtures",
-            "path": "fixtures/resolver/workspace-lifecycle/graph.cue",
+            "path": "fixtures/workspace-lifecycle/graph.cue",
             "expected": "pass",
             "generation": "manual",
             "targetPlanned": false,
@@ -620,7 +620,7 @@
             "assertion": "agent-context-resolver.leaves-owned",
             "polarity": "negative",
             "target": "agent-context-resolver.leaf.resolver-fixtures",
-            "path": "fixtures/resolver/agent-context-resolver/invalid-route-authority/result.cue",
+            "path": "fixtures/agent-context-resolver/invalid-route-authority.cue",
             "expected": "fail",
             "generation": "manual",
             "targetPlanned": false,
@@ -631,7 +631,7 @@
             "assertion": "agent-context-resolver.leaves-rooted",
             "polarity": "positive",
             "target": "agent-context-resolver.leaf.workspace-lifecycle-fixtures",
-            "path": "fixtures/resolver/workspace-lifecycle/packets.cue",
+            "path": "fixtures/workspace-lifecycle/packets.cue",
             "expected": "pass",
             "generation": "manual",
             "targetPlanned": false,
@@ -642,7 +642,7 @@
             "assertion": "agent-context-resolver.leaves-rooted",
             "polarity": "negative",
             "target": "agent-context-resolver.leaf.resolver-fixtures",
-            "path": "fixtures/resolver/agent-context-resolver/invalid-route-fragment/result.cue",
+            "path": "fixtures/agent-context-resolver/invalid-route-fragment.cue",
             "expected": "fail",
             "generation": "manual",
             "targetPlanned": false,
@@ -653,7 +653,7 @@
             "assertion": "agent-context-resolver.migration-acceptance-closed",
             "polarity": "positive",
             "target": "agent-context-resolver.leaf.proof-contract",
-            "path": "contracts/agent-context-resolver/proof.cue",
+            "path": "proof.cue",
             "expected": "pass",
             "generation": "manual",
             "targetPlanned": false,
@@ -667,7 +667,7 @@
             "fixtures": [],
             "check": "agent-context-resolver.check.sections-contained",
             "command": [
-                "cue vet ./contracts/agent-context-resolver"
+                "cue vet ."
             ],
             "description": "Validate section containment through the resolver domain CUE package."
         },
@@ -680,7 +680,7 @@
             ],
             "check": "agent-context-resolver.check.leaves-owned",
             "command": [
-                "cue vet ./contracts/agent-context-resolver"
+                "cue vet ."
             ],
             "description": "Validate leaf ownership with positive and negative resolver fixture obligations declared as evidence inputs."
         },
@@ -693,7 +693,7 @@
             ],
             "check": "agent-context-resolver.check.leaves-rooted",
             "command": [
-                "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                "cue eval . -e agentContextResolver -c"
             ],
             "description": "Validate leaf root paths with positive and negative resolver fixture obligations declared as evidence inputs."
         },
@@ -703,7 +703,7 @@
             "fixtures": [],
             "check": "agent-context-resolver.check.fixture-obligations-owned",
             "command": [
-                "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                "cue eval . -e agentContextResolver -c"
             ],
             "description": "Validate fixture obligation assertion and target references through graph constraints."
         },
@@ -718,7 +718,7 @@
             ],
             "check": "agent-context-resolver.check.test-obligations-owned",
             "command": [
-                "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                "cue eval . -e agentContextResolver -c"
             ],
             "description": "Validate test obligation assertion, fixture, and check references through graph constraints."
         },
@@ -733,7 +733,7 @@
             ],
             "check": "agent-context-resolver.check.assertion-coverage-complete",
             "command": [
-                "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                "cue eval . -e agentContextResolver -c"
             ],
             "description": "Validate active assertion coverage through graph constraints."
         },
@@ -745,13 +745,13 @@
             ],
             "check": "agent-context-resolver.check.migration-acceptance-closed",
             "command": [
-                "cue export ./contracts/agent-context-resolver -e agentContextResolver",
-                "cue export ./contracts/agent-context-resolver -e routeInventory",
-                "cue export ./contracts/agent-context-resolver -e routeInventoryValidation",
-                "cue export ./contracts/agent-context-resolver -e routeCompilerProof",
-                "cue export ./contracts/agent-context-resolver -e routeEnvelopeProtocolProof",
-                "cue export ./contracts/agent-context-resolver -e agentContextResolver.checkManifest",
-                "cue export ./contracts/agent-context-resolver -e agentContextResolver.validationCertificate"
+                "cue export . -e agentContextResolver",
+                "cue export . -e routeInventory",
+                "cue export . -e routeInventoryValidation",
+                "cue export . -e routeCompilerProof",
+                "cue export . -e routeEnvelopeProtocolProof",
+                "cue export . -e agentContextResolver.checkManifest",
+                "cue export . -e agentContextResolver.validationCertificate"
             ],
             "description": "Validate the final resolver migration acceptance exports, including route compiler proof closeout state."
         }
@@ -848,7 +848,7 @@
             ],
             "target": "agent-context-resolver.root",
             "command": [
-                "cue vet ./contracts/agent-context-resolver"
+                "cue vet ."
             ],
             "failure": "agent-context-resolver contains an orphaned, mis-owned, or unproven contract section."
         },
@@ -860,7 +860,7 @@
             ],
             "target": "agent-context-resolver.root",
             "command": [
-                "cue vet ./contracts/agent-context-resolver"
+                "cue vet ."
             ],
             "failure": "agent-context-resolver contains a section-owned leaf ID that does not resolve to a declared leaf with the section as parent."
         },
@@ -872,7 +872,7 @@
             ],
             "target": "agent-context-resolver.root",
             "command": [
-                "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                "cue eval . -e agentContextResolver -c"
             ],
             "expr": "agentContextResolver",
             "failure": "agent-context-resolver contains a declared leaf without a root path beginning at agent-context-resolver.root."
@@ -885,7 +885,7 @@
             ],
             "target": "agent-context-resolver.root",
             "command": [
-                "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                "cue eval . -e agentContextResolver -c"
             ],
             "expr": "agentContextResolver",
             "failure": "agent-context-resolver contains a fixture obligation with an orphaned assertion or target."
@@ -898,7 +898,7 @@
             ],
             "target": "agent-context-resolver.root",
             "command": [
-                "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                "cue eval . -e agentContextResolver -c"
             ],
             "expr": "agentContextResolver",
             "failure": "agent-context-resolver contains a test obligation with an orphaned assertion, fixture obligation, or check."
@@ -911,7 +911,7 @@
             ],
             "target": "agent-context-resolver.root",
             "command": [
-                "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                "cue eval . -e agentContextResolver -c"
             ],
             "expr": "agentContextResolver",
             "failure": "agent-context-resolver contains an active assertion without declared coverage."
@@ -924,13 +924,13 @@
             ],
             "target": "agent-context-resolver.root",
             "command": [
-                "cue export ./contracts/agent-context-resolver -e agentContextResolver",
-                "cue export ./contracts/agent-context-resolver -e routeInventory",
-                "cue export ./contracts/agent-context-resolver -e routeInventoryValidation",
-                "cue export ./contracts/agent-context-resolver -e routeCompilerProof",
-                "cue export ./contracts/agent-context-resolver -e routeEnvelopeProtocolProof",
-                "cue export ./contracts/agent-context-resolver -e agentContextResolver.checkManifest",
-                "cue export ./contracts/agent-context-resolver -e agentContextResolver.validationCertificate"
+                "cue export . -e agentContextResolver",
+                "cue export . -e routeInventory",
+                "cue export . -e routeInventoryValidation",
+                "cue export . -e routeCompilerProof",
+                "cue export . -e routeEnvelopeProtocolProof",
+                "cue export . -e agentContextResolver.checkManifest",
+                "cue export . -e agentContextResolver.validationCertificate"
             ],
             "expr": "routeCompilerProof",
             "failure": "agent-context-resolver migration acceptance is not closed by exported controller packet, route-worker invocation, deterministic reducer, bounded merge packet, adapter binding, and evidence records."
@@ -947,7 +947,7 @@
                 "assertion": "agent-context-resolver.sections-contained",
                 "fixtures": [],
                 "command": [
-                    "cue vet ./contracts/agent-context-resolver"
+                    "cue vet ."
                 ],
                 "evidenceRequired": {
                     "assertions": [
@@ -967,7 +967,7 @@
                     "agent-context-resolver.fixture.leaves-owned.negative.invalid-route-authority"
                 ],
                 "command": [
-                    "cue vet ./contracts/agent-context-resolver"
+                    "cue vet ."
                 ],
                 "evidenceRequired": {
                     "assertions": [
@@ -990,7 +990,7 @@
                     "agent-context-resolver.fixture.leaves-rooted.negative.invalid-route-fragment"
                 ],
                 "command": [
-                    "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                    "cue eval . -e agentContextResolver -c"
                 ],
                 "evidenceRequired": {
                     "assertions": [
@@ -1010,7 +1010,7 @@
                 "assertion": "agent-context-resolver.fixture-obligations-owned",
                 "fixtures": [],
                 "command": [
-                    "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                    "cue eval . -e agentContextResolver -c"
                 ],
                 "evidenceRequired": {
                     "assertions": [
@@ -1032,7 +1032,7 @@
                     "agent-context-resolver.fixture.leaves-rooted.negative.invalid-route-fragment"
                 ],
                 "command": [
-                    "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                    "cue eval . -e agentContextResolver -c"
                 ],
                 "evidenceRequired": {
                     "assertions": [
@@ -1059,7 +1059,7 @@
                     "agent-context-resolver.fixture.leaves-rooted.negative.invalid-route-fragment"
                 ],
                 "command": [
-                    "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                    "cue eval . -e agentContextResolver -c"
                 ],
                 "evidenceRequired": {
                     "assertions": [
@@ -1083,13 +1083,13 @@
                     "agent-context-resolver.fixture.migration-acceptance.positive.route-compiler-proof"
                 ],
                 "command": [
-                    "cue export ./contracts/agent-context-resolver -e agentContextResolver",
-                    "cue export ./contracts/agent-context-resolver -e routeInventory",
-                    "cue export ./contracts/agent-context-resolver -e routeInventoryValidation",
-                    "cue export ./contracts/agent-context-resolver -e routeCompilerProof",
-                    "cue export ./contracts/agent-context-resolver -e routeEnvelopeProtocolProof",
-                    "cue export ./contracts/agent-context-resolver -e agentContextResolver.checkManifest",
-                    "cue export ./contracts/agent-context-resolver -e agentContextResolver.validationCertificate"
+                    "cue export . -e agentContextResolver",
+                    "cue export . -e routeInventory",
+                    "cue export . -e routeInventoryValidation",
+                    "cue export . -e routeCompilerProof",
+                    "cue export . -e routeEnvelopeProtocolProof",
+                    "cue export . -e agentContextResolver.checkManifest",
+                    "cue export . -e agentContextResolver.validationCertificate"
                 ],
                 "evidenceRequired": {
                     "assertions": [
@@ -1121,7 +1121,7 @@
                     "fixtures": [],
                     "check": "agent-context-resolver.check.sections-contained",
                     "command": [
-                        "cue vet ./contracts/agent-context-resolver"
+                        "cue vet ."
                     ]
                 }
             },
@@ -1141,7 +1141,7 @@
                     ],
                     "check": "agent-context-resolver.check.leaves-owned",
                     "command": [
-                        "cue vet ./contracts/agent-context-resolver"
+                        "cue vet ."
                     ]
                 }
             },
@@ -1161,7 +1161,7 @@
                     ],
                     "check": "agent-context-resolver.check.leaves-rooted",
                     "command": [
-                        "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                        "cue eval . -e agentContextResolver -c"
                     ]
                 }
             },
@@ -1178,7 +1178,7 @@
                     "fixtures": [],
                     "check": "agent-context-resolver.check.fixture-obligations-owned",
                     "command": [
-                        "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                        "cue eval . -e agentContextResolver -c"
                     ]
                 }
             },
@@ -1200,7 +1200,7 @@
                     ],
                     "check": "agent-context-resolver.check.test-obligations-owned",
                     "command": [
-                        "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                        "cue eval . -e agentContextResolver -c"
                     ]
                 }
             },
@@ -1222,7 +1222,7 @@
                     ],
                     "check": "agent-context-resolver.check.assertion-coverage-complete",
                     "command": [
-                        "cue eval ./contracts/agent-context-resolver -e agentContextResolver -c"
+                        "cue eval . -e agentContextResolver -c"
                     ]
                 }
             },
@@ -1241,13 +1241,13 @@
                     ],
                     "check": "agent-context-resolver.check.migration-acceptance-closed",
                     "command": [
-                        "cue export ./contracts/agent-context-resolver -e agentContextResolver",
-                        "cue export ./contracts/agent-context-resolver -e routeInventory",
-                        "cue export ./contracts/agent-context-resolver -e routeInventoryValidation",
-                        "cue export ./contracts/agent-context-resolver -e routeCompilerProof",
-                        "cue export ./contracts/agent-context-resolver -e routeEnvelopeProtocolProof",
-                        "cue export ./contracts/agent-context-resolver -e agentContextResolver.checkManifest",
-                        "cue export ./contracts/agent-context-resolver -e agentContextResolver.validationCertificate"
+                        "cue export . -e agentContextResolver",
+                        "cue export . -e routeInventory",
+                        "cue export . -e routeInventoryValidation",
+                        "cue export . -e routeCompilerProof",
+                        "cue export . -e routeEnvelopeProtocolProof",
+                        "cue export . -e agentContextResolver.checkManifest",
+                        "cue export . -e agentContextResolver.validationCertificate"
                     ]
                 }
             }
@@ -1310,13 +1310,13 @@
             ],
             "pathScope": {
                 "allowedPaths": [
-                    "contracts/agent-context-resolver/domain.cue",
-                    "contracts/agent-context-resolver",
-                    "contracts/agent-context-resolver/generated",
-                    "fixtures/resolver/agent-context-resolver",
-                    "fixtures/resolver/workspace-lifecycle",
-                    "contracts/agent-context-resolver/seed",
-                    "test/agent-context-hook.sh"
+                    "domain.cue",
+                    ".",
+                    "generated",
+                    "fixtures/agent-context-resolver",
+                    "fixtures/workspace-lifecycle",
+                    "seed",
+                    "checks/agent-context-hook"
                 ],
                 "deniedPaths": [
                     "contracts/repo",
@@ -1487,11 +1487,11 @@
             "observedEvidence": [
                 {
                     "kind": "contract",
-                    "ref": "contracts/agent-context-resolver/routes.cue"
+                    "ref": "routes.cue"
                 },
                 {
                     "kind": "contract",
-                    "ref": "contracts/agent-context-resolver/resolver.cue"
+                    "ref": "resolver.cue"
                 }
             ],
             "reportsObservedResults": true,

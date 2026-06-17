@@ -11,7 +11,11 @@ else
 	done
 fi
 [ -d "$repo_root/cue.mod" ] || exit 2
-generated_dir="$repo_root/contracts/agent-context-resolver/generated"
+if [ -d "$repo_root/generated" ] && grep -q '/contracts/agent-context-resolver"' "$repo_root/cue.mod/module.cue"; then
+	generated_dir="$repo_root/generated"
+else
+	generated_dir="$repo_root/contracts/agent-context-resolver/generated"
+fi
 input_json=$(mktemp "${TMPDIR:-/tmp}/agent-context-resolver.XXXXXX.json")
 trap 'rm -f "$input_json"' EXIT HUP INT TERM
 cat >"$input_json"

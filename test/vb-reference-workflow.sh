@@ -3,6 +3,7 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 generated_dir="$repo_root/contracts/agent-context-resolver/generated"
+resolver_contract_dir="$repo_root/contracts/agent-context-resolver"
 resolver_main="$repo_root/contracts/agent-context-resolver/seed/cmd/seed-resolver/main.go"
 valid_fixture="$repo_root/contracts/agent-context-resolver/seed/fixtures/prompt_classification.valid.cue"
 tmp_root="$(mktemp -d)"
@@ -45,7 +46,7 @@ validate_reference_glue() {
 		fi
 	done < <(
 		cd "$repo_root"
-		rg -l --glob '*.cue' -F 'vb-reference' contracts | sort
+		rg -l --glob '*.cue' --glob '!contracts/agent-context-resolver/**' -F 'vb-reference' contracts | sort
 	)
 }
 
@@ -80,11 +81,14 @@ validate_reference_glue "$component_path"
 regenerated_dir="$tmp_root/regenerated"
 mkdir -p "$regenerated_dir"
 cp "$registry_path" "$regenerated_dir/registry.index.json"
-cue export ./contracts/agent-context-resolver \
-	-e routeInventory \
-	--force \
-	--out json \
-	--outfile "$regenerated_dir/route_inventory.json"
+(
+	cd "$resolver_contract_dir"
+	cue export . \
+		-e routeInventory \
+		--force \
+		--out json \
+		--outfile "$regenerated_dir/route_inventory.json"
+)
 go run "$resolver_main" generate \
 	--registry "$regenerated_dir/registry.index.json" \
 	--routes "$regenerated_dir/route_inventory.json" \

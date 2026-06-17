@@ -1,6 +1,8 @@
 package seedresolver
 
-fixture: {
-	prompt: "Use an undeclared context fragment."
-	selectedFragments: ["undeclared.fragment"]
+fixtures: {
+	unknown_fragment: {
+		prompt: "Use an undeclared context fragment."
+		selectedFragments: ["undeclared.fragment"]
+	}
 }

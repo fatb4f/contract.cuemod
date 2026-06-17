@@ -210,7 +210,7 @@
                     "Regenerate derived assets from CUE authority."
                 ],
                 "commands": [
-                    "./test/agent-context-hook.sh"
+                    "./checks/agent-context-hook"
                 ]
             },
             "outputSchema": {

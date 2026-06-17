@@ -1,10 +1,12 @@
 package seedresolver
 
-fixture: {
-	prompt: "Assemble the selected context body."
-	selectedFragments: ["agent-context-resolver.authority"]
-	contextBodies: [{
-		id:   "agent-context-resolver.authority"
-		body: "Injected authority body."
-	}]
+fixtures: {
+	context_body_from_prompt: {
+		prompt: "Assemble the selected context body."
+		selectedFragments: ["agent-context-resolver.authority"]
+		contextBodies: [{
+			id:   "agent-context-resolver.authority"
+			body: "Injected authority body."
+		}]
+	}
 }

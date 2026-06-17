@@ -63,16 +63,18 @@ mkdir -p "$tmp_root/generated"
 (
 	cd "$repo_root"
 	cue export ./contracts/registry.cue -e repoRegistry --force --out json --outfile "$tmp_root/generated/registry.index.json"
-	cue export ./contracts/agent-context-resolver -e routeInventory --force --out json --outfile "$tmp_root/generated/route_inventory.json"
-	go run ./contracts/agent-context-resolver/seed/cmd/seed-resolver/main.go generate \
+)
+(
+	cd "$repo_root/contracts/agent-context-resolver"
+	cue export . -e routeInventory --force --out json --outfile "$tmp_root/generated/route_inventory.json"
+	go run ./seed/cmd/seed-resolver/main.go generate \
 		--registry "$tmp_root/generated/registry.index.json" \
 		--routes "$tmp_root/generated/route_inventory.json" \
 		--out "$tmp_root/generated"
-	resolver_projection_dir="./contracts/agent-context-resolver/projections/agent""-skill"
-	cue export "$resolver_projection_dir" -e projection.hooks --out json >"$tmp_root/hooks.json"
-	cue export "$resolver_projection_dir" -e skillContent --out text >"$tmp_root/SKILL.md"
-	cue export "$resolver_projection_dir" -e 'projection.scripts["agent-context-resolver-hook"].content' --out text >"$tmp_root/agent-context-resolver-hook"
-	cue export "$resolver_projection_dir" -e 'projection.scripts["resolve-agent-context"].content' --out text >"$tmp_root/resolve-agent-context"
+	cue export ./projections/agent-skill -e projection.hooks --out json >"$tmp_root/hooks.json"
+	cue export ./projections/agent-skill -e skillContent --out text >"$tmp_root/SKILL.md"
+	cue export ./projections/agent-skill -e 'projection.scripts["agent-context-resolver-hook"].content' --out text >"$tmp_root/agent-context-resolver-hook"
+	cue export ./projections/agent-skill -e 'projection.scripts["resolve-agent-context"].content' --out text >"$tmp_root/resolve-agent-context"
 )
 
 for generated_file in \

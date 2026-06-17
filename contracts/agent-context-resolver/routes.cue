@@ -145,7 +145,7 @@ routeInventory: #RouteInventory & {
 			task: {
 				objective: "Validate generated agent skill and hook projections."
 				constraints: ["Regenerate derived assets from CUE authority."]
-				commands: ["./test/agent-context-hook.sh"]
+				commands: ["./checks/agent-context-hook"]
 			}
 			outputSchema: {schema: "agent.route-result.validation.v1"}
 			gates: ["registry-authority", "route-local-propagation", "structured-result"]
