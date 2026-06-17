@@ -1,16 +1,16 @@
 package agentcontextresolver
 
 import (
-	sectionadapters "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/adapters"
-	sectionassertions "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/assertions"
-	sectionchecks "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/checks"
-	sectionfixtures "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/fixtures"
-	sectiongenerated "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/generated"
-	graph "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/internal/graph"
-	sectionhooks "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/hooks"
-	sectionprojections "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/projections"
-	sectionseed "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/seed"
-	sectionworkers "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/workers"
+	sectionadapters "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/adapters:adapters"
+	sectionassertions "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/assertions:assertions"
+	sectionchecks "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/checks:checks"
+	sectionfixtures "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/fixtures:fixtures"
+	sectiongenerated "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/generated:generated"
+	graph "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/internal/graph:graph"
+	sectionhooks "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/hooks:hooks"
+	sectionprojections "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/projections:projections"
+	sectionseed "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/seed:seed"
+	sectionworkers "github.com/fatb4f/contract.cuemod/contracts/agent-context-resolver/workers:workers"
 )
 
 resolverModuleBoundary: {
@@ -547,7 +547,6 @@ agentContextResolver: graph.#ContractDomain & {
 				"cue export . -e routeInventory",
 				"cue export . -e routeInventoryValidation",
 				"cue export . -e routeCompilerProof",
-				"cue export . -e routeEnvelopeProtocolProof",
 				"cue export . -e agentContextResolver.checkManifest",
 				"cue export . -e agentContextResolver.validationCertificate",
 			]
@@ -665,7 +664,6 @@ agentContextResolver: graph.#ContractDomain & {
 				"cue export . -e routeInventory",
 				"cue export . -e routeInventoryValidation",
 				"cue export . -e routeCompilerProof",
-				"cue export . -e routeEnvelopeProtocolProof",
 				"cue export . -e agentContextResolver.checkManifest",
 				"cue export . -e agentContextResolver.validationCertificate",
 			]

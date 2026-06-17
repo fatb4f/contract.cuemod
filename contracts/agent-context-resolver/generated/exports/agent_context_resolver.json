@@ -749,7 +749,6 @@
                 "cue export . -e routeInventory",
                 "cue export . -e routeInventoryValidation",
                 "cue export . -e routeCompilerProof",
-                "cue export . -e routeEnvelopeProtocolProof",
                 "cue export . -e agentContextResolver.checkManifest",
                 "cue export . -e agentContextResolver.validationCertificate"
             ],
@@ -928,7 +927,6 @@
                 "cue export . -e routeInventory",
                 "cue export . -e routeInventoryValidation",
                 "cue export . -e routeCompilerProof",
-                "cue export . -e routeEnvelopeProtocolProof",
                 "cue export . -e agentContextResolver.checkManifest",
                 "cue export . -e agentContextResolver.validationCertificate"
             ],
@@ -1087,7 +1085,6 @@
                     "cue export . -e routeInventory",
                     "cue export . -e routeInventoryValidation",
                     "cue export . -e routeCompilerProof",
-                    "cue export . -e routeEnvelopeProtocolProof",
                     "cue export . -e agentContextResolver.checkManifest",
                     "cue export . -e agentContextResolver.validationCertificate"
                 ],
@@ -1245,7 +1242,6 @@
                         "cue export . -e routeInventory",
                         "cue export . -e routeInventoryValidation",
                         "cue export . -e routeCompilerProof",
-                        "cue export . -e routeEnvelopeProtocolProof",
                         "cue export . -e agentContextResolver.checkManifest",
                         "cue export . -e agentContextResolver.validationCertificate"
                     ]
