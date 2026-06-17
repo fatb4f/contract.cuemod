@@ -370,6 +370,25 @@ package graph
 	// agent-runtime from graph would make downstream domain packages prone to
 	// cycles because runtime contracts already import domain contracts.
 	runtimeContract: "contracts/agent-runtime/sdk_workers.cue" | *"contracts/agent-runtime/sdk_workers.cue"
+
+	protocolSurface?: close({
+		responseItemMetadata: close({
+			turn_id: "optional"
+		})
+		sourceIdentityRequired: true
+		supportedEnvelopeKinds: ["NEW_TASK", "MESSAGE", "FINAL_ANSWER"]
+		payloadBoundary: close({
+			plaintextEnvelope:               true
+			encryptedContent:                bool
+			plaintextCarriesCorrelationOnly: true
+			encryptedContentOpaque:          true
+			definesGraphTruth:               false
+			mutationAuthority:               false
+		})
+		authority:         "correlation_only"
+		definesGraphTruth: false
+		mutationAuthority: false
+	})
 })
 
 #AdapterContract: close({
@@ -384,6 +403,15 @@ package graph
 	declaredActions: [#WorkerBindingAction, ...#WorkerBindingAction]
 	routeIDs?: [...#ID]
 	declaredRouteIDs?: [...#ID]
+	supportedEnvelopeKinds?: [...("NEW_TASK" | "MESSAGE" | "FINAL_ANSWER")]
+	payloadBoundary?: {
+		plaintextEnvelope:               bool
+		encryptedContent:                bool
+		plaintextCarriesCorrelationOnly: true
+		encryptedContentOpaque:          true
+		definesGraphTruth:               false
+		mutationAuthority:               false
+	}
 
 	inputAuthority:    "root_codex"
 	resultAuthority:   "evidence_only"
@@ -412,6 +440,38 @@ package graph
 	adapterExecutionID: #ID
 	routeResultID:      #ID
 	adapter?:           #WorkerRuntimeAdapter
+	responseItemMetadata?: {
+		turn_id?: string & !=""
+	}
+	sourceIdentity?: {
+		sourceKind:      string & !=""
+		sourceID:        #ID
+		producerID?:     #ID
+		responseItemID?: string & !=""
+	}
+	routeEnvelope?: {
+		schema:     "codex.multi-agent.route-envelope.v2"
+		kind:       "NEW_TASK" | "MESSAGE" | "FINAL_ANSWER"
+		routeID:    #ID
+		workerID?:  #ID
+		adapterID?: #ID
+		metadata?: {
+			turn_id?: string & !=""
+		}
+		sourceIdentity:    _
+		payloadBoundary:   _
+		authority:         "correlation_only"
+		definesGraphTruth: false
+		mutationAuthority: false
+	}
+	payloadBoundary?: {
+		plaintextEnvelope:               bool
+		encryptedContent:                bool
+		plaintextCarriesCorrelationOnly: true
+		encryptedContentOpaque:          true
+		definesGraphTruth:               false
+		mutationAuthority:               false
+	}
 
 	status:  "pass" | "fail" | "blocked" | "partial"
 	summary: string & !=""
@@ -422,6 +482,7 @@ package graph
 	checksExpectedEvidence?: true
 	authority:               "evidence_only"
 	definesGraphTruth:       false
+	mutationAuthority?:      false
 
 	description?: string & !=""
 })

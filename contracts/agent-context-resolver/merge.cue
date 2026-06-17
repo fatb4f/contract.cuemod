@@ -19,6 +19,9 @@ package agentcontextresolver
 	summary:    string & !=""
 	facts?: [...string & !=""]
 	evidence?: [...#EvidenceRef]
+	responseItemMetadata?: #ResponseItemMetadata
+	sourceIdentity?:       #ResponseItemSourceIdentity
+	routeEnvelope?:        #MultiAgentV2RouteEnvelope
 	touchedPaths?: [...string & !=""]
 	diagnostics?: [...string & !=""]
 	patchPlan?: [...#PatchOp]
@@ -31,14 +34,24 @@ package agentcontextresolver
 	id:     #DeclaredID
 	kind:   "route-worker-evidence"
 
-	routeID:            #DeclaredID
-	workerID:           #DeclaredID
-	profileID:          #DeclaredID
-	adapterID:          #DeclaredID
-	invocationID:       #DeclaredID
-	adapterExecutionID: #DeclaredID
-	routeResultID:      #DeclaredID
-	adapter:            #WorkerRuntimeAdapter
+	routeID:               #DeclaredID
+	workerID:              #DeclaredID
+	profileID:             #DeclaredID
+	adapterID:             #DeclaredID
+	invocationID:          #DeclaredID
+	adapterExecutionID:    #DeclaredID
+	routeResultID:         #DeclaredID
+	adapter:               #WorkerRuntimeAdapter
+	responseItemMetadata?: #ResponseItemMetadata
+	sourceIdentity:        #ResponseItemSourceIdentity
+	routeEnvelope: #MultiAgentV2RouteEnvelope & {
+		routeID:        routeID
+		workerID:       workerID
+		adapterID:      adapterID
+		metadata?:      responseItemMetadata
+		sourceIdentity: sourceIdentity
+	}
+	payloadBoundary: #PayloadBoundary
 
 	status:  "pass" | "fail" | "blocked" | "partial"
 	summary: string & !=""
@@ -49,6 +62,7 @@ package agentcontextresolver
 	checksExpectedEvidence: bool | *true
 	authority:              "evidence_only"
 	definesGraphTruth:      false
+	mutationAuthority:      false
 	description?:           string & !=""
 })
 
@@ -73,13 +87,16 @@ package agentcontextresolver
 		workerID:     invocation.workerID
 	}
 	routeResult: {
-		routeID:   invocation.routeID
-		workerID:  invocation.workerID
-		profileID: invocation.profileID
-		adapter:   invocation.adapter
-		status:    evidenceRecord.status
-		summary:   evidenceRecord.summary
-		authority: "evidence_only"
+		routeID:               invocation.routeID
+		workerID:              invocation.workerID
+		profileID:             invocation.profileID
+		adapter:               invocation.adapter
+		status:                evidenceRecord.status
+		summary:               evidenceRecord.summary
+		responseItemMetadata?: evidenceRecord.responseItemMetadata
+		sourceIdentity:        evidenceRecord.sourceIdentity
+		routeEnvelope:         evidenceRecord.routeEnvelope
+		authority:             "evidence_only"
 	}
 	evidenceRecord: {
 		routeID:            invocation.routeID
@@ -91,8 +108,11 @@ package agentcontextresolver
 		adapter:            invocation.adapter
 		status:             routeResult.status
 		summary:            routeResult.summary
+		sourceIdentity:     routeResult.sourceIdentity
+		routeEnvelope:      routeResult.routeEnvelope
 		authority:          "evidence_only"
 		definesGraphTruth:  false
+		mutationAuthority:  false
 	}
 })
 

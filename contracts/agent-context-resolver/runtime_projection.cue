@@ -6,6 +6,48 @@ package agentcontextresolver
 	"mcp" |
 	"cli"
 
+#ResponseItemMetadata: close({
+	turn_id?: string & !=""
+})
+
+#ResponseItemSourceIdentity: close({
+	sourceKind:      "response_item" | "route_worker" | "adapter_execution"
+	sourceID:        #DeclaredID
+	producerID?:     #DeclaredID
+	responseItemID?: string & !=""
+})
+
+#MultiAgentV2EnvelopeKind:
+	"NEW_TASK" |
+	"MESSAGE" |
+	"FINAL_ANSWER"
+
+#PayloadBoundary: close({
+	plaintextEnvelope: true
+	encryptedContent:  bool
+
+	plaintextCarriesCorrelationOnly: true
+	encryptedContentOpaque:          true
+	definesGraphTruth:               false
+	mutationAuthority:               false
+})
+
+#MultiAgentV2RouteEnvelope: close({
+	schema: "codex.multi-agent.route-envelope.v2"
+	kind:   #MultiAgentV2EnvelopeKind
+
+	routeID:         #DeclaredID
+	workerID?:       #DeclaredID
+	adapterID?:      #DeclaredID
+	metadata?:       #ResponseItemMetadata
+	sourceIdentity:  #ResponseItemSourceIdentity
+	payloadBoundary: #PayloadBoundary
+
+	authority:         "correlation_only"
+	definesGraphTruth: false
+	mutationAuthority: false
+})
+
 #A2AWorkerAdapter: close({
 	runtime:   "a2a"
 	preferred: true
@@ -75,6 +117,8 @@ package agentcontextresolver
 	executesDeclaredWork: true
 	routeIDs?: [...#DeclaredID]
 	declaredRouteIDs: [...#DeclaredID] & [_, ...]
+	supportedEnvelopeKinds: [...#MultiAgentV2EnvelopeKind] | *["NEW_TASK", "MESSAGE", "FINAL_ANSWER"]
+	payloadBoundary: #PayloadBoundary
 	declaredActions: [
 		"inspect" |
 		"run_validation" |
@@ -104,6 +148,11 @@ package agentcontextresolver
 	invocationID: #DeclaredID
 	routeID:      #DeclaredID
 	workerID:     #DeclaredID
+	envelope: #MultiAgentV2RouteEnvelope & {
+		routeID:   routeID
+		workerID:  workerID
+		adapterID: adapterID
+	}
 
 	executesDeclaredWork: true
 	resultAuthority:      "evidence_only"

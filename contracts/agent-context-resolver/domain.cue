@@ -714,6 +714,24 @@ agentContextResolver: graph.#ContractDomain & {
 			actions: ["inspect", "run_validation", "collect_evidence"]
 			mayMutate:       false
 			resultAuthority: "evidence_only"
+			protocolSurface: {
+				responseItemMetadata: {
+					turn_id: "optional"
+				}
+				sourceIdentityRequired: true
+				supportedEnvelopeKinds: ["NEW_TASK", "MESSAGE", "FINAL_ANSWER"]
+				payloadBoundary: {
+					plaintextEnvelope:               true
+					encryptedContent:                true
+					plaintextCarriesCorrelationOnly: true
+					encryptedContentOpaque:          true
+					definesGraphTruth:               false
+					mutationAuthority:               false
+				}
+				authority:         "correlation_only"
+				definesGraphTruth: false
+				mutationAuthority: false
+			}
 		}
 	}
 
@@ -735,7 +753,16 @@ agentContextResolver: graph.#ContractDomain & {
 				"resolver.context-packet.inspect",
 				"repo.lifecycle.validate",
 			]
-			declaredRouteIDs:  routeIDs
+			declaredRouteIDs: routeIDs
+			supportedEnvelopeKinds: ["NEW_TASK", "MESSAGE", "FINAL_ANSWER"]
+			payloadBoundary: {
+				plaintextEnvelope:               true
+				encryptedContent:                true
+				plaintextCarriesCorrelationOnly: true
+				encryptedContentOpaque:          true
+				definesGraphTruth:               false
+				mutationAuthority:               false
+			}
 			inputAuthority:    "root_codex"
 			resultAuthority:   "evidence_only"
 			definesGraphTruth: false
@@ -761,8 +788,52 @@ agentContextResolver: graph.#ContractDomain & {
 			adapterExecutionID: "agent-context-resolver.adapter-execution.resolver-inspect-current"
 			routeResultID:      "agent-context-resolver.route-result.resolver-inspect-current"
 			adapter:            "a2a"
-			status:             "partial"
-			summary:            "Template evidence record for a bounded route-worker output observed through the declared A2A adapter."
+			responseItemMetadata: {
+				turn_id: "agent-context-resolver.turn.resolver-inspect-current"
+			}
+			sourceIdentity: {
+				sourceKind:     "response_item"
+				sourceID:       "agent-context-resolver.response-item.resolver-inspect-current"
+				producerID:     "agent-context-resolver.validation-worker"
+				responseItemID: "resp-item-resolver-inspect-current"
+			}
+			routeEnvelope: {
+				schema:    "codex.multi-agent.route-envelope.v2"
+				kind:      "FINAL_ANSWER"
+				routeID:   "resolver.inspect.current"
+				workerID:  "agent-context-resolver.validation-worker"
+				adapterID: "agent-context-resolver.a2a-adapter"
+				metadata: {
+					turn_id: "agent-context-resolver.turn.resolver-inspect-current"
+				}
+				sourceIdentity: {
+					sourceKind:     "response_item"
+					sourceID:       "agent-context-resolver.response-item.resolver-inspect-current"
+					producerID:     "agent-context-resolver.validation-worker"
+					responseItemID: "resp-item-resolver-inspect-current"
+				}
+				payloadBoundary: {
+					plaintextEnvelope:               true
+					encryptedContent:                true
+					plaintextCarriesCorrelationOnly: true
+					encryptedContentOpaque:          true
+					definesGraphTruth:               false
+					mutationAuthority:               false
+				}
+				authority:         "correlation_only"
+				definesGraphTruth: false
+				mutationAuthority: false
+			}
+			payloadBoundary: {
+				plaintextEnvelope:               true
+				encryptedContent:                true
+				plaintextCarriesCorrelationOnly: true
+				encryptedContentOpaque:          true
+				definesGraphTruth:               false
+				mutationAuthority:               false
+			}
+			status:  "partial"
+			summary: "Template evidence record for a bounded route-worker output observed through the declared A2A adapter."
 			observedEvidence: [
 				{kind: "contract", ref: "contracts/agent-context-resolver/routes.cue"},
 				{kind: "contract", ref: "contracts/agent-context-resolver/resolver.cue"},
@@ -771,6 +842,7 @@ agentContextResolver: graph.#ContractDomain & {
 			checksExpectedEvidence: true
 			authority:              "evidence_only"
 			definesGraphTruth:      false
+			mutationAuthority:      false
 			description:            "Evidence records bind route-worker invocation, adapter execution, and route result observations without becoming semantic authority."
 		}
 	}
