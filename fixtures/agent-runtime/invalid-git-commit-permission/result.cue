@@ -12,7 +12,7 @@ invalid: runtime.#WorkerRequest & {
 	worker:     "git-worker"
 	objective:  "Commit the bounded worker contract changes."
 	pathScope: {
-		allowedPaths: ["contracts/agent-runtime", "fixtures/agent-runtime", "test/check.sh"]
+		allowedPaths: ["contracts/agent-runtime", "fixtures/agent-runtime", "contracts/agent-runtime/assertions.cue"]
 		deniedPaths: ["generated", "projections"]
 	}
 	inputArtifacts: []

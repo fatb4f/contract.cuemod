@@ -188,14 +188,14 @@ body:
         ```sh
         cue fmt <target-files>
         cue vet ./contracts/<target>
-        cue vet ./fixtures/<target>
-        cue eval ./fixtures/<target> -e <validCase> -c
+        cue vet ./contracts/<target>/assertions
+        cue eval ./contracts/<target>/assertions -c
         ```
 
         ## Final validation, if required
 
         ```sh
-        ./test/check.sh
+        cue vet ./contracts/assertions ./contracts/<target>/assertions
         ```
     validations:
       required: true
