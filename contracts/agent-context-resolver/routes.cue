@@ -77,10 +77,11 @@ routeInventory: #RouteInventory & {
 			dependsOn: ["resolver.inspect.current"]
 			inputFragments: ["agent-context-resolver.authority"]
 			task: {
-				objective: "Compile and validate a bounded route plan."
+				objective: "Compile and validate a generated route controller packet."
 				constraints: [
 					"Reference registered routes and selected fragments only.",
 					"Keep root Codex as merge and synthesis authority.",
+					"Do not execute routes or spawn SDK subagents during route planning.",
 				]
 			}
 			outputSchema: {schema: "agent.route-result.validation.v1"}

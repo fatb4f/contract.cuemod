@@ -5,16 +5,16 @@ import "list"
 #DeclaredID: string & =~"^[a-z0-9][a-z0-9._-]*$"
 
 #ContextFragment: close({
-	id:    #DeclaredID
-	surface: "turn_start" | "prompt" | "mcp"
-	channel: "message" | "item" | "resource"
-	itemKind: "message" | "resource" | "tool_output"
+	id:                             #DeclaredID
+	surface:                        "turn_start" | "prompt" | "mcp"
+	channel:                        "message" | "item" | "resource"
+	itemKind:                       "message" | "resource" | "tool_output"
 	expectedNativeContextInjection: bool
-	label: string & !=""
+	label:                          string & !=""
 
 	if surface == "turn_start" {
-		channel: "message"
-		itemKind: "message"
+		channel:                        "message"
+		itemKind:                       "message"
 		expectedNativeContextInjection: true
 	}
 	if surface != "turn_start" {
@@ -34,10 +34,10 @@ import "list"
 })
 
 #PromptHint: close({
-	domain?: string
-	workflow?: string
+	domain?:        string
+	workflow?:      string
 	authorityRoot?: string
-	risk?: string
+	risk?:          string
 })
 
 #PromptEvidence: close({
@@ -47,7 +47,7 @@ import "list"
 
 #PromptClassification: close({
 	selectedFragments: [...#DeclaredID]
-	hints: #PromptHint
+	hints:    #PromptHint
 	evidence: #PromptEvidence
 })
 
@@ -56,18 +56,18 @@ import "list"
 	"known_fragment_selected" |
 	"context_body_not_assembled" |
 	"mcp_tool_output_not_implied_context" |
-	"subagent_scope_preserved"
+	"controller_packet_not_sdk_subagent"
 
 #LifecycleAssertion: close({
-	name: #LifecycleAssertionName
-	passed: true
+	name:    #LifecycleAssertionName
+	passed:  true
 	detail?: string & !=""
 })
 
 #ResolverLifecycleReport: close({
-	schema: "agent.context-resolver.lifecycle-report.v1"
-	registry: #Registry
-	turnStart: #TurnStartContextFragmentSet
+	schema:         "agent.context-resolver.lifecycle-report.v1"
+	registry:       #Registry
+	turnStart:      #TurnStartContextFragmentSet
 	classification: #PromptClassification
 	assertions: [#LifecycleAssertion, ...#LifecycleAssertion]
 	for _, id in classification.selectedFragments {
@@ -77,21 +77,24 @@ import "list"
 })
 
 #ResolverOutput: close({
-	schema:   "agent.context-resolver.output.v1"
-	prompt:   string & !=""
-	report:   #ResolverLifecycleReport
+	schema: "agent.context-resolver.output.v1"
+	prompt: string & !=""
+	report: #ResolverLifecycleReport
 	hook: close({
 		hook_event_name: "UserPromptSubmit"
 		selectedFragments: [...#DeclaredID]
-		hints: #PromptHint
-		evidence: #PromptEvidence
+		hints:             #PromptHint
+		evidence:          #PromptEvidence
 		additionalContext: string & !=""
+		// Optional resolver-produced controller packet for route planning.
+		// Execution adapters may consume it later, but this output does not
+		// represent an SDK subagent.
 		controller?: #ResolvedRoutePlan
 	})
 })
 
 #RegistryMatch: {
-	registry: #Registry
+	registry:       #Registry
 	classification: #PromptClassification
 
 	allowedFragmentIDs: [for entry in registry.fragments {entry.id}]

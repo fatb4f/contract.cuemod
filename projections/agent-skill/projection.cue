@@ -117,6 +117,8 @@ agentContextResolverHook: """
 				],
 				controller: {
 					schema: "agent.route-plan.v1",
+					plannerKind: "generated_controller_packet",
+					authority: "resolver_projection",
 					turnID: (
 						"prompt-" +
 						($prompt | @base64 | gsub("[^A-Za-z0-9]"; "") | .[0:20])

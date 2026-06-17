@@ -10,7 +10,7 @@ agentContextResolver: graph.#ContractDomain & {
 		kind:        "functional-domain"
 		package:     "agentcontextresolver"
 		rootPath:    "contracts/agent-context-resolver"
-		description: "Contained contract domain for resolver authority, lifecycle, route planning, projections, hooks, and validation evidence."
+		description: "Contained contract domain for resolver authority, lifecycle, generated route controller packets, projections, hooks, and validation evidence."
 	}
 
 	root: {
@@ -197,7 +197,7 @@ agentContextResolver: graph.#ContractDomain & {
 			parent: "agent-context-resolver.workers"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.workers", "agent-context-resolver.leaf.resolver-worker-binding"]
 			path:        "contracts/agent-context-resolver/resolver.cue"
-			description: "Resolver worker route packet and lifecycle binding contract."
+			description: "Resolver output and lifecycle binding contract for generated route controller packets."
 		}
 		"agent-context-resolver.leaf.seed-worker-script": {
 			kind:   "worker"

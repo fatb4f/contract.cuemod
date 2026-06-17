@@ -2,10 +2,15 @@ package agentcontextresolver
 
 import "list"
 
+// #ResolvedRoutePlan is the generated controller packet produced by resolver
+// authority. It describes route planning inputs, gates, propagation, and merge
+// policy; it is not an SDK subagent or a route executor.
 #ResolvedRoutePlan: {
-	schema: "agent.route-plan.v1"
-	turnID: string & !=""
-	intent: #PromptIntent
+	schema:      "agent.route-plan.v1"
+	plannerKind: "generated_controller_packet"
+	authority:   "resolver_projection"
+	turnID:      string & !=""
+	intent:      #PromptIntent
 	availableFragmentIDs: [...#DeclaredID]
 	availableRouteIDs: [...#DeclaredID]
 	selectedFragments: [...#DeclaredID] & [_, ...]
