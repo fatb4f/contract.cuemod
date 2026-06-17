@@ -17,8 +17,10 @@ import "list"
 	routes: [...#RouteInvocation] & [_, ...]
 	propagation: #PropagationPlan
 	gates: [...#Gate] & [_, ...]
-	expectedMerge: #MergePolicy
-	runtime?:      #RuntimeProjection
+	expectedMerge:       #MergePolicy
+	runtime?:            #RuntimeProjection
+	mergeReducer?:       #MergeReducer
+	modelSynthesisGate?: #ModelSynthesisGate
 
 	_routeIDs: [for route in routes {route.id}]
 

@@ -218,7 +218,7 @@ agentContextResolver: graph.#ContractDomain & {
 			parent: "agent-context-resolver.checks"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.checks", "agent-context-resolver.leaf.merge-contract"]
 			path:        "contracts/agent-context-resolver/merge.cue"
-			description: "Route result merge validation contract."
+			description: "Route result merge validation, deterministic reducer, bounded packet, and synthesis gate contract."
 		}
 		"agent-context-resolver.leaf.propagation-contract": {
 			kind:   "check"
