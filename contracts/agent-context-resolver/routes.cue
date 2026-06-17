@@ -35,6 +35,9 @@ import "list"
 	task:         #RouteTask
 	outputSchema: #RouteOutputSchema
 	gates: [...#DeclaredID] & [_, ...]
+	workerProfileID?:        #DeclaredID
+	workerBindingID?:        #DeclaredID
+	preferredWorkerAdapter?: #WorkerRuntimeAdapter | *"a2a"
 })
 
 #RegisteredRoute: close({
@@ -67,6 +70,9 @@ routeInventory: #RouteInventory & {
 			}
 			outputSchema: {schema: "agent.route-result.inspect.v1"}
 			gates: ["registry-authority", "route-local-propagation", "structured-result"]
+			workerProfileID:        "agent-context-resolver.a2a-worker"
+			workerBindingID:        "agent-context-resolver.validation-worker"
+			preferredWorkerAdapter: "a2a"
 			promptRouteIDs: ["resolver"]
 		},
 		{
@@ -86,6 +92,9 @@ routeInventory: #RouteInventory & {
 			}
 			outputSchema: {schema: "agent.route-result.validation.v1"}
 			gates: ["registry-authority", "route-local-propagation", "runtime-deny", "structured-result"]
+			workerProfileID:        "agent-context-resolver.a2a-worker"
+			workerBindingID:        "agent-context-resolver.validation-worker"
+			preferredWorkerAdapter: "a2a"
 			promptRouteIDs: ["resolver"]
 		},
 		{
@@ -102,6 +111,9 @@ routeInventory: #RouteInventory & {
 			}
 			outputSchema: {schema: "agent.route-result.inspect.v1"}
 			gates: ["registry-authority", "route-local-propagation", "structured-result"]
+			workerProfileID:        "agent-context-resolver.a2a-worker"
+			workerBindingID:        "agent-context-resolver.validation-worker"
+			preferredWorkerAdapter: "a2a"
 			promptRouteIDs: ["patch-stack"]
 		},
 		{
@@ -118,6 +130,9 @@ routeInventory: #RouteInventory & {
 			}
 			outputSchema: {schema: "agent.route-result.inspect.v1"}
 			gates: ["registry-authority", "route-local-propagation", "structured-result"]
+			workerProfileID:        "agent-context-resolver.a2a-worker"
+			workerBindingID:        "agent-context-resolver.validation-worker"
+			preferredWorkerAdapter: "a2a"
 			promptRouteIDs: ["mcp"]
 		},
 		{
@@ -134,6 +149,9 @@ routeInventory: #RouteInventory & {
 			}
 			outputSchema: {schema: "agent.route-result.validation.v1"}
 			gates: ["registry-authority", "route-local-propagation", "structured-result"]
+			workerProfileID:        "agent-context-resolver.a2a-worker"
+			workerBindingID:        "agent-context-resolver.validation-worker"
+			preferredWorkerAdapter: "a2a"
 			promptRouteIDs: ["skill"]
 		},
 		{
@@ -150,6 +168,9 @@ routeInventory: #RouteInventory & {
 			}
 			outputSchema: {schema: "agent.route-result.inspect.v1"}
 			gates: ["registry-authority", "route-local-propagation", "structured-result"]
+			workerProfileID:        "agent-context-resolver.a2a-worker"
+			workerBindingID:        "agent-context-resolver.validation-worker"
+			preferredWorkerAdapter: "a2a"
 			promptRouteIDs: ["context-packet"]
 		},
 		{
@@ -166,6 +187,9 @@ routeInventory: #RouteInventory & {
 			}
 			outputSchema: {schema: "agent.route-result.validation.v1"}
 			gates: ["registry-authority", "route-local-propagation", "structured-result"]
+			workerProfileID:        "agent-context-resolver.a2a-worker"
+			workerBindingID:        "agent-context-resolver.validation-worker"
+			preferredWorkerAdapter: "a2a"
 			promptRouteIDs: ["repo"]
 		},
 	]

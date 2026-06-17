@@ -116,15 +116,87 @@ routeCompilerProof: #ResolvedRoutePlan & {
 				outputSchema: routeInventory.routes[1].outputSchema
 			},
 		]
+		workerInvocations: [
+			{
+				schema:    "agent.route-worker-invocation.v1"
+				routeID:   routeInventory.routes[0].id
+				workerID:  "agent-context-resolver.validation-worker"
+				profileID: "agent-context-resolver.a2a-worker"
+				adapter:   "a2a"
+				a2a: {
+					runtime:                          "a2a"
+					preferred:                        true
+					offloadsContext:                  true
+					offloadsRouteLocalResponsibility: true
+					offloadsAuthority:                false
+					rootAuthority:                    "root_codex"
+					resultAuthority:                  "evidence_only"
+					structuredResult:                 true
+				}
+				packet: {
+					assignedBy: "root_codex"
+					bounded:    true
+					context:    routeCompilerProof.propagation.perRoute["resolver.inspect.current"]
+				}
+				returns: {
+					schema:           routeInventory.routes[0].outputSchema
+					evidenceRequired: true
+					authority:        "evidence_only"
+				}
+				deny: {
+					authorityDelegation:      true
+					rawTranscriptForwarding:  true
+					freeFormMCPToolExposure:  true
+					sdkExecutionFromResolver: true
+				}
+			},
+			{
+				schema:    "agent.route-worker-invocation.v1"
+				routeID:   routeInventory.routes[1].id
+				workerID:  "agent-context-resolver.validation-worker"
+				profileID: "agent-context-resolver.a2a-worker"
+				adapter:   "a2a"
+				a2a: {
+					runtime:                          "a2a"
+					preferred:                        true
+					offloadsContext:                  true
+					offloadsRouteLocalResponsibility: true
+					offloadsAuthority:                false
+					rootAuthority:                    "root_codex"
+					resultAuthority:                  "evidence_only"
+					structuredResult:                 true
+				}
+				packet: {
+					assignedBy: "root_codex"
+					bounded:    true
+					context:    routeCompilerProof.propagation.perRoute["resolver.plan.compile"]
+				}
+				returns: {
+					schema:           routeInventory.routes[1].outputSchema
+					evidenceRequired: true
+					authority:        "evidence_only"
+				}
+				deny: {
+					authorityDelegation:      true
+					rawTranscriptForwarding:  true
+					freeFormMCPToolExposure:  true
+					sdkExecutionFromResolver: true
+				}
+			},
+		]
 		requirements: {
-			agentRuntimeRegistry: "absent"
-			mcpRouteExecutor:     "absent"
+			agentRuntimeRegistry:  "absent"
+			workerAdapterRegistry: "absent"
+			mcpRouteExecutor:      "absent"
 		}
 		execution: {
-			allowed:                 false
-			requiresMCPAdapter:      true
+			allowed:                false
+			preferredWorkerAdapter: "a2a"
+			secondaryWorkerAdapters: ["sdk-direct", "mcp", "cli"]
+			requiresA2AAdapter:      true
+			requiresMCPAdapter:      false
 			requiresRuntimeRegistry: true
-			backend:                 "codex-sdk"
+			backend:                 "a2a"
 		}
 		deny: {
 			directSDKSpawn:          true
@@ -132,6 +204,8 @@ routeCompilerProof: #ResolvedRoutePlan & {
 			rawRegistryDump:         true
 			unselectedFragments:     true
 			globalMutation:          true
+			authorityDelegation:     true
+			freeFormMCPToolExposure: true
 		}
 		expectedResult: {schema: "agent.route-result.v1"}
 	}

@@ -11,9 +11,12 @@ package agentcontextresolver
 })
 
 #RouteResult: close({
-	routeID: #DeclaredID
-	status:  "pass" | "fail" | "blocked" | "partial"
-	summary: string & !=""
+	routeID:    #DeclaredID
+	workerID?:  #DeclaredID
+	profileID?: #DeclaredID
+	adapter?:   #WorkerRuntimeAdapter
+	status:     "pass" | "fail" | "blocked" | "partial"
+	summary:    string & !=""
 	facts?: [...string & !=""]
 	evidence?: [...#EvidenceRef]
 	touchedPaths?: [...string & !=""]

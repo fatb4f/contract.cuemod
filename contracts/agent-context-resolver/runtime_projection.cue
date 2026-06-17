@@ -1,5 +1,68 @@
 package agentcontextresolver
 
+#WorkerRuntimeAdapter:
+	"a2a" |
+	"sdk-direct" |
+	"mcp" |
+	"cli"
+
+#A2AWorkerAdapter: close({
+	runtime:   "a2a"
+	preferred: true
+
+	offloadsContext:                  true
+	offloadsRouteLocalResponsibility: true
+	offloadsAuthority:                false
+
+	rootAuthority:    "root_codex"
+	resultAuthority:  "evidence_only"
+	structuredResult: true
+})
+
+#WorkerProfile: close({
+	id: #DeclaredID
+
+	runtime:          #WorkerRuntimeAdapter | *"a2a"
+	preferredRuntime: "a2a" | *"a2a"
+	secondaryAdapters: [...#WorkerRuntimeAdapter] | *["sdk-direct", "mcp", "cli"]
+
+	a2a: #A2AWorkerAdapter & {
+		runtime:   "a2a"
+		preferred: true
+	}
+
+	controlInvariants: [...string & !=""] | *[
+		"Workers are predefined adapter-backed capabilities.",
+		"Root Codex assigns bounded invocation packets.",
+		"Workers return structured evidence.",
+		"A2A offloads context and route-local responsibility.",
+		"A2A does not offload authority.",
+	]
+
+	if runtime == "a2a" {
+		preferredRuntime: "a2a"
+	}
+})
+
+#WorkerBinding: close({
+	id: #DeclaredID
+
+	profileID:      #DeclaredID
+	runtimeAdapter: #WorkerRuntimeAdapter | *"a2a"
+
+	routeIDs: [...#DeclaredID] & [_, ...]
+
+	bounded:                true
+	resultAuthority:        "evidence_only"
+	structuredResultSchema: #RouteOutputSchema
+
+	deny: close({
+		freeFormMCPToolExposure: true
+		authorityDelegation:     true
+		unboundedInvocation:     true
+	})
+})
+
 #RuntimeRouteReference: close({
 	schema:       "agent.runtime-route-reference.v1"
 	routeID:      #DeclaredID
@@ -8,20 +71,55 @@ package agentcontextresolver
 	outputSchema: #RouteOutputSchema
 })
 
+#RouteWorkerInvocation: close({
+	schema: "agent.route-worker-invocation.v1"
+
+	routeID:   #DeclaredID
+	workerID:  #DeclaredID
+	profileID: #DeclaredID
+
+	adapter: #WorkerRuntimeAdapter | *"a2a"
+	a2a:     #A2AWorkerAdapter
+
+	packet: close({
+		assignedBy: "root_codex"
+		bounded:    true
+		context:    #RouteContextBoundary
+	})
+
+	returns: close({
+		schema:           #RouteOutputSchema
+		evidenceRequired: true
+		authority:        "evidence_only"
+	})
+
+	deny: close({
+		authorityDelegation:      true
+		rawTranscriptForwarding:  true
+		freeFormMCPToolExposure:  true
+		sdkExecutionFromResolver: true
+	})
+})
+
 #RuntimeProjection: close({
 	mode: "none" | "eligible" | "requires-agent-runtime"
 	routeRefs: [...#RuntimeRouteReference]
+	workerInvocations?: [...#RouteWorkerInvocation]
 
 	requirements: close({
-		agentRuntimeRegistry: "absent" | "present"
-		mcpRouteExecutor:     "absent" | "present"
+		agentRuntimeRegistry:  "absent" | "present"
+		workerAdapterRegistry: "absent" | "present" | *"absent"
+		mcpRouteExecutor:      "absent" | "present"
 	})
 
 	execution: close({
-		allowed:                 bool
-		requiresMCPAdapter:      bool | *true
+		allowed:                bool
+		preferredWorkerAdapter: "a2a" | *"a2a"
+		secondaryWorkerAdapters: [...#WorkerRuntimeAdapter] | *["sdk-direct", "mcp", "cli"]
+		requiresA2AAdapter:      bool | *true
+		requiresMCPAdapter:      bool | *false
 		requiresRuntimeRegistry: bool | *true
-		backend:                 "none" | "codex-sdk"
+		backend:                 "none" | "codex-sdk" | "a2a"
 	})
 
 	deny: close({
@@ -30,6 +128,8 @@ package agentcontextresolver
 		rawRegistryDump:         true
 		unselectedFragments:     true
 		globalMutation:          true
+		authorityDelegation:     true
+		freeFormMCPToolExposure: true
 	})
 
 	expectedResult: close({
@@ -43,11 +143,11 @@ package agentcontextresolver
 		mode: "eligible"
 		routeRefs: [_, ...]
 		requirements: {
-			agentRuntimeRegistry: "present"
-			mcpRouteExecutor:     "present"
+			agentRuntimeRegistry:  "present"
+			workerAdapterRegistry: "present"
 		}
 		execution: {
-			requiresMCPAdapter:      true
+			requiresA2AAdapter:      true
 			requiresRuntimeRegistry: true
 		}
 	}

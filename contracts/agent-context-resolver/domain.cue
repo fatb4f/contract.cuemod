@@ -648,6 +648,23 @@ agentContextResolver: graph.#ContractDomain & {
 		"agent-context-resolver.validation-worker": {
 			kind:      "validation-worker"
 			objective: "Validate agent-context-resolver contract-domain assertions."
+			profile: {
+				id:               "agent-context-resolver.a2a-worker"
+				runtime:          "a2a"
+				preferredRuntime: "a2a"
+				secondaryAdapters: ["sdk-direct", "mcp", "cli"]
+				a2a: {
+					runtime:                          "a2a"
+					preferred:                        true
+					offloadsContext:                  true
+					offloadsRouteLocalResponsibility: true
+					offloadsAuthority:                false
+					inputAuthority:                   "root_codex"
+					resultAuthority:                  "evidence_only"
+					description:                      "Preferred adapter for bounded route-worker invocation packets."
+				}
+			}
+			runtimeAdapter: "a2a"
 			allowedNodes: [
 				"agent-context-resolver.root",
 				"agent-context-resolver.assertions",

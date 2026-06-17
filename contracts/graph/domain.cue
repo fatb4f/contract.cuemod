@@ -103,6 +103,51 @@ package graph
 	"stage" |
 	"commit"
 
+#WorkerRuntimeAdapter:
+	"a2a" |
+	"sdk-direct" |
+	"mcp" |
+	"cli"
+
+#A2AWorkerAdapter: close({
+	runtime:   "a2a"
+	preferred: true
+
+	offloadsContext:                  true
+	offloadsRouteLocalResponsibility: true
+	offloadsAuthority:                false
+
+	inputAuthority:  "root_codex"
+	resultAuthority: "evidence_only"
+
+	description?: string & !=""
+})
+
+#WorkerProfile: close({
+	id: #ID
+
+	runtime:          #WorkerRuntimeAdapter | *"a2a"
+	preferredRuntime: "a2a" | *"a2a"
+	secondaryAdapters: [...#WorkerRuntimeAdapter] | *["sdk-direct", "mcp", "cli"]
+
+	a2a: #A2AWorkerAdapter & {
+		runtime:   "a2a"
+		preferred: true
+	}
+
+	controlInvariants: [...string & !=""] | *[
+		"Workers are predefined adapter-backed capabilities.",
+		"Root Codex assigns bounded invocation packets.",
+		"Workers return structured evidence.",
+		"A2A offloads context and route-local responsibility.",
+		"A2A does not offload authority.",
+	]
+
+	if runtime == "a2a" {
+		preferredRuntime: "a2a"
+	}
+})
+
 #ObjectModel: close({
 	id:       #ID
 	kind:     #ObjectModelKind
@@ -302,6 +347,9 @@ package graph
 	kind: #WorkerBindingKind
 
 	objective: string & !=""
+
+	profile:        #WorkerProfile
+	runtimeAdapter: #WorkerRuntimeAdapter | *profile.runtime
 
 	allowedNodes: [#ID, ...#ID]
 	deniedNodes: [...#ID]
