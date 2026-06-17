@@ -663,6 +663,13 @@ agentContextResolver: graph.#ContractDomain & {
 					resultAuthority:                  "evidence_only"
 					description:                      "Preferred adapter for bounded route-worker invocation packets."
 				}
+				controlInvariants: [
+					"Adapters execute declared work.",
+					"Adapters do not define graph truth.",
+					"Workers return evidence, not final authority.",
+					"Evidence records report observed results.",
+					"Checks declare expected evidence.",
+				]
 			}
 			runtimeAdapter: "a2a"
 			allowedNodes: [
@@ -707,6 +714,64 @@ agentContextResolver: graph.#ContractDomain & {
 			actions: ["inspect", "run_validation", "collect_evidence"]
 			mayMutate:       false
 			resultAuthority: "evidence_only"
+		}
+	}
+
+	adapters: {
+		"agent-context-resolver.a2a-adapter": graph.#AdapterContract & #AdapterContract & {
+			schema:               "agent.adapter-contract.v1"
+			runtime:              "a2a"
+			worker:               "agent-context-resolver.validation-worker"
+			workerBindingID:      "agent-context-resolver.validation-worker"
+			workerProfileID:      "agent-context-resolver.a2a-worker"
+			executesDeclaredWork: true
+			declaredActions: ["inspect", "run_validation", "collect_evidence"]
+			routeIDs: [
+				"resolver.inspect.current",
+				"resolver.plan.compile",
+				"vcs.patch-stack.inspect",
+				"mcp.evidence.inspect",
+				"agent-skill.projection.validate",
+				"resolver.context-packet.inspect",
+				"repo.lifecycle.validate",
+			]
+			declaredRouteIDs:  routeIDs
+			inputAuthority:    "root_codex"
+			resultAuthority:   "evidence_only"
+			definesGraphTruth: false
+			deny: {
+				semanticAuthority:      true
+				graphTruthDefinition:   true
+				freeFormToolSelection:  true
+				unboundedRouteMutation: true
+			}
+			description: "A2A route-worker adapter contract for executing declared resolver route work and returning evidence-only results."
+		}
+	}
+
+	evidenceRecords: {
+		"agent-context-resolver.evidence.route-worker-output": graph.#EvidenceRecord & #EvidenceRecord & {
+			schema:             "agent.evidence-record.v1"
+			kind:               "route-worker-evidence"
+			routeID:            "resolver.inspect.current"
+			workerID:           "agent-context-resolver.validation-worker"
+			profileID:          "agent-context-resolver.a2a-worker"
+			adapterID:          "agent-context-resolver.a2a-adapter"
+			invocationID:       "agent-context-resolver.invocation.resolver-inspect-current"
+			adapterExecutionID: "agent-context-resolver.adapter-execution.resolver-inspect-current"
+			routeResultID:      "agent-context-resolver.route-result.resolver-inspect-current"
+			adapter:            "a2a"
+			status:             "partial"
+			summary:            "Template evidence record for a bounded route-worker output observed through the declared A2A adapter."
+			observedEvidence: [
+				{kind: "contract", ref: "contracts/agent-context-resolver/routes.cue"},
+				{kind: "contract", ref: "contracts/agent-context-resolver/resolver.cue"},
+			]
+			reportsObservedResults: true
+			checksExpectedEvidence: true
+			authority:              "evidence_only"
+			definesGraphTruth:      false
+			description:            "Evidence records bind route-worker invocation, adapter execution, and route result observations without becoming semantic authority."
 		}
 	}
 

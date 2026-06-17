@@ -63,6 +63,53 @@ package agentcontextresolver
 	})
 })
 
+#AdapterContract: close({
+	schema: "agent.adapter-contract.v1"
+	id:     #DeclaredID
+
+	runtime:         #WorkerRuntimeAdapter
+	worker?:         #DeclaredID
+	workerBindingID: #DeclaredID
+	workerProfileID: #DeclaredID
+
+	executesDeclaredWork: true
+	routeIDs?: [...#DeclaredID]
+	declaredRouteIDs: [...#DeclaredID] & [_, ...]
+	declaredActions: [
+		"inspect" |
+		"run_validation" |
+		"collect_evidence",
+		...,
+	]
+
+	inputAuthority:    "root_codex"
+	resultAuthority:   "evidence_only"
+	definesGraphTruth: false
+
+	deny: close({
+		semanticAuthority:      true
+		graphTruthDefinition:   true
+		freeFormToolSelection:  true
+		unboundedRouteMutation: true
+	})
+
+	description?: string & !=""
+})
+
+#AdapterExecution: close({
+	schema: "agent.adapter-execution.v1"
+	id:     #DeclaredID
+
+	adapterID:    #DeclaredID
+	invocationID: #DeclaredID
+	routeID:      #DeclaredID
+	workerID:     #DeclaredID
+
+	executesDeclaredWork: true
+	resultAuthority:      "evidence_only"
+	definesGraphTruth:    false
+})
+
 #RuntimeRouteReference: close({
 	schema:       "agent.runtime-route-reference.v1"
 	routeID:      #DeclaredID
@@ -105,6 +152,7 @@ package agentcontextresolver
 	mode: "none" | "eligible" | "requires-agent-runtime"
 	routeRefs: [...#RuntimeRouteReference]
 	workerInvocations?: [...#RouteWorkerInvocation]
+	adapterContracts?: [...#AdapterContract]
 
 	requirements: close({
 		agentRuntimeRegistry:  "absent" | "present"

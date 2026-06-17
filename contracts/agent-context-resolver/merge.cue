@@ -26,6 +26,76 @@ package agentcontextresolver
 	authority:  "evidence_only"
 })
 
+#EvidenceRecord: close({
+	schema: "agent.evidence-record.v1"
+	id:     #DeclaredID
+	kind:   "route-worker-evidence"
+
+	routeID:            #DeclaredID
+	workerID:           #DeclaredID
+	profileID:          #DeclaredID
+	adapterID:          #DeclaredID
+	invocationID:       #DeclaredID
+	adapterExecutionID: #DeclaredID
+	routeResultID:      #DeclaredID
+	adapter:            #WorkerRuntimeAdapter
+
+	status:  "pass" | "fail" | "blocked" | "partial"
+	summary: string & !=""
+	observedEvidence: [...#EvidenceRef]
+	diagnostics?: [...string & !=""]
+
+	reportsObservedResults: true
+	checksExpectedEvidence: bool | *true
+	authority:              "evidence_only"
+	definesGraphTruth:      false
+	description?:           string & !=""
+})
+
+#RouteResultEvidenceMapping: close({
+	schema: "agent.route-result-evidence-mapping.v1"
+
+	invocation:       #RouteWorkerInvocation
+	adapterContract:  #AdapterContract
+	adapterExecution: #AdapterExecution
+	routeResult:      #RouteResult
+	evidenceRecord:   #EvidenceRecord
+
+	adapterContract: {
+		id:              evidenceRecord.adapterID
+		workerBindingID: invocation.workerID
+		workerProfileID: invocation.profileID
+	}
+	adapterExecution: {
+		adapterID:    adapterContract.id
+		invocationID: evidenceRecord.invocationID
+		routeID:      invocation.routeID
+		workerID:     invocation.workerID
+	}
+	routeResult: {
+		routeID:   invocation.routeID
+		workerID:  invocation.workerID
+		profileID: invocation.profileID
+		adapter:   invocation.adapter
+		status:    evidenceRecord.status
+		summary:   evidenceRecord.summary
+		authority: "evidence_only"
+	}
+	evidenceRecord: {
+		routeID:            invocation.routeID
+		workerID:           invocation.workerID
+		profileID:          invocation.profileID
+		adapterID:          adapterContract.id
+		invocationID:       adapterExecution.invocationID
+		adapterExecutionID: adapterExecution.id
+		adapter:            invocation.adapter
+		status:             routeResult.status
+		summary:            routeResult.summary
+		authority:          "evidence_only"
+		definesGraphTruth:  false
+	}
+})
+
 #RouteResultSchema: close({
 	schema: "agent.route-result.v1"
 	result: #RouteResult

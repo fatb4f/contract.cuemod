@@ -14,9 +14,15 @@ import "list"
 }
 
 #Evidence: {
-	kind:   "prompt_term" | "route_default"
+	kind:   "prompt_term" | "prompt_route" | "route_default"
 	value:  string
 	source: "user_prompt"
+}
+
+#ExpectedEvidence: {
+	kind:        "prompt_evidence" | "route_worker_evidence"
+	required:    true
+	description: string & !=""
 }
 
 #UserPromptSubmitOutput: {
@@ -24,6 +30,7 @@ import "list"
 	selectedFragments: [...string]
 	compactHints: [...string]
 	evidence: [...#Evidence]
+	expectedEvidence?: [...#ExpectedEvidence]
 	controller: #ResolvedRoutePlan
 
 	fullRegistry?:   _|_

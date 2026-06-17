@@ -372,6 +372,60 @@ package graph
 	runtimeContract: "contracts/agent-runtime/sdk_workers.cue" | *"contracts/agent-runtime/sdk_workers.cue"
 })
 
+#AdapterContract: close({
+	schema?: "agent.adapter-contract.v1"
+	id:      #ID
+	runtime: #WorkerRuntimeAdapter
+	worker:  #ID
+
+	workerBindingID?:      #ID
+	workerProfileID?:      #ID
+	executesDeclaredWork?: true
+	declaredActions: [#WorkerBindingAction, ...#WorkerBindingAction]
+	routeIDs?: [...#ID]
+	declaredRouteIDs?: [...#ID]
+
+	inputAuthority:    "root_codex"
+	resultAuthority:   "evidence_only"
+	definesGraphTruth: false
+
+	deny?: close({
+		semanticAuthority?:      true
+		graphTruthDefinition?:   true
+		freeFormToolSelection?:  true
+		unboundedRouteMutation?: true
+	})
+
+	description?: string & !=""
+})
+
+#EvidenceRecord: close({
+	schema?: "agent.evidence-record.v1"
+	id:      #ID
+	kind:    "route-worker-evidence"
+
+	routeID:            #ID
+	workerID:           #ID
+	profileID?:         #ID
+	adapterID:          #ID
+	invocationID:       #ID
+	adapterExecutionID: #ID
+	routeResultID:      #ID
+	adapter?:           #WorkerRuntimeAdapter
+
+	status:  "pass" | "fail" | "blocked" | "partial"
+	summary: string & !=""
+	observedEvidence?: [...]
+	diagnostics?: [...string & !=""]
+
+	reportsObservedResults:  true
+	checksExpectedEvidence?: true
+	authority:               "evidence_only"
+	definesGraphTruth:       false
+
+	description?: string & !=""
+})
+
 #HookBoundary: close({
 	id: #ID
 	kind:
@@ -426,6 +480,8 @@ package graph
 	checkManifest?:         #CheckManifest
 	validationCertificate?: #ValidationCertificate
 	workers: [ID=string]: #WorkerBinding & {id: ID}
+	adapters?: [ID=string]: #AdapterContract & {id: ID}
+	evidenceRecords?: [ID=string]: #EvidenceRecord & {id: ID}
 	hooks: [ID=string]: #HookBoundary & {id: ID}
 
 	model: id: id
@@ -433,6 +489,24 @@ package graph
 	for _, worker in workers {
 		if worker.kind == "validation-worker" && worker.mayMutate {
 			_validationWorkerMutationDenied: _|_
+		}
+	}
+
+	_adapterWorkerRefs: {
+		for _, adapter in adapters {
+			"\(adapter.id)": workers[adapter.worker]
+		}
+	}
+
+	_evidenceWorkerRefs: {
+		for _, record in evidenceRecords {
+			"\(record.id)": workers[record.workerID]
+		}
+	}
+
+	_evidenceAdapterRefs: {
+		for _, record in evidenceRecords {
+			"\(record.id)": adapters[record.adapterID]
 		}
 	}
 

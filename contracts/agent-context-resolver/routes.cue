@@ -198,9 +198,21 @@ routeInventory: #RouteInventory & {
 _availableFragmentIDs: [for fragment in turnStartFragmentSet.fragments {fragment.id}]
 _registeredRouteIDs: [for route in routeInventory.routes {route.id}]
 _registeredGateIDs: [for gate in routeInventory.gates {gate.id}]
+_boundWorkerIDs: [for _, worker in agentContextResolver.workers {worker.id}]
+_boundWorkerProfileIDs: [for _, worker in agentContextResolver.workers {worker.profile.id}]
+_boundAdapterRuntimes: [for _, adapter in agentContextResolver.adapters {adapter.runtime}]
 
 routeInventoryValidation: {
 	for route in routeInventory.routes {
+		if !list.Contains(_boundWorkerIDs, route.workerBindingID) {
+			_unboundWorker: _|_
+		}
+		if !list.Contains(_boundWorkerProfileIDs, route.workerProfileID) {
+			_unboundWorkerProfile: _|_
+		}
+		if !list.Contains(_boundAdapterRuntimes, route.preferredWorkerAdapter) {
+			_unboundWorkerAdapter: _|_
+		}
 		for fragmentID in route.inputFragments {
 			if !list.Contains(_availableFragmentIDs, fragmentID) {
 				_invalidFragment: _|_
