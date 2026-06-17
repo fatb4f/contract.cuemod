@@ -58,7 +58,8 @@ Allowed:
 
 ### 3. Full validation appears too often
 
-`test/check.sh` appears **61 combined times** in the path counter.
+The legacy full validation script appears **61 combined times** in the path
+counter.
 
 That does not necessarily mean it ran 61 times, but it means the full validation script was repeatedly inspected, patched, diffed, or referenced.
 
@@ -70,7 +71,7 @@ During micro-slice:
   cue vet ./fixtures/agent-runtime/<one-fixture>
 
 Only final gate:
-  ./test/check.sh
+  full repository validation
 ```
 
 ---
@@ -176,11 +177,11 @@ Hard caps:
 Allowed paths only:
 - contracts/agent-runtime/<specific-file>.cue
 - fixtures/agent-runtime/<specific-fixture>
-- test/check.sh only if validation list must be updated
+- the full validation script only if validation list must be updated
 
 Validation:
 - run narrow cue vet first
-- run ./test/check.sh at most once, only before commit
+- run full repository validation at most once, only before commit
 - stop on first validation class failure and summarize blocker
 ```
 

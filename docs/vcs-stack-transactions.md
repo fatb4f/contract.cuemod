@@ -140,9 +140,10 @@ adapter artifact failure, postflight failure, and rollback failure. Together
 they cover every rollback class and degraded recovery.
 
 `fixtures/vcs/invalid-reflog-only/rollback.cue` proves that reflog-only
-recovery cannot validate for an index rollback. `test/check.sh` requires that
-fixture to fail. `fixtures/vcs/invalid-missing-transaction-policy` similarly
-proves that a stack mutator cannot validate without a transaction policy.
+recovery cannot validate for an index rollback. Repository validation requires
+that fixture to fail. `fixtures/vcs/invalid-missing-transaction-policy`
+similarly proves that a stack mutator cannot validate without a transaction
+policy.
 
 ## Transactional Staging
 

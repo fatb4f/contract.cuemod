@@ -30,12 +30,12 @@ Current migration example:
 agent-context-resolver
   root: contracts/agent-context-resolver
 
-  leaves:
-    fixtures/resolver/agent-context-resolver
-    fixtures/resolver/workspace-lifecycle
-    generated/agent-context-resolver
-    seeds/contract-cuemod/agent-context-resolver
-    test/agent-context-hook.sh
+  local leaves:
+    fixtures/
+    checks/
+    generated/
+    projections/
+    seed/
 ```
 
 The refactor is needed because the current layout spreads one functional domain
@@ -975,7 +975,7 @@ agentContextResolver: graph.#ContractDomain & {
 			}
 			"agent-context-resolver.fixtures": {
 				kind: "fixture"
-				path: "fixtures/resolver/agent-context-resolver"
+				path: "contracts/agent-context-resolver/fixtures"
 				parent: "agent-context-resolver.root"
 				rootPath: [
 					"agent-context-resolver.root",
@@ -984,7 +984,7 @@ agentContextResolver: graph.#ContractDomain & {
 			}
 			"agent-context-resolver.generated": {
 				kind: "generated"
-				path: "generated/agent-context-resolver"
+				path: "contracts/agent-context-resolver/generated"
 				parent: "agent-context-resolver.root"
 				rootPath: [
 					"agent-context-resolver.root",
@@ -1009,4 +1009,5 @@ agentContextResolver: graph.#ContractDomain & {
 }
 ```
 
-The clean base lets the dirty layout fold inward without moving files or making `test/check.sh` the authority.
+The clean base lets the dirty layout fold inward without moving files or making
+the legacy repository-wide check script the authority.
