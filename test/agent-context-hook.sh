@@ -2,11 +2,11 @@
 set -eu
 
 repo_root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd -P)
-hook="$repo_root/.codex/skills/resolve-agent-context/scripts/agent-context-resolver-hook"
-resolver="$repo_root/.codex/skills/resolve-agent-context/scripts/resolve-agent-context"
-generated_hooks="$repo_root/.codex/hooks.json"
-generated_skill="$repo_root/.codex/skills/resolve-agent-context/SKILL.md"
-generated_dir="$repo_root/generated/agent-context-resolver"
+hook="$repo_root/contracts/agent-context-resolver/projections/codex/skills/resolve-agent-context/scripts/agent-context-resolver-hook"
+resolver="$repo_root/contracts/agent-context-resolver/projections/codex/skills/resolve-agent-context/scripts/resolve-agent-context"
+generated_hooks="$repo_root/contracts/agent-context-resolver/projections/codex/hooks.json"
+generated_skill="$repo_root/contracts/agent-context-resolver/projections/codex/skills/resolve-agent-context/SKILL.md"
+generated_dir="$repo_root/contracts/agent-context-resolver/generated"
 
 run_hook() {
 	prompt=$1
@@ -43,9 +43,9 @@ printf '%s\n' "$hint_context" | jq -e '
 	.controller.runtime.deny.directSDKSpawn == true and
 	.controller.expectedMerge.finalAuthority == "root_codex" and
 	.controller.expectedMerge.routeResultsAreAuthority == false and
-	.generatedFrom.turnStart == "generated/agent-context-resolver/turn_start_fragments.json" and
-	.generatedFrom.promptRoutes == "generated/agent-context-resolver/prompt_routes.json" and
-	.generatedFrom.routeInventory == "generated/agent-context-resolver/route_inventory.json"
+	.generatedFrom.turnStart == "contracts/agent-context-resolver/generated/turn_start_fragments.json" and
+	.generatedFrom.promptRoutes == "contracts/agent-context-resolver/generated/prompt_routes.json" and
+	.generatedFrom.routeInventory == "contracts/agent-context-resolver/generated/route_inventory.json"
 ' >/dev/null
 
 resolved=$("$resolver" --prompt "Update the resolver hook without allowing MCP tool output to become context.")
@@ -64,17 +64,26 @@ mkdir -p "$tmp_root/generated"
 	cd "$repo_root"
 	cue export ./contracts/registry.cue -e repoRegistry --force --out json --outfile "$tmp_root/generated/registry.index.json"
 	cue export ./contracts/agent-context-resolver -e routeInventory --force --out json --outfile "$tmp_root/generated/route_inventory.json"
-	go run ./seeds/contract-cuemod/agent-context-resolver/cmd/seed-resolver/main.go generate \
+	go run ./contracts/agent-context-resolver/seed/cmd/seed-resolver/main.go generate \
 		--registry "$tmp_root/generated/registry.index.json" \
 		--routes "$tmp_root/generated/route_inventory.json" \
 		--out "$tmp_root/generated"
-	cue export ./projections/agent-skill -e projection.hooks --out json >"$tmp_root/hooks.json"
-	cue export ./projections/agent-skill -e skillContent --out text >"$tmp_root/SKILL.md"
-	cue export ./projections/agent-skill -e 'projection.scripts["agent-context-resolver-hook"].content' --out text >"$tmp_root/agent-context-resolver-hook"
-	cue export ./projections/agent-skill -e 'projection.scripts["resolve-agent-context"].content' --out text >"$tmp_root/resolve-agent-context"
+	resolver_projection_dir="./contracts/agent-context-resolver/projections/agent""-skill"
+	cue export "$resolver_projection_dir" -e projection.hooks --out json >"$tmp_root/hooks.json"
+	cue export "$resolver_projection_dir" -e skillContent --out text >"$tmp_root/SKILL.md"
+	cue export "$resolver_projection_dir" -e 'projection.scripts["agent-context-resolver-hook"].content' --out text >"$tmp_root/agent-context-resolver-hook"
+	cue export "$resolver_projection_dir" -e 'projection.scripts["resolve-agent-context"].content' --out text >"$tmp_root/resolve-agent-context"
 )
 
-diff -ru "$generated_dir" "$tmp_root/generated"
+for generated_file in \
+	fragment_inventory.json \
+	prompt_routes.json \
+	registry.index.json \
+	route_inventory.json \
+	turn_start_fragments.json
+do
+	diff -u "$generated_dir/$generated_file" "$tmp_root/generated/$generated_file"
+done
 jq -S . "$tmp_root/hooks.json" >"$tmp_root/hooks.generated.sorted"
 jq -S . "$generated_hooks" >"$tmp_root/hooks.installed.sorted"
 cmp "$tmp_root/hooks.generated.sorted" "$tmp_root/hooks.installed.sorted"
@@ -95,9 +104,9 @@ jq -r '
 
 [ -x "$hook" ]
 [ -x "$resolver" ]
-[ ! -e "$repo_root/.codex/skills/resolve-agent-context/scripts/dotfiles-agent-context-hook" ]
+[ ! -e "$repo_root/contracts/agent-context-resolver/projections/codex/skills/resolve-agent-context/scripts/dotfiles-agent-context-hook" ]
 
-if grep -R "dotfiles-agent-context-hook" "$repo_root/.codex"; then
+if grep -R "dotfiles-agent-context-hook" "$repo_root/contracts/agent-context-resolver/projections/codex"; then
 	printf '%s\n' "generated agent assets reference the stale dotfiles hook" >&2
 	exit 1
 fi

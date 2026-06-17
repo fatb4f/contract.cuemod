@@ -1,0 +1,596 @@
+{
+    "schema": "agent.route-plan.v1",
+    "plannerKind": "generated_controller_packet",
+    "authority": "resolver_projection",
+    "turnID": "proof-turn",
+    "intent": "resolver",
+    "availableFragmentIDs": [
+        "agent-context-resolver.authority",
+        "agent-runtime.authority",
+        "agent-skill.projection",
+        "mcp.evidence-plane",
+        "resolver.context-packet",
+        "repo.lifecycle",
+        "repo.contract-seed",
+        "vcs.patch-stack",
+        "vb-contract.authority",
+        "vb-contract.contract-seed",
+        "vb-contract.component-seed",
+        "vb-contract.virtual-branch",
+        "vb-reference.authority",
+        "vb-reference.virtual-branch"
+    ],
+    "availableRouteIDs": [
+        "resolver.inspect.current",
+        "resolver.plan.compile",
+        "vcs.patch-stack.inspect",
+        "mcp.evidence.inspect",
+        "agent-skill.projection.validate",
+        "resolver.context-packet.inspect",
+        "repo.lifecycle.validate"
+    ],
+    "selectedFragments": [
+        "agent-context-resolver.authority"
+    ],
+    "routes": [
+        {
+            "id": "resolver.inspect.current",
+            "kind": "inspect",
+            "priority": 100,
+            "sequence": 10,
+            "parallelGroup": "inspect",
+            "dependsOn": [],
+            "inputFragments": [
+                "agent-context-resolver.authority"
+            ],
+            "task": {
+                "objective": "Inspect the current resolver authority and generated boundary.",
+                "constraints": [
+                    "Treat CUE and repository state as durable authority."
+                ],
+                "files": [
+                    "contracts/agent-context-resolver"
+                ]
+            },
+            "outputSchema": {
+                "schema": "agent.route-result.inspect.v1"
+            },
+            "gates": [
+                "registry-authority",
+                "route-local-propagation",
+                "structured-result"
+            ]
+        },
+        {
+            "id": "resolver.plan.compile",
+            "kind": "validate",
+            "priority": 95,
+            "sequence": 20,
+            "dependsOn": [
+                "resolver.inspect.current"
+            ],
+            "inputFragments": [
+                "agent-context-resolver.authority"
+            ],
+            "task": {
+                "objective": "Compile and validate a generated route controller packet.",
+                "constraints": [
+                    "Reference registered routes and selected fragments only.",
+                    "Keep root Codex as merge and synthesis authority.",
+                    "Do not execute routes or spawn SDK subagents during route planning."
+                ]
+            },
+            "outputSchema": {
+                "schema": "agent.route-result.validation.v1"
+            },
+            "gates": [
+                "registry-authority",
+                "route-local-propagation",
+                "runtime-deny",
+                "structured-result"
+            ]
+        }
+    ],
+    "propagation": {
+        "mode": "route-local",
+        "root": {
+            "includes": {
+                "intent": "resolver",
+                "selectedFragments": [
+                    "agent-context-resolver.authority"
+                ],
+                "acceptedRouteResults": []
+            },
+            "excludes": [
+                "raw route logs",
+                "unvalidated route claims",
+                "runtime implementation details"
+            ]
+        },
+        "perRoute": {
+            "resolver.inspect.current": {
+                "includes": {
+                    "objective": "Inspect the current resolver authority and generated boundary.",
+                    "acceptedFacts": [],
+                    "selectedFragments": [
+                        "agent-context-resolver.authority"
+                    ],
+                    "files": [
+                        "contracts/agent-context-resolver"
+                    ]
+                },
+                "excludes": [
+                    "full transcript",
+                    "unselected fragments",
+                    "raw registry",
+                    "unbounded tool logs",
+                    "irrelevant route outputs"
+                ],
+                "return": {
+                    "schema": {
+                        "schema": "agent.route-result.inspect.v1"
+                    },
+                    "maxSummaryTokens": 800,
+                    "evidenceRequired": true
+                }
+            },
+            "resolver.plan.compile": {
+                "includes": {
+                    "objective": "Compile and validate a generated route controller packet.",
+                    "acceptedFacts": [],
+                    "selectedFragments": [
+                        "agent-context-resolver.authority"
+                    ],
+                    "files": [
+                        "contracts/agent-context-resolver"
+                    ],
+                    "priorArtifacts": [
+                        "resolver.inspect.current"
+                    ]
+                },
+                "excludes": [
+                    "full transcript",
+                    "unselected fragments",
+                    "raw registry",
+                    "unbounded tool logs",
+                    "irrelevant route outputs"
+                ],
+                "return": {
+                    "schema": {
+                        "schema": "agent.route-result.validation.v1"
+                    },
+                    "maxSummaryTokens": 800,
+                    "evidenceRequired": true
+                }
+            }
+        },
+        "denyFullTranscript": true,
+        "denyRawRegistryDump": true,
+        "denyUnselectedFragments": true,
+        "requireStructuredResult": true
+    },
+    "gates": [
+        {
+            "id": "registry-authority",
+            "class": "registry_authority",
+            "stage": "selection",
+            "appliesToKinds": [
+                "inspect",
+                "validate",
+                "generate",
+                "diff",
+                "test",
+                "summarize",
+                "risk_scan"
+            ],
+            "required": true
+        },
+        {
+            "id": "route-local-propagation",
+            "class": "propagation_boundary",
+            "stage": "projection",
+            "appliesToKinds": [
+                "inspect",
+                "validate",
+                "generate",
+                "diff",
+                "test",
+                "summarize",
+                "risk_scan"
+            ],
+            "required": true
+        },
+        {
+            "id": "runtime-deny",
+            "class": "runtime_denial",
+            "stage": "execution",
+            "appliesToKinds": [
+                "validate",
+                "generate",
+                "diff",
+                "test",
+                "risk_scan"
+            ],
+            "required": true
+        },
+        {
+            "id": "structured-result",
+            "class": "structured_result",
+            "stage": "merge",
+            "appliesToKinds": [
+                "inspect",
+                "validate",
+                "generate",
+                "diff",
+                "test",
+                "summarize",
+                "risk_scan"
+            ],
+            "required": true
+        }
+    ],
+    "expectedMerge": {
+        "mode": "fail_closed",
+        "requireStructuredResults": true,
+        "requireEvidenceForClaims": true,
+        "conflictPolicy": "root_decides",
+        "maxMergedSummaryTokens": 1200,
+        "finalAuthority": "root_codex",
+        "routeResultsAreAuthority": false
+    },
+    "mergeReducer": {
+        "schema": "agent.merge-reducer.v1",
+        "stage": "merge_reduction",
+        "input": "route_results",
+        "output": "bounded_merge_packet",
+        "deterministic": true,
+        "steps": [
+            "schema_validation",
+            "evidence_compression",
+            "merge_policy",
+            "bounded_merge_packet"
+        ],
+        "order": {
+            "primary": "route.sequence",
+            "tieBreaker": "route.id",
+            "direction": "ascending"
+        },
+        "compression": {
+            "schema": "agent.evidence-compression.v1",
+            "stage": "evidence_compression",
+            "mode": "bounded",
+            "input": "validated_route_results",
+            "output": "compressed_evidence",
+            "mayReduceEvidenceVolume": true,
+            "mustPreserveProvenance": true,
+            "provenanceFields": [
+                "routeID",
+                "evidence"
+            ],
+            "deny": {
+                "eraseProvenance": true,
+                "rawTranscriptInput": true
+            }
+        },
+        "policy": {
+            "mode": "fail_closed",
+            "requireStructuredResults": true,
+            "requireEvidenceForClaims": true,
+            "conflictPolicy": "root_decides",
+            "maxMergedSummaryTokens": 1200,
+            "finalAuthority": "root_codex",
+            "routeResultsAreAuthority": false
+        },
+        "packet": {
+            "schema": "agent.bounded-merge-packet.v1",
+            "producer": "merge_reducer",
+            "stage": "bounded_merge_packet",
+            "deterministic": true,
+            "finalAuthority": "root_codex",
+            "routeResultsAuthority": "evidence_only",
+            "routeResultsAreAuthority": false,
+            "maxSummaryTokens": 1200,
+            "sourceRouteIDs": [
+                "resolver.inspect.current",
+                "resolver.plan.compile"
+            ],
+            "facts": [],
+            "evidence": [
+                {
+                    "kind": "contract",
+                    "ref": "contracts/agent-context-resolver/proof.cue"
+                },
+                {
+                    "kind": "contract",
+                    "ref": "contracts/agent-context-resolver/merge.cue"
+                }
+            ],
+            "diagnostics": [],
+            "conflicts": [],
+            "deny": {
+                "rawWorkerTranscripts": true,
+                "arbitraryTranscripts": true,
+                "unboundedEvidence": true
+            }
+        },
+        "deny": {
+            "rawWorkerTranscripts": true,
+            "unstructuredResults": true,
+            "routeResultsAsFinal": true
+        }
+    },
+    "modelSynthesisGate": {
+        "schema": "agent.model-synthesis-gate.v1",
+        "stage": "model_synthesis",
+        "allowed": false,
+        "input": {
+            "schema": "agent.bounded-merge-packet.v1",
+            "producer": "merge_reducer",
+            "stage": "bounded_merge_packet",
+            "deterministic": true,
+            "finalAuthority": "root_codex",
+            "routeResultsAuthority": "evidence_only",
+            "routeResultsAreAuthority": false,
+            "maxSummaryTokens": 1200,
+            "sourceRouteIDs": [
+                "resolver.inspect.current",
+                "resolver.plan.compile"
+            ],
+            "facts": [],
+            "evidence": [
+                {
+                    "kind": "contract",
+                    "ref": "contracts/agent-context-resolver/proof.cue"
+                },
+                {
+                    "kind": "contract",
+                    "ref": "contracts/agent-context-resolver/merge.cue"
+                }
+            ],
+            "diagnostics": [],
+            "conflicts": [],
+            "deny": {
+                "rawWorkerTranscripts": true,
+                "arbitraryTranscripts": true,
+                "unboundedEvidence": true
+            }
+        },
+        "reads": "bounded_merge_packet_only",
+        "deny": {
+            "rawWorkerTranscripts": true,
+            "arbitraryRouteResultAccess": true,
+            "routeResultsAsAuthority": true
+        }
+    },
+    "runtime": {
+        "mode": "requires-agent-runtime",
+        "routeRefs": [
+            {
+                "schema": "agent.runtime-route-reference.v1",
+                "routeID": "resolver.inspect.current",
+                "routeKind": "inspect",
+                "context": {
+                    "includes": {
+                        "objective": "Inspect the current resolver authority and generated boundary.",
+                        "acceptedFacts": [],
+                        "selectedFragments": [
+                            "agent-context-resolver.authority"
+                        ],
+                        "files": [
+                            "contracts/agent-context-resolver"
+                        ]
+                    },
+                    "excludes": [
+                        "full transcript",
+                        "unselected fragments",
+                        "raw registry",
+                        "unbounded tool logs",
+                        "irrelevant route outputs"
+                    ],
+                    "return": {
+                        "schema": {
+                            "schema": "agent.route-result.inspect.v1"
+                        },
+                        "maxSummaryTokens": 800,
+                        "evidenceRequired": true
+                    }
+                },
+                "outputSchema": {
+                    "schema": "agent.route-result.inspect.v1"
+                }
+            },
+            {
+                "schema": "agent.runtime-route-reference.v1",
+                "routeID": "resolver.plan.compile",
+                "routeKind": "validate",
+                "context": {
+                    "includes": {
+                        "objective": "Compile and validate a generated route controller packet.",
+                        "acceptedFacts": [],
+                        "selectedFragments": [
+                            "agent-context-resolver.authority"
+                        ],
+                        "files": [
+                            "contracts/agent-context-resolver"
+                        ],
+                        "priorArtifacts": [
+                            "resolver.inspect.current"
+                        ]
+                    },
+                    "excludes": [
+                        "full transcript",
+                        "unselected fragments",
+                        "raw registry",
+                        "unbounded tool logs",
+                        "irrelevant route outputs"
+                    ],
+                    "return": {
+                        "schema": {
+                            "schema": "agent.route-result.validation.v1"
+                        },
+                        "maxSummaryTokens": 800,
+                        "evidenceRequired": true
+                    }
+                },
+                "outputSchema": {
+                    "schema": "agent.route-result.validation.v1"
+                }
+            }
+        ],
+        "workerInvocations": [
+            {
+                "schema": "agent.route-worker-invocation.v1",
+                "routeID": "resolver.inspect.current",
+                "workerID": "agent-context-resolver.validation-worker",
+                "profileID": "agent-context-resolver.a2a-worker",
+                "adapter": "a2a",
+                "a2a": {
+                    "runtime": "a2a",
+                    "preferred": true,
+                    "offloadsContext": true,
+                    "offloadsRouteLocalResponsibility": true,
+                    "offloadsAuthority": false,
+                    "rootAuthority": "root_codex",
+                    "resultAuthority": "evidence_only",
+                    "structuredResult": true
+                },
+                "packet": {
+                    "assignedBy": "root_codex",
+                    "bounded": true,
+                    "context": {
+                        "includes": {
+                            "objective": "Inspect the current resolver authority and generated boundary.",
+                            "acceptedFacts": [],
+                            "selectedFragments": [
+                                "agent-context-resolver.authority"
+                            ],
+                            "files": [
+                                "contracts/agent-context-resolver"
+                            ]
+                        },
+                        "excludes": [
+                            "full transcript",
+                            "unselected fragments",
+                            "raw registry",
+                            "unbounded tool logs",
+                            "irrelevant route outputs"
+                        ],
+                        "return": {
+                            "schema": {
+                                "schema": "agent.route-result.inspect.v1"
+                            },
+                            "maxSummaryTokens": 800,
+                            "evidenceRequired": true
+                        }
+                    }
+                },
+                "returns": {
+                    "schema": {
+                        "schema": "agent.route-result.inspect.v1"
+                    },
+                    "evidenceRequired": true,
+                    "authority": "evidence_only"
+                },
+                "deny": {
+                    "authorityDelegation": true,
+                    "rawTranscriptForwarding": true,
+                    "freeFormMCPToolExposure": true,
+                    "sdkExecutionFromResolver": true
+                }
+            },
+            {
+                "schema": "agent.route-worker-invocation.v1",
+                "routeID": "resolver.plan.compile",
+                "workerID": "agent-context-resolver.validation-worker",
+                "profileID": "agent-context-resolver.a2a-worker",
+                "adapter": "a2a",
+                "a2a": {
+                    "runtime": "a2a",
+                    "preferred": true,
+                    "offloadsContext": true,
+                    "offloadsRouteLocalResponsibility": true,
+                    "offloadsAuthority": false,
+                    "rootAuthority": "root_codex",
+                    "resultAuthority": "evidence_only",
+                    "structuredResult": true
+                },
+                "packet": {
+                    "assignedBy": "root_codex",
+                    "bounded": true,
+                    "context": {
+                        "includes": {
+                            "objective": "Compile and validate a generated route controller packet.",
+                            "acceptedFacts": [],
+                            "selectedFragments": [
+                                "agent-context-resolver.authority"
+                            ],
+                            "files": [
+                                "contracts/agent-context-resolver"
+                            ],
+                            "priorArtifacts": [
+                                "resolver.inspect.current"
+                            ]
+                        },
+                        "excludes": [
+                            "full transcript",
+                            "unselected fragments",
+                            "raw registry",
+                            "unbounded tool logs",
+                            "irrelevant route outputs"
+                        ],
+                        "return": {
+                            "schema": {
+                                "schema": "agent.route-result.validation.v1"
+                            },
+                            "maxSummaryTokens": 800,
+                            "evidenceRequired": true
+                        }
+                    }
+                },
+                "returns": {
+                    "schema": {
+                        "schema": "agent.route-result.validation.v1"
+                    },
+                    "evidenceRequired": true,
+                    "authority": "evidence_only"
+                },
+                "deny": {
+                    "authorityDelegation": true,
+                    "rawTranscriptForwarding": true,
+                    "freeFormMCPToolExposure": true,
+                    "sdkExecutionFromResolver": true
+                }
+            }
+        ],
+        "requirements": {
+            "agentRuntimeRegistry": "absent",
+            "workerAdapterRegistry": "absent",
+            "mcpRouteExecutor": "absent"
+        },
+        "execution": {
+            "allowed": false,
+            "preferredWorkerAdapter": "a2a",
+            "secondaryWorkerAdapters": [
+                "sdk-direct",
+                "mcp",
+                "cli"
+            ],
+            "requiresA2AAdapter": true,
+            "requiresMCPAdapter": false,
+            "requiresRuntimeRegistry": true,
+            "backend": "a2a"
+        },
+        "deny": {
+            "directSDKSpawn": true,
+            "rawTranscriptForwarding": true,
+            "rawRegistryDump": true,
+            "unselectedFragments": true,
+            "globalMutation": true,
+            "authorityDelegation": true,
+            "freeFormMCPToolExposure": true
+        },
+        "expectedResult": {
+            "schema": "agent.route-result.v1"
+        }
+    }
+}

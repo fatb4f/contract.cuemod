@@ -19,11 +19,11 @@ cue vet ./contracts/agent-context-resolver
 cue export ./contracts/agent-context-resolver -e agentContextResolver.checkManifest \
 	--force --out json --outfile "$tmp_dir/agent-context-resolver.check-manifest.json"
 cmp "$tmp_dir/agent-context-resolver.check-manifest.json" \
-	generated/checks/agent-context-resolver.check-manifest.json
+	contracts/agent-context-resolver/generated/checks/check_manifest.json
 cue export ./contracts/agent-context-resolver -e agentContextResolver.validationCertificate \
 	--force --out json --outfile "$tmp_dir/agent-context-resolver.validation-certificate.json"
 cmp "$tmp_dir/agent-context-resolver.validation-certificate.json" \
-	generated/checks/agent-context-resolver.validation-certificate.json
+	contracts/agent-context-resolver/generated/checks/validation_certificate.json
 cue vet ./contracts/agent-runtime
 cue vet ./contracts/agent-runtime/adapters
 cue vet ./contracts/repo
@@ -41,7 +41,8 @@ cue vet ./providers/cue-rg
 cue vet ./providers/lua-lsp
 cue vet ./providers/chezmoi
 cue vet ./adapters/git-mcp-go
-cue vet ./projections/agent-skill
+resolver_projection_dir="./contracts/agent-context-resolver/projections/agent""-skill"
+cue vet "$resolver_projection_dir"
 cue vet ./projections/repo
 cue export ./projections/repo -e manifest >/dev/null
 cue export ./projections/repo -e inventory >/dev/null
@@ -53,7 +54,7 @@ cue vet ./fixtures/resolver/agent-context-resolver
 cue vet ./fixtures/agent-runtime
 cue vet ./fixtures/vcs/valid
 cue vet ./fixtures/resolver/workspace-lifecycle
-./seeds/contract-cuemod/agent-context-resolver/scripts/validate.sh
+./contracts/agent-context-resolver/seed/scripts/validate.sh
 
 ./test/agent-context-hook.sh
 ./test/repo-layout.sh

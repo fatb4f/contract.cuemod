@@ -50,13 +50,13 @@ skillContent: """
 
 	The `UserPromptSubmit` hook provides a bounded route controller packet, not task authority.
 
-	1. Run `.codex/skills/resolve-agent-context/scripts/resolve-agent-context --prompt "<prompt>"`.
+	1. Run `contracts/agent-context-resolver/projections/codex/skills/resolve-agent-context/scripts/resolve-agent-context --prompt "<prompt>"`.
 	2. Treat `selectedFragments` as a subset of `availableFragmentIDs`.
 	3. Treat `controller.routes` as a subset of `controller.availableRouteIDs`.
-	4. Resolve selected fragment metadata through `generated/agent-context-resolver/fragment_inventory.json`.
+	4. Resolve selected fragment metadata through `contracts/agent-context-resolver/generated/fragment_inventory.json`.
 	5. Inspect the declared `sourcePath` and obey repository instruction boundaries before editing.
 	6. Never execute projected routes directly or treat generated JSON and MCP/tool output as source authority.
-	7. Regenerate `.codex` and resolver JSON outputs from their CUE sources after changes.
+	7. Regenerate resolver-local Codex projection and JSON outputs from their CUE sources after changes.
 	"""
 
 agentContextResolverHook: """
@@ -64,8 +64,16 @@ agentContextResolverHook: """
 	set -eu
 
 	script_dir=$(CDPATH= cd -- "$(dirname "$0")" && pwd -P)
-	repo_root=${CONTRACT_CUEMOD_ROOT:-$(CDPATH= cd -- "$script_dir/../../../.." && pwd -P)}
-	generated_dir="$repo_root/generated/agent-context-resolver"
+	if [ -n "${CONTRACT_CUEMOD_ROOT:-}" ]; then
+		repo_root=$CONTRACT_CUEMOD_ROOT
+	else
+		repo_root=$script_dir
+		while [ "$repo_root" != "/" ] && [ ! -d "$repo_root/cue.mod" ]; do
+			repo_root=$(CDPATH= cd -- "$repo_root/.." && pwd -P)
+		done
+	fi
+	[ -d "$repo_root/cue.mod" ] || exit 2
+	generated_dir="$repo_root/contracts/agent-context-resolver/generated"
 	input_json=$(mktemp "${TMPDIR:-/tmp}/agent-context-resolver.XXXXXX.json")
 	trap 'rm -f "$input_json"' EXIT HUP INT TERM
 	cat >"$input_json"
@@ -84,7 +92,7 @@ agentContextResolverHook: """
 			($prompt | ascii_downcase) as $lower |
 			[$turnStart[0].fragments[].id] as $available |
 			[
-				$promptRoutes[0].routes[]
+			($promptRoutes[0] | if type == "array" then . else .routes end)[]
 				| . as $route
 					| select(any($route.terms[]; . as $term | $lower | contains($term)))
 			] as $matched |
@@ -241,9 +249,9 @@ agentContextResolverHook: """
 					}
 				},
 				generatedFrom: {
-					turnStart: "generated/agent-context-resolver/turn_start_fragments.json",
-					promptRoutes: "generated/agent-context-resolver/prompt_routes.json",
-					routeInventory: "generated/agent-context-resolver/route_inventory.json"
+					turnStart: "contracts/agent-context-resolver/generated/turn_start_fragments.json",
+					promptRoutes: "contracts/agent-context-resolver/generated/prompt_routes.json",
+					routeInventory: "contracts/agent-context-resolver/generated/route_inventory.json"
 				},
 				resolver: {
 					command: ".codex/skills/resolve-agent-context/scripts/resolve-agent-context",

@@ -122,49 +122,6 @@
             ]
         },
         {
-            "path": "generated/",
-            "kind": "directory",
-            "role": "generated",
-            "lifecycle": "generated",
-            "authority": "derived",
-            "generated": true,
-            "owner": "contracts/agent-context-resolver",
-            "description": "Generated resolver projections and lifecycle outputs.",
-            "allowedFileKinds": [
-                "file",
-                "directory"
-            ],
-            "allowedImports": [],
-            "validatesWith": [
-                "cue vet ./contracts",
-                "./test/check.sh"
-            ],
-            "prunesWith": [
-                "reject undeclared children"
-            ]
-        },
-        {
-            "path": "seeds/",
-            "kind": "directory",
-            "role": "fixture",
-            "lifecycle": "test-fixture",
-            "authority": "non-authority",
-            "generated": false,
-            "owner": "contracts/validation",
-            "description": "Imported seed bundles that validate independently.",
-            "allowedFileKinds": [
-                "file",
-                "directory"
-            ],
-            "allowedImports": [],
-            "validatesWith": [
-                "./seeds/contract-cuemod/agent-context-resolver/scripts/validate.sh"
-            ],
-            "prunesWith": [
-                "reject undeclared children"
-            ]
-        },
-        {
             "path": "test/",
             "kind": "directory",
             "role": "validation",
@@ -230,27 +187,6 @@
             ],
             "validatesWith": [
                 "./test/repo-layout.sh"
-            ],
-            "prunesWith": [
-                "reject undeclared children"
-            ]
-        },
-        {
-            "path": ".codex/",
-            "kind": "directory",
-            "role": "generated",
-            "lifecycle": "generated",
-            "authority": "derived",
-            "generated": true,
-            "owner": "projections/agent-skill",
-            "description": "Generated agent runtime projection.",
-            "allowedFileKinds": [
-                "file",
-                "directory"
-            ],
-            "allowedImports": [],
-            "validatesWith": [
-                "./test/agent-context-hook.sh"
             ],
             "prunesWith": [
                 "reject undeclared children"

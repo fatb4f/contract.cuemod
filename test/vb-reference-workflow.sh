@@ -2,9 +2,9 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-generated_dir="$repo_root/generated/agent-context-resolver"
-resolver_main="$repo_root/seeds/contract-cuemod/agent-context-resolver/cmd/seed-resolver/main.go"
-valid_fixture="$repo_root/seeds/contract-cuemod/agent-context-resolver/fixtures/prompt_classification.valid.cue"
+generated_dir="$repo_root/contracts/agent-context-resolver/generated"
+resolver_main="$repo_root/contracts/agent-context-resolver/seed/cmd/seed-resolver/main.go"
+valid_fixture="$repo_root/contracts/agent-context-resolver/seed/fixtures/prompt_classification.valid.cue"
 tmp_root="$(mktemp -d)"
 trap 'rm -rf "$tmp_root"' EXIT
 cd "$repo_root"
@@ -89,7 +89,15 @@ go run "$resolver_main" generate \
 	--registry "$regenerated_dir/registry.index.json" \
 	--routes "$regenerated_dir/route_inventory.json" \
 	--out "$regenerated_dir"
-diff -ru "$generated_dir" "$regenerated_dir"
+for generated_file in \
+	fragment_inventory.json \
+	prompt_routes.json \
+	registry.index.json \
+	route_inventory.json \
+	turn_start_fragments.json
+do
+	diff -u "$generated_dir/$generated_file" "$regenerated_dir/$generated_file"
+done
 
 undeclared_glue_component="$tmp_root/undeclared-glue-component.json"
 jq '.allowedGlue = []' "$component_path" >"$undeclared_glue_component"

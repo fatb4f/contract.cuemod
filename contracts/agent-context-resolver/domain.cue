@@ -182,14 +182,14 @@ agentContextResolver: graph.#ContractDomain & {
 			kind:   "generated"
 			parent: "agent-context-resolver.generated"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.generated", "agent-context-resolver.leaf.generated-fragments"]
-			path:        "generated/agent-context-resolver"
+			path:        "contracts/agent-context-resolver/generated"
 			description: "Generated resolver route, fragment, lifecycle, and turn-start evidence outputs."
 		}
 		"agent-context-resolver.leaf.seed-resolver": {
 			kind:   "seed"
 			parent: "agent-context-resolver.seeds"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.seeds", "agent-context-resolver.leaf.seed-resolver"]
-			path:        "seeds/contract-cuemod/agent-context-resolver"
+			path:        "contracts/agent-context-resolver/seed"
 			description: "Standalone seed package for the resolver contract slice."
 		}
 		"agent-context-resolver.leaf.resolver-worker-binding": {
@@ -203,7 +203,7 @@ agentContextResolver: graph.#ContractDomain & {
 			kind:   "worker"
 			parent: "agent-context-resolver.workers"
 			rootPath: ["agent-context-resolver.root", "agent-context-resolver.workers", "agent-context-resolver.leaf.seed-worker-script"]
-			path:        "seeds/contract-cuemod/agent-context-resolver/scripts"
+			path:        "contracts/agent-context-resolver/seed/scripts"
 			description: "Seed validation and generation scripts used as worker evidence."
 		}
 		"agent-context-resolver.leaf.gates-contract": {
@@ -759,10 +759,10 @@ agentContextResolver: graph.#ContractDomain & {
 				allowedPaths: [
 					"contracts/agent-context-resolver/domain.cue",
 					"contracts/agent-context-resolver",
-					"generated/agent-context-resolver",
+					"contracts/agent-context-resolver/generated",
 					"fixtures/resolver/agent-context-resolver",
 					"fixtures/resolver/workspace-lifecycle",
-					"seeds/contract-cuemod/agent-context-resolver",
+					"contracts/agent-context-resolver/seed",
 					"test/agent-context-hook.sh",
 				]
 				deniedPaths: [
