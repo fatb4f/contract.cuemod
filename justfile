@@ -1,15 +1,16 @@
 set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
 
 check:
-  cue vet ./contracts/assertions
-  cue eval ./contracts/assertions -c >/dev/null
-  cue vet ./contracts/agent-context-resolver/assertions
-  cue eval ./contracts/agent-context-resolver/assertions -c >/dev/null
-  cue vet ./contracts/agent-runtime
-  cue vet ./contracts/adapters
-  cue vet ./contracts/protocols/mcp
-  cue vet ./contracts/protocols/a2a
-  cue vet ./contracts/context/packet
+  cd contracts/factory && cue vet -c=false . ./object ./transition ./workers ./workers/codex ./workers/cue ./workers/cue/cue-lsp ./workers/cue/cue-rg ./workers/gitbutler ./adapters ./assertions
+  cd contracts/factory && cue eval ./assertions -c >/dev/null
+  test ! -e fixtures
+  test ! -e generated
+  test ! -e providers
+  test ! -e projections
+  test ! -e adapters
+  test ! -e test
+  test ! -e contracts/repo
+  test ! -e contracts/vcs
 
 smoke:
   go test ./...
@@ -18,7 +19,7 @@ smoke:
   printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | go run ./cmd/contract-mcp | rg 'acr\.(inventory|resolve_prompt|plan_route|validate|export_runtime_projection)' >/dev/null
 
 fmt:
-  cue fmt ./contracts/... ./providers/... ./projections/... ./fixtures/...
+  cue fmt ./contracts/... ./migration/legacy/...
 
 archive:
   tar --exclude=.git -czf ../contract.cuemod.tar.gz -C .. contract.cuemod

@@ -1,27 +1,25 @@
-# contract.cuemod
+# contract.reflective-transition-factory
 
-This repository is the typed authority graph for MCP-mediated semantic access.
-Raw files are storage, MCP providers are access paths, and CUE contracts define
-which provider may expose facts about an artifact.
+This repository is the reflective transition factory contract surface. The
+factory admits changes only through bounded contract objects, fixture packets,
+generated projections, worker aperture adapters, or explicitly quarantined
+migration evidence.
 
 ## Authority surface
 
-`contracts/` is the only contract authority root.
+`contracts/factory/` is the active factory authority root.
 
-- `contracts/` defines MCP envelopes, graph identities, provider planes, and validation profiles.
-- `adapters/` contains declarative references to external backend implementations.
-- `providers/` declares concrete `cue-lsp` and `lua-lsp` capabilities plus a deferred `chezmoi` identity.
-- top-level output, projection, fixture, seed, and runtime roots may exist as
-  install targets or materialized views, but they are not resolver source
-  authority.
+- `contracts/factory/kernel/` and `contracts/factory/object/` define the contract objects.
+- `contracts/factory/fixtures/` contains factory fixture and packet evidence.
+- `contracts/factory/generated/` is reserved for factory generated artifacts.
+- `contracts/factory/workers/` defines worker aperture references.
+- `contracts/factory/adapters/` contains only factory aperture boundaries.
+- `contracts/factory/assertions/` gates the pruning surface.
+- `migration/legacy/` preserves old repo, VCS, provider, projection, fixture,
+  generated, adapter, and documentation material as non-authority evidence.
 
-The repository is intentionally not a source index. `raw_path` exists only as
-provider execution metadata and every artifact access contract fixes
-`access.direct` to `false`.
-
-The `git-mcp-go` adapter declaration pins the external
-`fatb4f/git-mcp-go` `worktree-v0` source. Its implementation is not vendored
-into this contract catalogue.
+Top-level fixtures and generated outputs are not source authority. They must be
+factory fixtures, factory projections, or migration evidence.
 
 ## Agent Context Resolver
 

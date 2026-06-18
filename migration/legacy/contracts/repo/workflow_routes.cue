@@ -12,12 +12,12 @@ package repo
 		changeUnit?: string
 	}
 
-	planOperation:   string
+	planOperation:    string
 	dryRunOperation?: string
 	mutateOperation?: string
 
-	requiresHumanApproval: bool | *true
-	requiresGraphValidation: bool | *true
+	requiresHumanApproval:     bool | *true
+	requiresGraphValidation:   bool | *true
 	requiresProjectionRefresh: bool | *true
 
 	gates: [...string]
@@ -39,17 +39,17 @@ package repo
 	role:    #AgentRole
 	sandbox: #Sandbox
 
-	inputs:          [...string]
+	inputs: [...string]
 	expectedOutputs: [...string]
 
 	allowedTools: [...string]
 	forbiddenTools?: [...string]
 
 	vcsScope: {
-		refs?:        [...string]
-		commits?:     [...string]
+		refs?: [...string]
+		commits?: [...string]
 		changeUnits?: [...string]
-		surfaces?:    [...string]
+		surfaces?: [...string]
 	}
 
 	gates: [...string]
@@ -93,7 +93,7 @@ package repo
 	"label-derived"
 
 #Gate: close({
-	id: string & !=""
+	id:   string & !=""
 	kind: #GateKind
 
 	inputs: [...string]
@@ -105,56 +105,56 @@ package repo
 
 requiredWorkflowGates: {
 	graphBeforeProjection: #Gate & {
-		id: "gate.graph-before-projection"
-		kind: "graph-validation"
+		id:             "gate.graph-before-projection"
+		kind:           "graph-validation"
 		failureMessage: "Graph must validate before projection is generated."
 	}
 
 	projectionNonAuthority: #Gate & {
-		id: "gate.projection-non-authority"
-		kind: "projection-nonauthority"
+		id:             "gate.projection-non-authority"
+		kind:           "projection-nonauthority"
 		failureMessage: "Projection cannot decide topology or mutation target."
 	}
 
 	gitRepresentableMutationTarget: #Gate & {
-		id: "gate.git-representable-mutation-target"
-		kind: "mutation-target"
+		id:             "gate.git-representable-mutation-target"
+		kind:           "mutation-target"
 		failureMessage: "Mutation target must be commit, ref, or change-unit."
 	}
 
 	dryRunRequired: #Gate & {
-		id: "gate.dry-run-required"
-		kind: "dry-run-required"
+		id:             "gate.dry-run-required"
+		kind:           "dry-run-required"
 		failureMessage: "Mutation route requires dry-run when available."
 	}
 
 	approvalRequired: #Gate & {
-		id: "gate.approval-required"
-		kind: "approval-required"
+		id:             "gate.approval-required"
+		kind:           "approval-required"
 		failureMessage: "Mutating operation requires approval."
 	}
 
 	sandboxRequired: #Gate & {
-		id: "gate.codex-sandbox-required"
-		kind: "sandbox-required"
+		id:             "gate.codex-sandbox-required"
+		kind:           "sandbox-required"
 		failureMessage: "Every Codex task must declare sandbox."
 	}
 
 	vcsScopeRequired: #Gate & {
-		id: "gate.codex-vcs-scope-required"
-		kind: "vcs-scope-required"
+		id:             "gate.codex-vcs-scope-required"
+		kind:           "vcs-scope-required"
 		failureMessage: "Every subagent task must declare VCS scope."
 	}
 
 	butSDKRouteRequired: #Gate & {
-		id: "gate.but-sdk-route-required"
-		kind: "adapter-route-required"
+		id:             "gate.but-sdk-route-required"
+		kind:           "adapter-route-required"
 		failureMessage: "Every but-sdk operation must be represented as an adapter route."
 	}
 
 	labelDerived: #Gate & {
-		id: "gate.label-derived"
-		kind: "label-derived"
+		id:             "gate.label-derived"
+		kind:           "label-derived"
 		failureMessage: "Semantic labels are derived and non-authoritative."
 	}
 }

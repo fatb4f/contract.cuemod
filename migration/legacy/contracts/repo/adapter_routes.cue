@@ -13,7 +13,7 @@ package repo
 	outputSchema: string & !=""
 
 	requiresExclusiveWorktree: bool | *false
-	recordsOplogSnapshot:     bool | *false
+	recordsOplogSnapshot:      bool | *false
 	hasDryRunVariant:          bool | *false
 
 	gates: [...string]
@@ -29,7 +29,7 @@ package repo
 
 	role: "fallback" | "verification" | "escape-hatch"
 
-	inputs:  [...string]
+	inputs: [...string]
 	outputs: [...string]
 
 	gates: [...string]
@@ -54,7 +54,7 @@ package repo
 
 	plane: "read" | "plan" | "validate" | "mutate"
 
-	inputs:  [...string]
+	inputs: [...string]
 	outputs: [...string]
 
 	allowedAdapters: [...string]
@@ -71,7 +71,7 @@ package repo
 
 	role: "thread" | "prompt" | "agent" | "sandbox" | "result"
 
-	inputs:  [...string]
+	inputs: [...string]
 	outputs: [...string]
 
 	gates: [...string]
@@ -79,44 +79,44 @@ package repo
 
 readPlaneResources: {
 	graphCurrent: #MCPResource & {
-		uri: "repo://vcs/graph/current"
-		source: "vcs-graph"
+		uri:           "repo://vcs/graph/current"
+		source:        "vcs-graph"
 		authoritative: true
-		derived: false
+		derived:       false
 	}
 
 	workspaceCurrent: #MCPResource & {
-		uri: "repo://vcs/workspace/current"
-		source: "workspace"
+		uri:           "repo://vcs/workspace/current"
+		source:        "workspace"
 		authoritative: false
-		derived: true
+		derived:       true
 	}
 
 	operationsAvailable: #MCPResource & {
-		uri: "repo://vcs/operations/available"
-		source: "operation-registry"
+		uri:           "repo://vcs/operations/available"
+		source:        "operation-registry"
 		authoritative: true
-		derived: false
+		derived:       false
 	}
 
 	taskGroups: #MCPResource & {
-		uri: "repo://agent/task-groups"
-		source: "agent-registry"
+		uri:           "repo://agent/task-groups"
+		source:        "agent-registry"
 		authoritative: true
-		derived: false
+		derived:       false
 	}
 
 	gatesCurrent: #MCPResource & {
-		uri: "repo://gates/current"
-		source: "gate-registry"
+		uri:           "repo://gates/current"
+		source:        "gate-registry"
 		authoritative: true
-		derived: false
+		derived:       false
 	}
 }
 
 toolPlane: {
 	graphValidate: #MCPTool & {
-		name: "repo.graph.validate"
+		name:  "repo.graph.validate"
 		plane: "validate"
 		inputs: ["vcs.graph"]
 		outputs: ["gate-result"]
@@ -125,7 +125,7 @@ toolPlane: {
 	}
 
 	vcsMutationPlan: #MCPTool & {
-		name: "repo.vcs.mutationPlan"
+		name:  "repo.vcs.mutationPlan"
 		plane: "plan"
 		inputs: ["vcs.graph", "workflow.route"]
 		outputs: ["workflow.operation.plan"]
@@ -134,7 +134,7 @@ toolPlane: {
 	}
 
 	vcsDryRun: #MCPTool & {
-		name: "repo.vcs.dryRun"
+		name:  "repo.vcs.dryRun"
 		plane: "plan"
 		inputs: ["workflow.operation.plan"]
 		outputs: ["workflow.operation.dry-run-result"]
@@ -143,7 +143,7 @@ toolPlane: {
 	}
 
 	vcsApplyMutation: #MCPTool & {
-		name: "repo.vcs.applyMutation"
+		name:  "repo.vcs.applyMutation"
 		plane: "mutate"
 		inputs: ["workflow.operation.dry-run-result", "gate.approval"]
 		outputs: ["vcs.graph", "vcs.workspace", "vcs.oplog"]
@@ -153,7 +153,7 @@ toolPlane: {
 	}
 
 	agentTaskGroupPlan: #MCPTool & {
-		name: "repo.agent.taskGroupPlan"
+		name:  "repo.agent.taskGroupPlan"
 		plane: "plan"
 		inputs: ["workflow.task_group"]
 		outputs: ["agent.pipeline.plan"]
@@ -164,60 +164,60 @@ toolPlane: {
 
 butSDKRoutes: {
 	changesInWorktree: #ButSDKRoute & {
-		id: "but-sdk.changesInWorktree"
-		api: "changesInWorktree"
+		id:            "but-sdk.changesInWorktree"
+		api:           "changesInWorktree"
 		operationKind: "inspect"
-		mode: "read"
-		inputSchema: "vcs.repository"
-		outputSchema: "vcs.change_unit[]"
+		mode:          "read"
+		inputSchema:   "vcs.repository"
+		outputSchema:  "vcs.change_unit[]"
 	}
 
 	assignHunk: #ButSDKRoute & {
-		id: "but-sdk.assignHunk"
-		api: "assignHunk"
-		operationKind: "assign-change"
-		mode: "mutate"
-		inputSchema: "vcs.assignment"
-		outputSchema: "vcs.assignment"
+		id:                        "but-sdk.assignHunk"
+		api:                       "assignHunk"
+		operationKind:             "assign-change"
+		mode:                      "mutate"
+		inputSchema:               "vcs.assignment"
+		outputSchema:              "vcs.assignment"
 		requiresExclusiveWorktree: true
-		recordsOplogSnapshot: true
+		recordsOplogSnapshot:      true
 		gates: ["gate.graph-before-projection", "gate.git-representable-mutation-target", "gate.approval-required"]
 	}
 
 	commitCreate: #ButSDKRoute & {
-		id: "but-sdk.commitCreate"
-		api: "commitCreate"
-		operationKind: "create-commit"
-		mode: "mutate"
-		inputSchema: "workflow.commit-create-input"
-		outputSchema: "vcs.commit"
+		id:                        "but-sdk.commitCreate"
+		api:                       "commitCreate"
+		operationKind:             "create-commit"
+		mode:                      "mutate"
+		inputSchema:               "workflow.commit-create-input"
+		outputSchema:              "vcs.commit"
 		requiresExclusiveWorktree: true
-		recordsOplogSnapshot: true
-		hasDryRunVariant: true
+		recordsOplogSnapshot:      true
+		hasDryRunVariant:          true
 		gates: ["gate.graph-before-projection", "gate.dry-run-required", "gate.approval-required"]
 	}
 
 	unapplyStack: #ButSDKRoute & {
-		id: "but-sdk.unapplyStack"
-		api: "unapplyStack"
-		operationKind: "unapply-stack"
-		mode: "mutate"
-		inputSchema: "workflow.unapply-input"
-		outputSchema: "vcs.workspace"
+		id:                        "but-sdk.unapplyStack"
+		api:                       "unapplyStack"
+		operationKind:             "unapply-stack"
+		mode:                      "mutate"
+		inputSchema:               "workflow.unapply-input"
+		outputSchema:              "vcs.workspace"
 		requiresExclusiveWorktree: true
-		recordsOplogSnapshot: true
+		recordsOplogSnapshot:      true
 		gates: ["gate.graph-before-projection", "gate.dry-run-required", "gate.approval-required"]
 	}
 
 	workspaceIntegrateUpstream: #ButSDKRoute & {
-		id: "but-sdk.workspaceIntegrateUpstream"
-		api: "workspaceIntegrateUpstream"
-		operationKind: "integrate-upstream"
-		mode: "mutate"
-		inputSchema: "workflow.integrate-upstream-input"
-		outputSchema: "vcs.workspace"
+		id:                        "but-sdk.workspaceIntegrateUpstream"
+		api:                       "workspaceIntegrateUpstream"
+		operationKind:             "integrate-upstream"
+		mode:                      "mutate"
+		inputSchema:               "workflow.integrate-upstream-input"
+		outputSchema:              "vcs.workspace"
 		requiresExclusiveWorktree: true
-		recordsOplogSnapshot: true
+		recordsOplogSnapshot:      true
 		gates: ["gate.graph-before-projection", "gate.dry-run-required", "gate.approval-required"]
 	}
 }

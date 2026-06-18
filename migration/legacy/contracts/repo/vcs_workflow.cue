@@ -6,14 +6,14 @@ package repo
 	graph:     #Graph
 	workspace: #WorkspaceState
 
-	changes:     [string]: #ChangeUnit
+	changes: [string]:     #ChangeUnit
 	assignments: [string]: #Assignment
 
 	operations: [string]: #Operation
 	taskGroups: [string]: #TaskGroup
 
 	projections: [string]: #Projection
-	gates:       [string]: #Gate
+	gates: [string]:       #Gate
 })
 
 #Repository: close({
@@ -42,7 +42,7 @@ package repo
 	kind: #RefKind
 
 	pointsTo?: string
-	upstream?:  string
+	upstream?: string
 })
 
 #GraphEdgeKind: "parent" | "reachability" | "dependency" | "contains" | "targets"
@@ -60,8 +60,8 @@ package repo
 
 #Graph: close({
 	commits: [string]: #Commit
-	refs:    [string]: #Ref
-	edges:   [...#GraphEdge]
+	refs: [string]:    #Ref
+	edges: [...#GraphEdge]
 
 	target: #TargetFrame
 })
@@ -82,7 +82,7 @@ package repo
 	assignments: [...string]
 
 	// Workspace/refinfo views are derived, compressed, and may be lossy.
-	lossy: bool | *true
+	lossy:                     bool | *true
 	derivedFromGraphRevision?: string
 })
 
@@ -145,11 +145,11 @@ package repo
 	source: #OperationSource
 	mode:   #OperationMode
 
-	inputs:  [...string]
+	inputs: [...string]
 	outputs: [...string]
 
 	requiresExclusiveWorktree: bool | *false
-	recordsOplogSnapshot:     bool | *false
+	recordsOplogSnapshot:      bool | *false
 
 	gates: [...string]
 })
@@ -167,9 +167,9 @@ package repo
 
 #MutationInvariant: close({
 	targetMustBeGitRepresentable:          true
-	selectorDurability:                   "operation-local-only"
-	requireDryRunWhenAvailable:           true
-	requireGraphValidationBeforeMutation: true
+	selectorDurability:                    "operation-local-only"
+	requireDryRunWhenAvailable:            true
+	requireGraphValidationBeforeMutation:  true
 	requireProjectionRefreshAfterMutation: true
 })
 
