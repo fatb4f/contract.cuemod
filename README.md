@@ -1,27 +1,18 @@
 # contract.reflective-transition-factory
 
-This repository is the reflective transition factory contract surface. The
-factory admits changes only through bounded contract objects, fixture packets,
-generated projections, worker aperture adapters, or explicitly quarantined
-migration evidence.
+This repository no longer owns reflective transition factory authority. The
+factory authority was extracted to `fatb4f/factory` through migration umbrella
+`#66`.
 
 ## Authority surface
 
-`contracts/factory/` is the active factory authority root.
+`contracts/factory/` is intentionally absent here. Current factory authority,
+future factory issues, and scheduled upstream-monitor output belong in
+`fatb4f/factory`.
 
-- `contracts/factory/kernel/` and `contracts/factory/object/` define the contract objects.
-- `contracts/factory/extraction/` seals the extraction surface for the
-  dedicated factory repository migration.
-- `contracts/factory/fixtures/` contains factory fixture and packet evidence.
-- `contracts/factory/generated/` is reserved for factory generated artifacts.
-- `contracts/factory/workers/` defines worker aperture references.
-- `contracts/factory/adapters/` contains only factory aperture boundaries.
-- `contracts/factory/assertions/` gates the pruning surface.
-- `migration/legacy/` preserves old repo, VCS, provider, projection, fixture,
-  generated, adapter, and documentation material as non-authority evidence.
-
-Top-level fixtures and generated outputs are not source authority. They must be
-factory fixtures, factory projections, or migration evidence.
+This repository retains only extraction provenance under
+`migration/factory-extraction/` and historical non-authority evidence under
+`migration/legacy/`.
 
 ## Agent Context Resolver
 
