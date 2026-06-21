@@ -10,6 +10,8 @@ migration evidence.
 `contracts/factory/` is the active factory authority root.
 
 - `contracts/factory/kernel/` and `contracts/factory/object/` define the contract objects.
+- `contracts/factory/extraction/` seals the extraction surface for the
+  dedicated factory repository migration.
 - `contracts/factory/fixtures/` contains factory fixture and packet evidence.
 - `contracts/factory/generated/` is reserved for factory generated artifacts.
 - `contracts/factory/workers/` defines worker aperture references.

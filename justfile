@@ -1,7 +1,7 @@
 set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
 
 check:
-  cd contracts/factory && cue vet -c=false . ./object ./transition ./workers ./workers/codex ./workers/cue ./workers/cue/cue-lsp ./workers/cue/cue-rg ./workers/gitbutler ./adapters ./assertions
+  cd contracts/factory && cue vet -c=false . ./object ./transition ./extraction ./workers ./workers/codex ./workers/cue ./workers/cue/cue-lsp ./workers/cue/cue-rg ./workers/gitbutler ./adapters ./assertions
   cd contracts/factory && cue eval ./assertions -c >/dev/null
   cd contracts/factory && cue vet ./fixtures/negative/valid
   cd contracts/factory && ! cue vet ./fixtures/negative/invalid-candidate-without-negative-fixture
