@@ -14,8 +14,7 @@ check:
 
 smoke:
   go test ./...
-  go run ./cmd/contractctl acr validate >/dev/null
-  go run ./cmd/contractctl acr inventory >/dev/null
+  just check
   printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | go run ./cmd/contract-mcp | rg 'acr\.(inventory|resolve_prompt|plan_route|validate|export_runtime_projection)' >/dev/null
 
 fmt:
