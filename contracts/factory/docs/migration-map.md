@@ -1,51 +1,45 @@
-# Migration Map
+# Factory migration map
 
-This map records the disposition for the mixed migration surface before any
-additional destructive pruning. `migration/legacy/**` is retained only as
-non-authority reference material; green-path validation must use
-`contracts/factory/**` plus the explicitly retained runtime and resolver inputs.
+This document classifies every remaining root in the factory branch before any destructive migration, quarantine, or deletion.
 
-Allowed classifications are `keep-active`, `migrate-factory`,
-`quarantine-legacy`, and `delete`.
+Allowed classifications:
 
-## Top-Level Roots
+- keep-active
+- migrate-factory
+- quarantine-legacy
+- delete
 
-| source path | current role | classification | target path | action | blocking dependency | notes |
-| --- | --- | --- | --- | --- | --- | --- |
-| `.github/` | GitHub issue and repository metadata. | keep-active | `.github/` | Retain as repository shell metadata. | None. | Non-authority support surface. |
-| `adapters/` | Former raw adapter source root; absent from current root. | quarantine-legacy | `migration/legacy/adapters/` | Keep quarantined legacy adapter fixtures only. | Worker apertures must remain under `contracts/factory/workers/**` or backed by `cmd/` and `internal/`. | Current Git MCP adapter material is quarantined at `migration/legacy/adapters/git-mcp-go/`. |
-| `cmd/` | Active Go command entrypoints for contract tooling. | keep-active | `cmd/` | Retain while commands serve factory or resolver workflow. | Commands must not reintroduce root semantic authority. | `contractctl` and `contract-mcp` are tooling adapters only. |
-| `contracts/` | Contract container for factory authority and active inputs. | keep-active | `contracts/` | Retain as the only active contract container. | Non-factory roots must stay explicitly classified by this map. | Active authority is `contracts/factory/`; runtime and resolver roots remain bounded inputs. |
-| `docs/` | Former top-level documentation root; absent from current root. | quarantine-legacy | `migration/legacy/docs/` or `contracts/factory/docs/` | Keep legacy docs quarantined; write factory docs under `contracts/factory/docs/`. | Factory docs must describe factory authority rather than old repo authority. | Existing legacy docs are under `migration/legacy/docs/`. |
-| `fixtures/` | Former top-level fixture root; absent from current root. | migrate-factory | `contracts/factory/fixtures/` or `migration/legacy/fixtures/` | Keep active runtime packets under factory fixtures; quarantine old MCP/VCS/VB fixtures. | Active fixtures must be tied to factory packets or assertions. | Current active packet fixtures are under `contracts/factory/fixtures/packets/runtime/`. |
-| `generated/` | Former top-level generated artifact root; absent from current root. | migrate-factory | `contracts/factory/generated/` or `migration/legacy/generated/` | Reserve factory generated output under factory; quarantine old generated plugin artifacts. | Generated files must have a factory source or be migration evidence. | Current old Codex plugin artifacts are quarantined. |
-| `internal/` | Active Go implementation support. | keep-active | `internal/` | Retain while backing active command adapters. | Must remain tooling implementation, not contract authority. | Supports current Go tooling. |
-| `projections/` | Former top-level projection root; absent from current root. | quarantine-legacy | `migration/legacy/projections/` or `contracts/factory/generated/projections/` | Keep old repo projections quarantined; future active projections belong under factory generated output. | Factory projection generator must exist before any active projection is restored. | Current repo projection is quarantined at `migration/legacy/projections/repo/`. |
-| `providers/` | Former top-level provider declarations; absent from current root. | quarantine-legacy | `migration/legacy/providers/` or `contracts/factory/workers/**` | Quarantine legacy providers unless rewritten as worker aperture references. | Direct provider observation must be replaced by factory worker apertures. | `cue-lsp` and `cue-rg` were migrated under `contracts/factory/workers/cue/`; `chezmoi` and `lua-lsp` remain legacy evidence. |
-| `test/` | Former top-level test scripts; absent from current root. | delete | None. | Replace old repo-layout tests with factory pruning checks. | Factory assertions and `just check` must cover the pruning surface. | Legacy agent context hook script is quarantined at `migration/legacy/test/`. |
-| `go.mod` | Go tooling module metadata. | keep-active | `go.mod` | Retain as tooling-only module. | Must not become semantic contract authority. | There is no root `cue.mod`. |
-| `justfile` | Developer validation commands. | keep-active | `justfile` | Retain and keep checks aimed at factory pruning surface. | Checks must exclude quarantined legacy paths as green-path inputs. | `just check` rejects old top-level authority roots. |
-| `README.md` | Repository overview. | keep-active | `README.md` | Retain as root shell documentation. | Must describe factory authority and quarantine boundary. | Current README documents `migration/legacy/` as non-authority evidence. |
-| `migration/` | Explicit quarantine container. | keep-active | `migration/legacy/` | Retain as migration boundary. | Tests/assertions must not treat quarantine as green-path input. | This root is part of the target shape even though it was not in the original mixed root list. |
+No root survives because it existed before. Every retained artifact must support the reflective transition factory.
 
-## Contract Families
-
-| source path | current role | classification | target path | action | blocking dependency | notes |
-| --- | --- | --- | --- | --- | --- | --- |
-| `contracts/adapters` | Former adapter contract family; absent from active contracts. | quarantine-legacy | `migration/legacy/contracts/adapters/` | Keep as legacy reference only. | Factory adapters must remain worker aperture boundaries. | Current active adapter boundary is `contracts/factory/adapters/`. |
-| `contracts/agent-context-resolver` | Active resolver selection and route-planning input. | keep-active | `contracts/agent-context-resolver/` and eventual `contracts/factory/resolver/` | Retain as active bounded input; migrate factory-owned resolver concepts when ready. | Resolver outputs must not depend on legacy repo/provider authority. | Some resolver internals still reference migration acceptance material and need continued containment. |
-| `contracts/agent-runtime` | Active runtime event and packet input. | keep-active | `contracts/agent-runtime/` and eventual `contracts/factory/runtime/` | Retain as active bounded input; migrate factory-owned runtime concepts when ready. | Runtime bindings must remain packet inputs, not raw SDK authority. | Raw SDK authority surfaces are excluded from the factory green path. |
-| `contracts/agent-skill` | Former agent skill contract family; absent from active contracts. | quarantine-legacy | `migration/legacy/contracts/agent-skill/` | Keep as migration reference only. | Rewrite as factory worker/resolver material before reactivation. | Legacy fixtures remain under `migration/legacy/fixtures/agent-skill/`. |
-| `contracts/assertions` | Former repo-wide assertion family; absent from active contracts. | migrate-factory | `contracts/factory/assertions/` or `migration/legacy/contracts/assertions/` | Keep factory pruning assertions active; quarantine old repo-layout assertions. | Assertions must validate factory pruning rather than old repo layout. | Current active gate is `contracts/factory/assertions/gate.cue`. |
-| `contracts/context` | Former context packet family; absent from active contracts. | quarantine-legacy | `migration/legacy/contracts/context/` | Keep as resolver migration reference only. | Active context behavior must be represented through resolver/runtime inputs or factory objects. | No independent context authority survives. |
-| `contracts/factory` | Reflective transition factory authority. | keep-active | `contracts/factory/` | Retain as active authority root. | Local `contracts/factory/cue.mod/` remains the only CUE module boundary if needed. | Contains object, transition, workers, adapters, assertions, fixtures, generated, and docs. |
-| `contracts/graph` | Former repo graph vocabulary; absent from active contracts. | quarantine-legacy | `migration/legacy/contracts/graph/` | Keep as reference unless rewritten as factory evidence graph. | A factory evidence graph model would need explicit object/transition binding. | Current graph vocabulary is legacy evidence only. |
-| `contracts/object` | Former object contract family; absent from active contracts. | migrate-factory | `contracts/factory/object/` | Merge object definitions into factory object authority; remove old root. | Factory object definitions must cover required transition artifacts. | Current object contracts are active under `contracts/factory/object/`. |
-| `contracts/protocols` | Former protocol sketches; absent from active contracts. | quarantine-legacy | `migration/legacy/contracts/protocols/` | Keep as migration reference only. | Any active protocol must be expressed through worker apertures or runtime packets. | Not green-path factory authority. |
-| `contracts/providers` | Former provider declarations; absent from active contracts. | quarantine-legacy | `migration/legacy/contracts/providers/` or `contracts/factory/workers/**` | Quarantine legacy providers unless rewritten as worker aperture schemas. | Direct backend observation must be removed from active contracts. | Current active provider-like CUE references are scoped under factory CUE workers. |
-| `contracts/repo` | Former repo authority model; absent from active contracts. | quarantine-legacy | `migration/legacy/contracts/repo/` | Keep quarantined or delete after reference value is exhausted. | Factory pruning checks must remain independent of repo authority model. | Must not return as active authority. |
-| `contracts/transition-factory` | Former transition factory family; absent from active contracts. | migrate-factory | `contracts/factory/transition/` | Merge transition definitions into factory transition authority; remove old root. | Factory transition gates and invariants must cover retained behavior. | Current transition contracts are active under `contracts/factory/transition/`. |
-| `contracts/validation` | Former validation family; absent from active contracts. | migrate-factory | `contracts/factory/assertions/` or `migration/legacy/contracts/validation/` | Move active validation to factory assertions; quarantine legacy validation vocabulary. | Validation must target factory pruning surface. | Legacy validation material is quarantined. |
-| `contracts/vcs` | Former raw VCS authority model; absent from active contracts. | quarantine-legacy | `migration/legacy/contracts/vcs/` | Keep quarantined or delete after reference value is exhausted. | Raw Git/VCS must be represented only through worker evidence apertures if needed. | Must not return as agent-facing authority. |
-| `contracts/workers` | Former worker family; absent from active contracts. | migrate-factory | `contracts/factory/workers/` or `migration/legacy/contracts/workers/` | Move active worker apertures into factory; quarantine old worker vocabulary. | Workers must expose aperture contracts, not raw provider declarations. | Current active worker apertures are under `contracts/factory/workers/`. |
-| `contracts/registry.cue` | Former aggregate registry; absent from active contracts. | delete | None. | Do not restore as repo-wide semantic registry. | Factory authority must not depend on root contract aggregation. | Old registry behavior is superseded by factory-local surfaces and bounded inputs. |
+| Source path | Current role | Classification | Target path | Action | Blocking dependency | Notes |
+|---|---|---|---|---|---|---|
+| .github/ | repo process | keep-active | .github/ | keep | none | Issue templates and repo workflow metadata. |
+| README.md | repo entrypoint | migrate-factory | README.md | rewrite | factory surface stable | Should describe transition-factory branch, not old authority host. |
+| go.mod | Go tooling module | keep-active | go.mod | keep temporarily | adapter audit | Process/tooling only; not semantic authority. |
+| justfile | control adapter | keep-active | justfile | keep temporarily | command audit | Should route factory checks only. |
+| cmd/ | Go CLI commands | keep-active | cmd/ | audit | adapter audit | Keep only commands serving factory workflow. |
+| internal/ | Go internals | keep-active | internal/ | audit | adapter audit | Keep only internals backing active factory adapters. |
+| fixtures/ | legacy fixture root | migrate-factory / quarantine-legacy | contracts/factory/fixtures/ or migration/legacy/fixtures/ | classify children | fixture audit | No top-level fixture root in final surface. |
+| generated/ | legacy generated root | migrate-factory / quarantine-legacy | contracts/factory/generated/ or migration/legacy/generated/ | classify children | projection audit | No top-level generated root in final surface. |
+| providers/ | old provider model | quarantine-legacy | migration/legacy/providers/ | move after audit | worker aperture audit | Provider model is superseded by worker aperture model. |
+| projections/ | old projection root | migrate-factory / quarantine-legacy | contracts/factory/generated/projections/ or migration/legacy/projections/ | classify children | projection audit | Factory projections must be post-admission artifacts. |
+| adapters/ | adapter implementations | keep-active / quarantine-legacy | contracts/factory/adapters/ or migration/legacy/adapters/ | classify children | adapter audit | Raw git adapter likely legacy unless rewritten as worker aperture. |
+| docs/ | mixed docs | migrate-factory / quarantine-legacy | contracts/factory/docs/ or migration/legacy/docs/ | classify children | doc audit | Active docs must describe factory model. |
+| test/ | old validation scripts | migrate-factory / quarantine-legacy | contracts/factory/checks/ or migration/legacy/test/ | classify children | validation audit | Checks should target factory gates. |
+| contracts/factory/ | target factory surface | keep-active | contracts/factory/ | keep | none | Dominant contract surface. |
+| contracts/object/ | object vocabulary | migrate-factory | contracts/factory/object/ | move/merge | import audit | Avoid parallel object roots. |
+| contracts/transition-factory/ | old transition factory root | migrate-factory | contracts/factory/transition/ | move/merge | import audit | Collapse into factory-local module. |
+| contracts/workers/ | worker vocabulary | migrate-factory | contracts/factory/workers/ | move/merge | worker audit | Worker apertures belong to factory surface. |
+| contracts/agent-runtime/ | runtime input surface | migrate-factory | contracts/factory/runtime/ | move/merge | resolver/runtime audit | Runtime is input to transition packet. |
+| contracts/agent-context-resolver/ | resolver input surface | migrate-factory | contracts/factory/resolver/ | move/merge | resolver audit | Resolver selects objects/workers/evidence. |
+| contracts/repo/ | old repo authority | quarantine-legacy | migration/legacy/contracts/repo/ | move | none | Not active factory authority. |
+| contracts/vcs/ | old raw VCS model | quarantine-legacy | migration/legacy/contracts/vcs/ | move | none | GitButler worker should be VCS aperture. |
+| contracts/providers/ | old provider model | quarantine-legacy | migration/legacy/contracts/providers/ | move | none | Superseded by worker aperture model. |
+| contracts/agent-skill/ | plugin/skill legacy | quarantine-legacy | migration/legacy/contracts/agent-skill/ | move | plugin audit | Not core factory surface. |
+| contracts/graph/ | old authority graph | quarantine-legacy | migration/legacy/contracts/graph/ | move after audit | graph audit | Retain only if converted to bounded evidence model. |
+| contracts/protocols/ | protocol vocabulary | classify | TBD | audit | protocol audit | Could be transport support or legacy. |
+| contracts/assertions/ | assertion vocabulary | migrate-factory | contracts/factory/assertions/ | move/merge | gate audit | Assertions are gate authority. |
+| contracts/validation/ | validation vocabulary | migrate-factory | contracts/factory/validation/ | move/merge | gate audit | Keep only validation tied to factory gates. |
+| contracts/context/ | context vocabulary | classify | TBD | audit | resolver audit | Likely resolver/runtime migration source. |
+| contracts/adapters/ | adapter vocabulary | migrate-factory | contracts/factory/adapters/ | reduce/move | adapter audit | Must become worker aperture boundary vocabulary. |
+| contracts/registry.cue | old root registry | delete / migrate-factory | contracts/factory/registry.cue or none | classify | registry audit | No root contract authority registry. |
