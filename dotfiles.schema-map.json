@@ -23,13 +23,53 @@
       "capabilities": ["search", "evidence"]
     },
     {
+      "id": "df:provider/cue-lsp",
+      "kind": "cue-lsp",
+      "protocol": "lsp-over-mcp",
+      "authority": "cue-graph",
+      "runtime": true,
+      "callable": true,
+      "capabilities": ["definition", "references", "hover", "diagnostics", "documentSymbols", "workspaceSymbols", "validate", "evidence"],
+      "mcp": {
+        "serverID": "df:mcp/cue-lsp",
+        "transport": "stdio",
+        "adapter": "lsp-over-mcp",
+        "toolPrefix": "cue_lsp",
+        "tools": {
+          "definition": "cue_lsp.definition",
+          "references": "cue_lsp.references",
+          "hover": "cue_lsp.hover",
+          "diagnostics": "cue_lsp.diagnostics",
+          "documentSymbols": "cue_lsp.document_symbols",
+          "workspaceSymbols": "cue_lsp.workspace_symbols",
+          "validate": "cue_lsp.validate",
+          "evidence": "cue_lsp.evidence"
+        }
+      }
+    },
+    {
       "id": "df:provider/lua-lsp",
       "kind": "lua-lsp",
       "protocol": "lsp-over-mcp",
       "authority": "lua-implementation",
-      "runtime": false,
-      "callable": false,
-      "capabilities": ["definition", "references", "hover", "diagnostics", "documentSymbols", "workspaceSymbols", "evidence"]
+      "runtime": true,
+      "callable": true,
+      "capabilities": ["definition", "references", "hover", "diagnostics", "documentSymbols", "workspaceSymbols", "evidence"],
+      "mcp": {
+        "serverID": "df:mcp/lua-lsp",
+        "transport": "stdio",
+        "adapter": "lsp-over-mcp",
+        "toolPrefix": "lua_lsp",
+        "tools": {
+          "definition": "lua_lsp.definition",
+          "references": "lua_lsp.references",
+          "hover": "lua_lsp.hover",
+          "diagnostics": "lua_lsp.diagnostics",
+          "documentSymbols": "lua_lsp.document_symbols",
+          "workspaceSymbols": "lua_lsp.workspace_symbols",
+          "evidence": "lua_lsp.evidence"
+        }
+      }
     },
     {
       "id": "df:provider/wezterm-types",
@@ -75,8 +115,16 @@
     "dotfiles.manifest-slice": {
       "authority": "cue-graph",
       "files": [".github/dotfiles-manifest-slice/contracts/issues/**"],
-      "providerIDs": ["df:provider/codex-cli", "df:provider/cue-rg"]
+      "providerIDs": ["df:provider/cue-lsp", "df:provider/codex-cli", "df:provider/cue-rg"]
     }
+  },
+  "mcpExecutionPolicy": {
+    "providersReachable": true,
+    "hookMayExecuteProviders": false,
+    "providerOutputIsContext": false,
+    "providerOutputIsAuthority": false,
+    "requiresEvidenceWrapper": true,
+    "routeDeclaredFilesOnly": true
   },
   "executionPolicy": {
     "providerOutputIsContext": false,
