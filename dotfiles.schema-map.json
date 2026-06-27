@@ -1,0 +1,86 @@
+{
+  "schema": "contract.cuemod.semantic-provider.schema-map.v0",
+  "name": "dotfiles",
+  "targetRepo": "fatb4f/dotfiles",
+  "providerCatalogue": "fatb4f/dotfiles:.codex/plugins/agent-context-resolver/generated/provider_inventory.json",
+  "providers": [
+    {
+      "id": "df:provider/codex-cli",
+      "kind": "codex-cli",
+      "protocol": "agent-runtime",
+      "authority": "bounded-patch-executor",
+      "runtime": false,
+      "callable": false,
+      "capabilities": ["targeted-read", "apply-patch", "targeted-validation", "commit-summary"]
+    },
+    {
+      "id": "df:provider/cue-rg",
+      "kind": "cue-rg",
+      "protocol": "mcp-tool",
+      "authority": "bounded-text-evidence",
+      "runtime": false,
+      "callable": false,
+      "capabilities": ["search", "evidence"]
+    },
+    {
+      "id": "df:provider/lua-lsp",
+      "kind": "lua-lsp",
+      "protocol": "lsp-over-mcp",
+      "authority": "lua-implementation",
+      "runtime": false,
+      "callable": false,
+      "capabilities": ["definition", "references", "hover", "diagnostics", "documentSymbols", "workspaceSymbols", "evidence"]
+    },
+    {
+      "id": "df:provider/wezterm-types",
+      "kind": "wezterm-types",
+      "protocol": "lua-lsp-library",
+      "authority": "wezterm-lua-type-surface",
+      "runtime": false,
+      "callable": false,
+      "upstream": "DrKJeff16/wezterm-types",
+      "capabilities": ["type-annotations", "completion-surface", "diagnostic-context", "hover-context"]
+    },
+    {
+      "id": "df:provider/chezmoi",
+      "kind": "chezmoi",
+      "protocol": "mcp-tool",
+      "authority": "deployment-provenance",
+      "runtime": false,
+      "callable": false,
+      "capabilities": []
+    }
+  ],
+  "semanticSurfaces": {
+    "dotfiles.workspace-ide": {
+      "authority": "bounded-workflow-doc",
+      "files": [".github/WORKSPACE_IDE_VERIFICATION.md"],
+      "providerIDs": ["df:provider/cue-rg"]
+    },
+    "dotfiles.wezterm-lua": {
+      "authority": "lua-implementation",
+      "files": ["chezmoi/private_dot_config/wezterm/**"],
+      "providerIDs": ["df:provider/lua-lsp", "df:provider/wezterm-types", "df:provider/cue-rg"]
+    },
+    "dotfiles.nvim-workflow": {
+      "authority": "lua-implementation",
+      "files": ["chezmoi/private_dot_config/nvim/lua/workflow/**"],
+      "providerIDs": ["df:provider/lua-lsp", "df:provider/cue-rg"]
+    },
+    "dotfiles.xplr-sidebar": {
+      "authority": "lua-implementation",
+      "files": ["chezmoi/private_dot_config/xplr/init.lua"],
+      "providerIDs": ["df:provider/lua-lsp", "df:provider/cue-rg"]
+    },
+    "dotfiles.manifest-slice": {
+      "authority": "cue-graph",
+      "files": [".github/dotfiles-manifest-slice/contracts/issues/**"],
+      "providerIDs": ["df:provider/codex-cli", "df:provider/cue-rg"]
+    }
+  },
+  "executionPolicy": {
+    "providerOutputIsContext": false,
+    "providerOutputIsAuthority": false,
+    "hookMayExecuteProviders": false
+  }
+}
